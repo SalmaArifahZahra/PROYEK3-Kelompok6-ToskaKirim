@@ -10,12 +10,11 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id('id_user');
-            $table->string('name', 100);
-            $table->string('email', 100)->unique();
+            $table->string('nama');
+            $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['admin', 'user'])->default('user');
-            $table->text('address')->nullable();
-            $table->timestamps();
+            $table->enum('peran', ['superadmin', 'admin', 'customer'])->default('customer');
+            $table->timestampsTz();
         });
     }
 
