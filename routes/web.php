@@ -1,7 +1,20 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+
+Route::middleware(['guest'])->group(function () {
+    Route::controller(AuthController::class)->group(function () {
+        Route::get('/', 'index_login')->name('login');
+        Route::get('/register', 'index_register');
+        Route::post('/login', 'action_login');
+    });
 });
+
+//Testing route
+Route::get('/customer/profile/complete', function () {
+    return view('customer.profile.complete_profile');
+});
+
+
