@@ -2,232 +2,126 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign Up Page</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up Page</title>
 
-  <style>
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      font-family: 'sans-serif', sans-serif;
-      background-color: #e8ebf1;
-    }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 
-    .signup-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .signup-container {
-      display: flex;
-      width: 900px;
-      background-color: #fff;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 8px 20px rgba(1, 20, 104, 0.05);
-    }
-
-    .left-panel {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 50px 40px;
-      background-color: #fff;
-    }
-
-    .right-panel {
-      flex: 1;
-      background-color: #2d9cdb;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 0 60px;
-      text-align: left;
-    }
-
-    .right-panel h1 {
-      font-weight: 800;
-      font-size: 2.5rem;
-      margin-bottom: 15px;
-      line-height: 1.1;
-    }
-
-    .right-panel p {
-      font-size: 0.95rem;
-      opacity: 0.9;
-    }
-
-    .signup-card {
-      width: 100%;
-      max-width: 350px;
-    }
-
-    .signup-card h2 {
-      color: #2d9cdb;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .signup-card small {
-      display: block;
-      text-align: center;
-      color: #6c757d;
-      margin-bottom: 25px;
-    }
-
-    .form-control {
-      height: 45px;
-      border-radius: 8px;
-      border: 1px solid #bcd3e9;
-    }
-
-    .input-group-text {
-      background-color: #fff;
-    }
-
-    .form-control:focus {
-      border-color: #2d9cdb;
-      box-shadow: none;
-    }
-
-    .btn-signup {
-      background-color: #0b5fa4;
-      color: #fff;
-      height: 45px;
-      border-radius: 8px;
-      font-weight: 500;
-      border: none;
-    }
-
-    .btn-signup:hover {
-      background-color: #094c82;
-      color: #fff;
-    }
-
-    .signin-link {
-      color: #2d9cdb;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    @media (max-width: 768px) {
-      .signup-container {
-        flex-direction: column-reverse;
-        width: 100%;
-        border-radius: 0;
-      }
-
-      .right-panel {
-        text-align: center;
-        align-items: center;
-        padding: 40px 20px;
-      }
-
-      .left-panel {
-        padding: 30px 20px;
-      }
-    }
-  </style>
+    @vite(['resources/css/app.css'])
 </head>
 
-<body>
-  <div class="signup-wrapper">
-    <div class="signup-container">
+<body class="bg-[#e8ebf1] min-h-screen flex items-center justify-center">
 
-      <div class="left-panel">
-        <div class="signup-card">
-          <h2>SIGN UP</h2>
-          <small>Create a new account</small>
+    <div class="flex w-[900px] bg-white rounded-xl overflow-hidden shadow-lg">
 
-          @if ($errors->any())
-          <div class="alert alert-danger">
-            @foreach ($errors->all() as $error)
-            <div>{{ $error }}</div>
-            @endforeach
-          </div>
-          @endif
+        <div class="flex-1 flex items-center justify-center px-10 py-14">
+            <div class="w-full max-w-xs">
 
-          @if (session('success'))
-          <div class="alert alert-success">
-            {{ session('success') }}
-          </div>
-          @endif
+                <div class="flex justify-center mb-6">
+                    <img src="{{ asset('images/icon_toska.png') }}" class="w-20 h-20 object-contain" alt="Logo">
+                </div>
 
-          <form action="/register" method="POST">
-            @csrf
+                <h2 class="text-[#2d9cdb] text-center text-2xl font-bold">SIGN UP</h2>
+                <p class="text-center text-gray-500 mb-6 text-sm">Create a new account</p>
 
-            <div class="mb-3">
-              <label class="form-label">Username</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" name="username" class="form-control" placeholder="Enter your Username" required>
-              </div>
+                @if ($errors->any())
+                    <div class="bg-red-100 text-red-600 p-3 rounded-md mb-4 text-sm">
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if (session('success'))
+                    <div class="bg-green-100 text-green-700 p-3 rounded-md mb-4 text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                <form action="/register" method="POST" class="space-y-4">
+                    @csrf
+
+                    <div>
+                        <label class="block text-gray-700 mb-1 text-sm">Username</label>
+                        <div class="flex items-center border border-[#bcd3e9] rounded-lg bg-white">
+                            <span class="px-3 text-gray-500"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" name="username" required
+                                   class="w-full py-2.5 bg-transparent outline-none"
+                                   placeholder="Enter your Username">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-1 text-sm">Email</label>
+                        <div class="flex items-center border border-[#bcd3e9] rounded-lg bg-white">
+                            <span class="px-3 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" name="email" required
+                                   class="w-full py-2.5 bg-transparent outline-none"
+                                   placeholder="Enter your Email">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-1 text-sm">Password</label>
+                        <div class="flex items-center border border-[#bcd3e9] rounded-lg bg-white">
+                            <span class="px-3 text-gray-500"><i class="fa-solid fa-lock"></i></span>
+
+                            <input type="password" id="password" name="password" required
+                                   class="w-full py-2.5 bg-transparent outline-none"
+                                   placeholder="Enter your Password">
+
+                            <span id="togglePassword" class="px-3 text-gray-500 cursor-pointer">
+                                <i class="fa-solid fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-[#0b5fa4] text-white py-2.5 rounded-lg hover:bg-[#094c82] font-medium">
+                        Sign Up
+                    </button>
+
+                </form>
+
             </div>
-
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" name="email" class="form-control" placeholder="Enter your Email" required>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Password</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" id="password" name="password" class="form-control"
-                  placeholder="Enter your Password" required>
-                <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
-                  <i class="bi bi-eye"></i>
-                </span>
-              </div>
-            </div>
-
-            <button type="submit" class="btn btn-signup w-100 mb-3">Sign Up</button>
-
-            <p class="text-center mb-0">
-              Already have an account?
-              <a href="/" class="signin-link">Sign In</a>
-            </p>
-          </form>
         </div>
-      </div>
 
-      <div class="right-panel">
-        <h1>JOIN US,<br>WELCOME!</h1>
-        <p>Create your account and start your journey with us today.</p>
-      </div>
+        <div class="flex-1 bg-[#2d9cdb] text-white flex flex-col justify-center px-16 py-10">
+
+            <h1 class="font-extrabold text-4xl leading-tight mb-4">
+                JOIN US,<br>WELCOME!
+            </h1>
+
+            <p class="opacity-90 text-[0.95rem] mb-6">
+                Create your account and start your journey with us today.
+            </p>
+
+            <p class="text-white text-sm opacity-90 mb-3">
+                Already have an account?
+            </p>
+
+            <a href="/"
+                class="inline-block w-fit border border-white text-white px-6 py-2 rounded-full text-sm font-medium
+                       hover:bg-white hover:text-[#2d9cdb] transition duration-300">
+                Sign In
+            </a>
+
+        </div>
 
     </div>
-  </div>
 
-  <script>
-    document.getElementById('togglePassword').addEventListener('click', function () {
-      const input = document.getElementById('password');
-      const icon = this.querySelector('i');
 
-      if (input.type === "password") {
-        input.type = "text";
-        icon.classList.remove("bi-eye");
-        icon.classList.add("bi-eye-slash");
-      } else {
-        input.type = "password";
-        icon.classList.remove("bi-eye-slash");
-        icon.classList.add("bi-eye");
-      }
-    });
-  </script>
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const input = document.getElementById('password');
+            const icon = this.querySelector('i');
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+            input.type = input.type === "password" ? "text" : "password";
+            icon.classList.toggle("fa-eye");
+            icon.classList.toggle("fa-eye-slash");
+        });
+    </script>
+
 </body>
-
 </html>
