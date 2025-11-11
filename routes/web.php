@@ -11,3 +11,10 @@ Route::middleware(['guest'])->group(function () {
         Route::post('/login', 'action_login');
     });
 });
+
+//Testing route
+Route::get('/customer/profile/complete', function () {
+    return view('customer.profile.complete_profile');
+});
+
+
