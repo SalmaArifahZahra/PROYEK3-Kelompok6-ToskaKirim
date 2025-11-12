@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function action_login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'username' => 'required',
+            'email' => 'required',
             'password' => 'required',
         ]);
 
@@ -28,7 +28,7 @@ class AuthController extends Controller
                 ->withInput();
         }
 
-        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $request->session()->regenerate();
 
             $user = Auth::user();
@@ -44,7 +44,7 @@ class AuthController extends Controller
         }
 
 
-        return back()->withErrors(['username' => 'Login gagal: username/password salah'])->withInput();
+        return back()->withErrors(['email' => 'Login gagal: email/password salah'])->withInput();
     }
 
     public function index_register()
