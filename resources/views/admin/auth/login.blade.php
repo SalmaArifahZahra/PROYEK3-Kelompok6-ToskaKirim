@@ -48,7 +48,7 @@
             <div class="flex items-center justify-center gap-4">
                 <img src="{{ asset('images/icon_toska.png') }}" class="h-16 w-auto" alt="ToskaKirim Logo">
                 <div class="text-center">
-                    <h1 class="text-[3rem] font-bold text-[#14b8a6] leading-none">ADMIN</h1>
+                    <h1 class="text-[3rem] font-bold text-[#5BC6BC] leading-none">ADMIN</h1>
                     <p class="text-gray-600 text-sm">Sign in to your account</p>
                 </div>
             </div>
@@ -129,7 +129,7 @@
 
                 <!-- Submit Button -->
                 <button type="submit"
-                        class="w-full bg-[#14b8a6] text-white py-2.5 rounded-lg hover:bg-[#0f9488] font-medium transition-colors">
+                        class="w-full bg-[#5BC6BC] text-white py-2.5 rounded-lg hover:bg-[#3A767E] font-medium transition-colors">
                     Sign In
                 </button>
 
