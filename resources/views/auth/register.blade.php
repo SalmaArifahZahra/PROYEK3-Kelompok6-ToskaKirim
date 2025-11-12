@@ -22,7 +22,7 @@
                     <img src="{{ asset('images/icon_toska.png') }}" class="w-20 h-20 object-contain" alt="Logo">
                 </div>
 
-                <h2 class="text-[#2d9cdb] text-center text-2xl font-bold">SIGN UP</h2>
+                <h2 class="text-[#5BC6BC] text-center text-2xl font-bold">SIGN UP</h2>
                 <p class="text-center text-gray-500 mb-6 text-sm">Create a new account</p>
 
                 @if ($errors->any())
@@ -78,7 +78,7 @@
                     </div>
 
                     <button type="submit"
-                        class="w-full bg-[#0b5fa4] text-white py-2.5 rounded-lg hover:bg-[#094c82] font-medium">
+                        class="w-full bg-[#5BC6BC] text-white py-2.5 rounded-lg hover:bg-[#3A767E] font-medium">
                         Sign Up
                     </button>
 
@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <div class="flex-1 bg-[#2d9cdb] text-white flex flex-col justify-center px-16 py-10">
+        <div class="flex-1 bg-[#5BC6BC] text-white flex flex-col justify-center px-16 py-10">
 
             <h1 class="font-extrabold text-4xl leading-tight mb-4">
                 JOIN US,<br>WELCOME!
@@ -103,7 +103,7 @@
 
             <a href="/"
                 class="inline-block w-fit border border-white text-white px-6 py-2 rounded-full text-sm font-medium
-                       hover:bg-white hover:text-[#2d9cdb] transition duration-300">
+                       hover:bg-white hover:text-[#2d9cdb]">
                 Sign In
             </a>
 

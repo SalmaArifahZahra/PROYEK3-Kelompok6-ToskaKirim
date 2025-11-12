@@ -6,17 +6,19 @@
     <title>@yield('title', 'Customer Page')</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-    {{-- @include('components.customer_navbar') --}}
+    @include('component.customer.navbar')
 
-    <main class="py-10 px-4">
+    <main class="grow py-10 px-4">
         @yield('content')
     </main>
 
+    @include('component.customer.footer')
+
 </body>
 </html>
+

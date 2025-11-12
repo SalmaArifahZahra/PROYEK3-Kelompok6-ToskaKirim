@@ -12,9 +12,14 @@ Route::middleware(['guest'])->group(function () {
     });
 });
 
-//Testing route
+//Testing Customer Profile
 Route::get('/customer/profile/complete', function () {
     return view('customer.profile.complete_profile');
+});
+
+//Testing Footer Customer
+Route::get('/customer/test_customer', function () {
+    return view('customer.test_customer');
 });
 
 
