@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -14,25 +13,55 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'nama' => 'SuperAdmin',
-            'email' => 'super@gmail.com',
-            'password' => Hash::make('super123'),
-            'peran' => 'superadmin',
-        ]);
-
-        User::create([
-            'nama' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin123'),
-            'peran' => 'admin',
-        ]);
-
-        User::create([
-            'nama' => 'Customer',
-            'email' => 'customer@gmail.com',
-            'password' => Hash::make('customer123'),
-            'peran' => 'customer',
+        DB::table('users')->insert([
+            [
+                'nama' => 'Super Admin',
+                'email' => 'superadmin@toskikirim.com',
+                'password' => Hash::make('password123'),
+                'peran' => 'superadmin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama' => 'Admin ToskaKirim',
+                'email' => 'admin@toskikirim.com',
+                'password' => Hash::make('password123'),
+                'peran' => 'admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama' => 'Budi Santoso',
+                'email' => 'budi@gmail.com',
+                'password' => Hash::make('password123'),
+                'peran' => 'customer',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama' => 'Siti Nurhaliza',
+                'email' => 'siti@gmail.com',
+                'password' => Hash::make('password123'),
+                'peran' => 'customer',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama' => 'Ahmad Rizky',
+                'email' => 'ahmad@gmail.com',
+                'password' => Hash::make('password123'),
+                'peran' => 'customer',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama' => 'Dewi Lestari',
+                'email' => 'dewi@gmail.com',
+                'password' => Hash::make('password123'),
+                'peran' => 'customer',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }
