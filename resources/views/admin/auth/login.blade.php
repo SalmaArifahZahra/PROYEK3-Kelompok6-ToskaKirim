@@ -36,7 +36,7 @@
 
 </head>
 
-<body class="bg-[#DEE1EA] min-h-screen flex flex-col items-center justify-between p-4 py-8">
+<body class="bg-[#E9F4FF] min-h-screen flex flex-col items-center justify-between p-4 py-8">
     
     <!-- Spacer atas -->
     <div></div>
