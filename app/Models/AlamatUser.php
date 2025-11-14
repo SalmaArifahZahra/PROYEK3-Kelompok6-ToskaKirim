@@ -36,4 +36,17 @@ class AlamatUser extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
+
+    /**
+     * Set alamat ini sebagai alamat utama.
+     * Otomatis unset alamat utama lainnya milik user yang sama.
+     */
+    public function setAsUtama(): void
+    {
+        // Unset semua alamat utama milik user ini
+        AlamatUser::where('id_user', $this->id_user)
+                   ->update(['is_utama' => false]);
+        
+        $this->update(['is_utama' => true]);
+    }
 }

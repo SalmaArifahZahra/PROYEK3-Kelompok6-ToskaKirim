@@ -19,6 +19,8 @@
 
     @include('component.customer.footer')
 
+    @stack('scripts')
+
 </body>
 </html>
 

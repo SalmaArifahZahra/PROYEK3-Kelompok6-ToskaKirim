@@ -21,12 +21,10 @@ class User extends Authenticatable
         'peran',
     ];
 
-    protected $hidden = [
-        'password',
-    ];
-
     protected $casts = [
         'peran' => RoleEnum::class,
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
     public function alamatUser(): HasMany
@@ -42,5 +40,12 @@ class User extends Authenticatable
     public function pesanan(): HasMany
     {
         return $this->hasMany(Pesanan::class, 'id_user', 'id_user');
+    }
+
+    public function setAsUtama(): void
+    {
+        $user = $this->user;
+        $user->alamatUser()->update(['is_utama' => false]);
+        $this->update(['is_utama' => true]);
     }
 }
