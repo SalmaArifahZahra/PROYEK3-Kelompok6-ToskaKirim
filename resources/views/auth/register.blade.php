@@ -39,17 +39,17 @@
                     </div>
                 @endif
 
-                <form action="/register" method="POST" class="space-y-4">
+                <form action="{{ route('register.action') }}" method="POST" class="space-y-4">
                     @csrf
 
                     <div>
-                        <label class="block text-gray-700 mb-1 text-sm">Username</label>
+                        <label class="block text-gray-700 mb-1 text-sm">Nama Lengkap</label>
                         <div class="flex items-center border border-[#bcd3e9] rounded-lg bg-white">
                             <span class="px-3 text-gray-500"><i class="fa-solid fa-user"></i></span>
-                            <input type="text" name="username" required
-                                   class="w-full py-2.5 bg-transparent outline-none"
-                                   placeholder="Enter your Username">
-                        </div>
+                            <input type="text" name="nama" required
+                                class="w-full py-2.5 bg-transparent outline-none"
+                                placeholder="Masukkan Nama Lengkap Anda"
+                                value="{{ old('nama') }}"> </div>
                     </div>
 
                     <div>
@@ -57,8 +57,9 @@
                         <div class="flex items-center border border-[#bcd3e9] rounded-lg bg-white">
                             <span class="px-3 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
                             <input type="email" name="email" required
-                                   class="w-full py-2.5 bg-transparent outline-none"
-                                   placeholder="Enter your Email">
+                                class="w-full py-2.5 bg-transparent outline-none"
+                                placeholder="Masukkan Email Anda"
+                                value="{{ old('email') }}">
                         </div>
                     </div>
 
@@ -68,8 +69,8 @@
                             <span class="px-3 text-gray-500"><i class="fa-solid fa-lock"></i></span>
 
                             <input type="password" id="password" name="password" required
-                                   class="w-full py-2.5 bg-transparent outline-none"
-                                   placeholder="Enter your Password">
+                                class="w-full py-2.5 bg-transparent outline-none"
+                                placeholder="Masukkan Password Anda">
 
                             <span id="togglePassword" class="px-3 text-gray-500 cursor-pointer">
                                 <i class="fa-solid fa-eye"></i>
@@ -77,8 +78,19 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label class="block text-gray-700 mb-1 text-sm">Konfirmasi Password</label>
+                        <div class="flex items-center border border-[#bcd3e9] rounded-lg bg-white">
+                            <span class="px-3 text-gray-500"><i class="fa-solid fa-lock"></i></span>
+                            
+                            <input type="password" id="password_confirmation" name="password_confirmation" required
+                                class="w-full py-2.5 bg-transparent outline-none"
+                                placeholder="Ketik Ulang Password Anda">
+                        </div>
+                    </div>
+
                     <button type="submit"
-                        class="w-full bg-[#5BC6BC] text-white py-2.5 rounded-lg hover:bg-[#3A767E] font-medium">
+                            class="w-full bg-[#5BC6BC] text-white py-2.5 rounded-lg hover:bg-[#3A767E] font-medium">
                         Sign Up
                     </button>
 

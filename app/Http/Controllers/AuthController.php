@@ -2,53 +2,109 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function index_login()
+    /**
+     * Menampilkan halaman login.
+     * Sesuai rute: GET /
+     */
+    public function index_login(): View
     {
-        return view('auth.login');
+        return view('auth.login'); 
     }
 
-    public function action_login(Request $request)
+    /**
+     * Menampilkan halaman register.
+     * Sesuai rute: GET /register
+     */
+    public function index_register(): View
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Memproses data dari form register.
+     * Sesuai rute: POST /register
+     */
+    public function action_register(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required',
-            'password' => 'required',
+            'nama' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+            ],
         ]);
 
         if ($validator->fails()) {
-            return redirect(to: '/login')
+            return back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            $request->session()->regenerate();
+        $user = User::create([
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'peran' => 'customer',
+        ]);
 
-            $user = Auth::user();
-            $peran = $user->peran ?? '';
+        Auth::login($user);
 
-            if ($peran === 'admin') {
-                return redirect()->intended('/admin/home');
-            } elseif ($peran === 'customer') {
-                return redirect()->intended('/customer/home');
-            }
-
-            return redirect('/');
-        }
-
-
-        return back()->withErrors(['email' => 'Login gagal: email/password salah'])->withInput();
+        return redirect()->route('customer.profile.complete');
     }
 
-    public function index_register()
+    /**
+     * Memproses data dari form login.
+     * Sesuai rute: POST /login
+     */
+    public function action_login(Request $request): RedirectResponse
     {
-        return view('auth.register');
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput($request->only('email'));
+        }
+
+        $credentials = $request->only('email', 'password');
+        $remember = $request->boolean('remember');
+        
+        if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+            
+            return redirect()->route('dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Email atau password yang dimasukkan salah.',
+        ])->withInput($request->only('email'));
+    }
+
+    /**
+     * Memproses logout user.
+     * Sesuai rute: POST /logout
+     */
+    public function action_logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 }

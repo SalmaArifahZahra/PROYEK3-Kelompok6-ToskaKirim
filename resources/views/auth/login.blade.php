@@ -70,7 +70,7 @@
                         <label class="block text-gray-700 mb-1 text-sm">Email</label>
                         <div class="flex items-center border border-[#bcd3e9] rounded-lg bg-white">
                             <span class="px-3 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
-                            <input type="email" name="username"
+                            <input type="email" name="email"
                                    class="w-full py-2.5 bg-transparent outline-none"
                                    placeholder="Enter your Email" required>
                         </div>
