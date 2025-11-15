@@ -10,6 +10,7 @@ class WilayahController extends Controller
 {
     protected $baseUrl = 'https://ibnux.github.io/data-indonesia';
 
+    // Menampilkan daftar provinsi
     public function getProvinces()
     {
         try {
@@ -37,6 +38,7 @@ class WilayahController extends Controller
         }
     }
 
+    // Menampilkan daftar kota/kabupaten berdasarkan ID provinsi
     public function getRegencies($provinceId)
     {
         try {
@@ -64,6 +66,7 @@ class WilayahController extends Controller
         }
     }
 
+    // Menampilkan daftar kecamatan berdasarkan ID kota/kabupaten
     public function getDistricts($regencyId)
     {
         try {
@@ -91,6 +94,7 @@ class WilayahController extends Controller
         }
     }
 
+    // Menampilkan daftar kelurahan berdasarkan ID kecamatan
     public function getVillages($districtId)
     {
         try {

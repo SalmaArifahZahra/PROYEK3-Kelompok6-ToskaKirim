@@ -16,12 +16,21 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 
 // --- Rute Publik (Guest) ---
 Route::middleware(['guest'])->group(function () {
-    Route::controller(AuthController::class)->group(function () {
-        Route::get('/', 'index_login')->name('login');
-        Route::get('/register', 'index_register')->name('register');
-        Route::post('/login', 'action_login')->name('login.action');
-        Route::post('/register', 'action_register')->name('register.action');
-    });
+    // Customer (public) login/register
+    Route::get('/', [AuthController::class, 'index_login'])->name('login');
+    Route::post('/login', [AuthController::class, 'action_login'])->name('login.action');
+    Route::get('/register', [AuthController::class, 'index_register'])->name('register');
+    Route::post('/register', [AuthController::class, 'action_register'])->name('register.action');
+
+    // Admin / Superadmin login (separate URL and handler)
+    Route::get('/admin/login', [AuthController::class, 'index_admin_login'])->name('admin.login');
+    Route::post('/admin/login', [AuthController::class, 'action_admin_login'])->name('admin.login.action');
+
+    // Profile completion untuk registrasi baru (tanpa auth)
+    Route::get('/customer/profile/complete', [AlamatUserController::class, 'create'])
+         ->name('customer.profile.complete');
+    Route::post('/customer/alamat', [AlamatUserController::class, 'store'])
+         ->name('customer.alamat.store');
 });
 
 // --- Rute Terproteksi (Autentikasi) ---
@@ -38,8 +47,6 @@ Route::middleware(['auth'])->group(function () {
         
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('/profile/complete', [AlamatUserController::class, 'create'])
-             ->name('profile.complete');
         
         Route::resource('alamat', AlamatUserController::class)->except(['show']);
         Route::post('/alamat/{alamat}/set-utama', [AlamatUserController::class, 'setUtama'])

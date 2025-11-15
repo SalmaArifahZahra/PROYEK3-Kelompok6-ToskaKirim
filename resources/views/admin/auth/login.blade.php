@@ -68,12 +68,12 @@
                 </div>
             @endif
 
-            <form action="/login" method="POST" class="space-y-6">
+            <form action="/admin/login" method="POST" class="space-y-6">
                 @csrf
 
-                <!-- Username Input -->
+                <!-- Nama Input -->
                 <div>
-                    <label class="block text-gray-700 mb-2 text-sm font-medium">Username</label>
+                    <label class="block text-gray-700 mb-2 text-sm font-medium">Nama</label>
                     <div class="flex items-center border border-[#d1d5db] rounded-lg bg-white">
                         <span class="px-3 text-gray-500">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,13 +81,13 @@
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </span>
-                        <input type="text" name="username"
+                        <input type="text" name="nama"
                                class="w-full py-2.5 bg-transparent outline-none text-gray-900"
-                               placeholder="Enter your Username"
-                               value="{{ old('username') }}"
+                               placeholder="Enter your Nama"
+                               value="{{ old('nama') }}"
                                required>
                     </div>
-                    @error('username')
+                    @error('nama')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
