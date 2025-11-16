@@ -59,7 +59,8 @@ Route::middleware(['auth'])->group(function () {
         // Rute landing page Admin (Nama 'admin.dashboard' sudah benar)
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-        // (Nanti kita tambahkan rute Kategori & Produk di sini)
+        // Rute Produk
+        Route::get('/produk', [\App\Http\Controllers\Admin\ProdukController::class, 'index'])->name('produk.index');
     });
 
     // --- Rute Superadmin ---
