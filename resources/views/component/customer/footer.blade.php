@@ -14,7 +14,7 @@
             <p class="text-sm leading-relaxed">
                 Jl. Arcamnik Endah Ruko III No.3, Sukamiskin, Kec. Arcamanik, Kota Bandung, Jawa Barat 40291
             </p>
-            <p class="mt-3 text-sm">📞 +62 856 0847 2373</p>
+            <p class="mt-3 text-sm">+62 856 0847 2373</p>
         </div>
 
         <div class="flex justify-center md:justify-end">

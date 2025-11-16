@@ -1,18 +1,34 @@
 <nav class="bg-[#5BC6BC] shadow-md">
     <div class="max-w-9xl mx-auto px-7 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
+
+        <div class="flex items-center">
             <img src="{{ asset('images/icon_toska.png') }}" alt="ToskaKirim Logo" class="h-16">
         </div>
 
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-6">
+
+            <div class="flex justify-center mx-10">
+                <div class="relative w-[350px]">
+                    <input type="text" placeholder="Search"
+                        class="w-full bg-white text-gray-700 rounded-full px-5 py-2 border border-gray-300 focus:outline-none">
+                    <button class="absolute top-1/2 -translate-y-1/2 right-4">
+                        <i class="fas fa-search text-[#5BC6BC] text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
             <a href="#" class="text-white text-xl hover:text-gray-100 transition">
                 <i class="fas fa-shopping-cart"></i>
             </a>
 
-            <a href="{{ route('login') }}"
-                class="text-white border border-white px-4 py-1 rounded-md text-sm hover:bg-white hover:text-[#5BC6BC] transition">
-                Login
-            </a>
+            <a href="/" class="text-white font-medium hover:text-[#174552] transition">Home</a>
+
+            <span class="text-white font-medium">
+                Halo, {{ Auth::user()->nama }}
+            </span>
+
+
         </div>
+
     </div>
 </nav>
