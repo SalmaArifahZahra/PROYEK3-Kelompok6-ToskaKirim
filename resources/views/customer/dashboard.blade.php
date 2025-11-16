@@ -4,6 +4,6 @@
 
 @section('content')
 
-
+@include('component.customer.carousel_card')
 
 @endsection

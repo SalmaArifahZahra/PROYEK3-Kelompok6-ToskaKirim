@@ -26,6 +26,33 @@
             <span class="text-white font-medium">
                 Halo, {{ Auth::user()->nama }}
             </span>
+            <form id="logoutForm" action="/logout" method="POST">
+                @csrf
+                <button type="button" id="logoutBtn"
+                    class=" hover:bg-[#dc2626] text-white font-medium px-6 py-3 rounded-lg transition-colors">
+                    Logout
+                </button>
+            </form>
+
+            <script>
+                document.getElementById('logoutBtn').addEventListener('click', function() {
+                    Swal.fire({
+                        title: 'Apakah kamu yakin keluar?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Ya, logout!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('logoutForm').submit();
+                        }
+                    });
+                });
+            </script>
+
+
 
 
         </div>
