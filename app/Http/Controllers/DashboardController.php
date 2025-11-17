@@ -17,7 +17,7 @@ class DashboardController extends Controller
     public function index(): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Debug: Log peran user
         \Log::info('User login - Role: ' . $user->peran->value);
 
@@ -28,7 +28,7 @@ class DashboardController extends Controller
         } elseif ($user->peran === RoleEnum::CUSTOMER) {
             return redirect()->route('customer.dashboard');
         }
-        
+
         // Fallback jika peran tidak dikenal
         Auth::logout();
         return redirect()->route('login')->withErrors([

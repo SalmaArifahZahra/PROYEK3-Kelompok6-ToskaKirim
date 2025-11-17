@@ -14,32 +14,32 @@ class KategoriSeeder extends Seeder
     {
         DB::table('kategori')->insert([
             [
-                'nama_kategori' => 'Makanan Ringan',
-                'foto' => 'kategori/makanan-ringan.jpg',
+                'nama_kategori' => 'Makanan ',
+                'foto' => 'kategori/category1.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'nama_kategori' => 'Minuman',
-                'foto' => 'kategori/minuman.jpg',
+                'foto' => 'kategori/category2.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nama_kategori' => 'Makanan Berat',
-                'foto' => 'kategori/makanan-berat.jpg',
+                'nama_kategori' => 'Kebutuhan Rumah',
+                'foto' => 'kategori/category3.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nama_kategori' => 'Roti & Kue',
-                'foto' => 'kategori/roti-kue.jpg',
+                'nama_kategori' => 'Kesehatan & Kebersihan',
+                'foto' => 'kategori/category4.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nama_kategori' => 'Buah & Sayur',
-                'foto' => 'kategori/buah-sayur.jpg',
+                'nama_kategori' => 'Lainnya',
+                'foto' => 'kategori/category5.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
