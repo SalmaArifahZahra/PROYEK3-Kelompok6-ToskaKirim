@@ -12,16 +12,9 @@ class DashboardController extends Controller
      * Menampilkan halaman dashboard customer.
      * Sesuai rute: GET /customer/home
      */
-    // public function index(): View
-    // {
-    //     // Asumsi Anda punya view di: resources/views/customer/dashboard.blade.php
-    //     return view('customer.dashboard');
-    // }
-
-    public function index()
+    public function index(): View
     {
-        return view('customer.dashboard', [
-            'kategori' => \App\Models\Kategori::all()
-        ]);
+        // Asumsi Anda punya view di: resources/views/customer/dashboard.blade.php
+        return view('customer.dashboard');
     }
 }

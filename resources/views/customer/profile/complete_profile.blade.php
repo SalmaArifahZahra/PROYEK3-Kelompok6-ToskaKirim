@@ -24,7 +24,7 @@
 
         <div>
             <label for="nama_penerima" class="block text-gray-700 font-medium mb-1">Nama Penerima</label>
-            <input type="text" id="nama_penerima" name="nama_penerima" value="{{ old('nama_penerima', auth()->user()->nama) }}" required
+                 <input type="text" id="nama_penerima" name="nama_penerima" value="{{ old('nama_penerima', auth()->check() ? auth()->user()->nama : session('temp_user_name')) }}" required
                    placeholder="Masukkan nama penerima"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:border-blue-500 focus:ring-blue-500 outline-none @error('nama_penerima') border-red-500 @enderror">
             @error('nama_penerima')
@@ -159,7 +159,7 @@
 
         async function fetchData(endpoint, selectElement, placeholder) {
             try {
-                console.log(`🔄 Fetching: ${API_URL}/${endpoint}`);
+                console.log(`Fetching: ${API_URL}/${endpoint}`);
                 
                 const response = await fetch(`${API_URL}/${endpoint}`);
                 
@@ -168,15 +168,15 @@
                 }
                 
                 const result = await response.json();
-                console.log(`✅ Response from ${endpoint}:`, result);
+                console.log(`Response from ${endpoint}:`, result);
                 
                 const data = result.data || result || [];
-                console.log(`📊 Data array:`, data);
+                console.log(`Data array:`, data);
                 
                 selectElement.innerHTML = `<option value="">Pilih ${placeholder}</option>`;
                 
                 if (Array.isArray(data)) {
-                    console.log(`✨ Adding ${data.length} items to select`);
+                    console.log(`Adding ${data.length} items to select`);
                     data.forEach(item => {
                         const option = document.createElement('option');
                         option.value = item.id;
