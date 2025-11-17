@@ -16,43 +16,29 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    /**
-     * Menampilkan dashboard utama Superadmin.
-     * Sesuai rute: GET /superadmin/dashboard
-     */
+    // Menampilkan halaman dashboard superadmin.
     public function dashboard(): View
     {
         return view('superadmin.dashboard');
     }
 
-    /**
-     * Menampilkan daftar semua user.
-     * Sesuai rute: GET /superadmin/users
-     */
+    // Menampilkan daftar user.
     public function index(): View
     {
         $users = User::orderBy('nama')->get();
         
-        // Asumsi view ada di: resources/views/superadmin/users/dashboard.blade.php
         return view('superadmin.users.dashboard', [
             'users' => $users
         ]);
     }
 
-    /**
-     * Menampilkan form untuk membuat user baru.
-     * Sesuai rute: GET /superadmin/users/create
-     */
+    // Menampilkan form untuk membuat user baru.
     public function create(): View
     {
-        // Asumsi view ada di: resources/views/superadmin/users/create.blade.php
         return view('superadmin.users.create');
     }
 
-    /**
-     * Menyimpan user baru (Admin/Customer) ke database.
-     * Sesuai rute: POST /superadmin/users
-     */
+    // Menyimpan user baru.
     public function store(Request $request): RedirectResponse
     {
         // Validasi
@@ -72,27 +58,19 @@ class UserController extends Controller
 
         User::create($data);
 
-        // Redirect ke halaman daftar user dengan pesan sukses
         return redirect()->route('superadmin.users.dashboard')
                          ->with('success', 'User baru berhasil dibuat.');
     }
 
-    /**
-     * Menampilkan form untuk mengedit user.
-     * Sesuai rute: GET /superadmin/users/{user}/edit
-     */
-    public function edit(User $user): View // Route Model Binding
+    // Menampilkan form untuk mengedit user.
+    public function edit(User $user): View
     {
-        // Asumsi view ada di: resources/views/superadmin/users/edit.blade.php
         return view('superadmin.users.edit', [
             'user' => $user
         ]);
     }
 
-    /**
-     * Memproses update user.
-     * Sesuai rute: PUT /superadmin/users/{user}
-     */
+    // Memperbarui data user.
     public function update(Request $request, User $user): RedirectResponse
     {
         // Validasi
@@ -103,7 +81,7 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id_user, 'id_user')
             ],
             'peran' => ['required', Rule::in(RoleEnum::ADMIN, RoleEnum::CUSTOMER)],
-            'password' => ['nullable', 'sometimes', Password::min(8)], // Password opsional
+            'password' => ['nullable', 'sometimes', Password::min(8)],
         ]);
 
         if ($validator->fails()) {
@@ -112,11 +90,10 @@ class UserController extends Controller
 
         $data = $validator->validated();
 
-        // Hanya update password jika diisi
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
-            unset($data['password']); // Hapus dari data agar tidak menimpa password lama
+            unset($data['password']);
         }
 
         $user->update($data);
@@ -125,10 +102,7 @@ class UserController extends Controller
                          ->with('success', 'Data user berhasil diperbarui.');
     }
 
-    /**
-     * Menghapus user.
-     * Sesuai rute: DELETE /superadmin/users/{user}
-     */
+    // Menghapus user.
     public function destroy(User $user): RedirectResponse
     {
         // Safety check: Superadmin tidak boleh menghapus dirinya sendiri
