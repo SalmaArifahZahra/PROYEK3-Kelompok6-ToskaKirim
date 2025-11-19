@@ -29,4 +29,20 @@ class Produk extends Model
     {
         return $this->hasMany(ProdukDetail::class, 'id_produk', 'id_produk');
     }
+
+    //testing fungsi harga dan foto default -salma
+    public function detailDefault()
+    {
+        return $this->hasOne(ProdukDetail::class, 'id_produk', 'id_produk')->oldest();
+    }
+
+    public function getFotoAttribute()
+    {
+        return $this->detail->first()->foto ?? 'default.jpg';
+    }
+
+    public function getHargaAttribute()
+    {
+        return $this->detail->first()->harga_jual ?? 0;
+    }
 }
