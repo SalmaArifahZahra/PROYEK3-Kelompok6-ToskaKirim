@@ -9,11 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    /**
-     * Pintu Gerbang setelah login.
-     * Redirect user ke dashboard yang sesuai berdasarkan peran.
-     * Sesuai rute: GET /dashboard
-     */
+    // Menampilkan halaman dashboard sesuai peran user.
     public function index(): RedirectResponse
     {
         $user = Auth::user();
@@ -29,7 +25,6 @@ class DashboardController extends Controller
             return redirect()->route('customer.dashboard');
         }
         
-        // Fallback jika peran tidak dikenal
         Auth::logout();
         return redirect()->route('login')->withErrors([
             'email' => 'Peran tidak dikenali, silahkan hubungi administrator.'

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AlamatUser;
+use App\Models\User;
 use App\Http\Requests\StoreAlamatUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -11,9 +12,7 @@ use Illuminate\View\View;
 
 class AlamatUserController extends Controller
 {
-    /**
-     * Menampilkan daftar alamat milik user.
-     */
+    // Menampilkan daftar alamat user
     public function index(): View
     {
         $alamatList = Auth::user()->alamatUser()
@@ -25,27 +24,43 @@ class AlamatUserController extends Controller
         ]);
     }
 
-    /**
-     * Menampilkan form untuk melengkapi profil (membuat alamat pertama).
-     */
+    // Menampilkan form untuk menambahkan alamat baru
+    // Bisa diakses tanpa auth jika sedang registrasi
     public function create(): View
     {
         return view('customer.profile.complete_profile');
     }
 
-    /**
-     * Menyimpan alamat baru.
-     * Perhatikan 'StoreAlamatUserRequest' menggantikan 'Request'.
-     */
+    // Memproses penyimpanan alamat baru
     public function store(StoreAlamatUserRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $user = $request->user();
 
-        // Cek apakah user sudah punya alamat sebelumnya
+        // Cek registrasi baru
+        $isNewRegistration = session()->has('temp_user_id');
+
+        if ($isNewRegistration) {
+            // Untuk user baru, ambil user ID dari session
+            $userId = session('temp_user_id');
+            $user = User::find($userId);
+
+            if (!$user) {
+                return redirect()->route('register')
+                                 ->withErrors(['error' => 'Sesi registrasi tidak valid. Silakan daftar ulang.']);
+            }
+
+            $data['id_user'] = $userId;
+        } else {
+            // Untuk user yang sudah login
+            $user = $request->user();
+            if (!$user) {
+                return redirect()->route('login')
+                                 ->withErrors(['error' => 'Anda harus login terlebih dahulu.']);
+            }
+            $data['id_user'] = $user->id_user;
+        }
+
         $userHasAddress = $user->alamatUser()->count() > 0;
-
-        $data['id_user'] = $user->id_user;
         
         // Jika user belum punya alamat, set alamat pertama ini sebagai utama
         if (!$userHasAddress) {
@@ -62,13 +77,17 @@ class AlamatUserController extends Controller
             $alamat->setAsUtama();
         }
 
+        if ($isNewRegistration) {
+            session()->forget('temp_user_id');
+            return redirect()->route('login')
+                             ->with('success', 'Registrasi dan profil berhasil disimpan! Silakan login dengan email dan password yang telah Anda buat.');
+        }
+
         return redirect()->route('customer.dashboard')
-                         ->with('success', 'Selamat datang! Alamat Anda berhasil disimpan.');
+                         ->with('success', 'Alamat berhasil disimpan!');
     }
 
-    /**
-     * Menampilkan form untuk mengedit alamat.
-     */
+    // Menampilkan form untuk mengedit alamat
     public function edit(AlamatUser $alamat): View
     {
         $this->authorize('update', $alamat); 
@@ -78,10 +97,7 @@ class AlamatUserController extends Controller
         ]);
     }
 
-    /**
-     * Memproses update alamat.
-     * Perhatikan 'StoreAlamatUserRequest' dipakai lagi (validasi sama).
-     */
+    // Memperbarui data alamat
     public function update(StoreAlamatUserRequest $request, AlamatUser $alamat): RedirectResponse
     {
         $this->authorize('update', $alamat);
@@ -92,9 +108,7 @@ class AlamatUserController extends Controller
                          ->with('success', 'Alamat berhasil diperbarui.');
     }
 
-    /**
-     * Menghapus alamat.
-     */
+    // Menghapus alamat
     public function destroy(AlamatUser $alamat): RedirectResponse
     {
         $this->authorize('delete', $alamat);
@@ -112,9 +126,7 @@ class AlamatUserController extends Controller
                          ->with('success', 'Alamat berhasil dihapus.');
     }
 
-    /**
-     * Meng-set satu alamat sebagai alamat utama.
-     */
+    // Menetapkan alamat sebagai alamat utama
     public function setUtama(AlamatUser $alamat): RedirectResponse
     {
         $this->authorize('setUtama', $alamat);

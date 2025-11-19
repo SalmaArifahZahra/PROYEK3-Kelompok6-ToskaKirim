@@ -6,17 +6,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAlamatUserRequest extends FormRequest
 {
-    /**
-     * Tentukan apakah user diizinkan membuat request ini.
-     */
     public function authorize(): bool
     {
         return true; 
     }
 
-    /**
-     * Dapatkan aturan validasi yang berlaku untuk request ini.
-     */
     public function rules(): array
     {
         return [

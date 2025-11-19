@@ -1,0 +1,107 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Produk;
+use App\Models\ProdukDetail;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+class ProdukDetailController extends Controller
+{
+    // Menampilkan form untuk membuat varian/detail baru.
+    public function create(Produk $produk): View
+    {
+        return view('admin.produk_detail.create', [
+            'produk' => $produk
+        ]);
+    }
+
+    // Menyimpan varian/detail baru.
+    public function store(Request $request, Produk $produk): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'nama_varian' => 'required|string|max:150',
+            'harga_modal' => 'required|numeric|min:0',
+            'harga_jual' => 'required|numeric|min:0',
+            'stok' => 'required|integer|min:0',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $data = $validator->validated();
+
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('produk_detail', 'public');
+            $data['foto'] = $path;
+        }
+
+        $data['id_produk'] = $produk->id_produk;
+
+        ProdukDetail::create($data);
+
+        return redirect()->route('admin.produk.edit', $produk->id_produk)
+                         ->with('success', 'Varian produk baru berhasil ditambahkan.');
+    }
+
+    // Menampilkan form untuk mengedit varian/detail.
+    public function edit(Produk $produk, ProdukDetail $detail): View
+    {
+        return view('admin.produk_detail.edit', [
+            'produk' => $produk,
+            'detail' => $detail
+        ]);
+    }
+
+    // Memperbarui varian/detail.
+    public function update(Request $request, Produk $produk, ProdukDetail $detail): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'nama_varian' => 'required|string|max:150',
+            'harga_modal' => 'required|numeric|min:0',
+            'harga_jual' => 'required|numeric|min:0',
+            'stok' => 'required|integer|min:0',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $data = $validator->validated();
+
+        if ($request->hasFile('foto')) {
+            if ($detail->foto) {
+                Storage::disk('public')->delete($detail->foto);
+            }
+            $path = $request->file('foto')->store('produk_detail', 'public');
+            $data['foto'] = $path;
+        }
+
+        $detail->update($data);
+
+        return redirect()->route('admin.produk.edit', $produk->id_produk)
+                         ->with('success', 'Varian produk berhasil diperbarui.');
+    }
+
+    // Menghapus varian/detail.
+    public function destroy(Produk $produk, ProdukDetail $detail): RedirectResponse
+    {
+        if ($detail->foto) {
+            Storage::disk('public')->delete($detail->foto);
+        }
+
+        $detail->delete();
+
+        return redirect()->route('admin.produk.edit', $produk->id_produk)
+                         ->with('success', 'Varian produk berhasil dihapus.');
+    }
+}
