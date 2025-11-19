@@ -68,6 +68,9 @@ Route::middleware(['auth'])->group(function () {
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);
         
+        // Rute Produk Detail Index
+        Route::get('produk/{produk}/detail', [AdminProdukDetailController::class, 'index'])->name('produk_detail.index');
+        
         // Rute Varian/Detail Produk (Nested)
         Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function() {
             Route::get('/create', [AdminProdukDetailController::class, 'create'])->name('create');
@@ -75,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
             Route::put('/{detail}', [AdminProdukDetailController::class, 'update'])->name('update');
             Route::delete('/{detail}', [AdminProdukDetailController::class, 'destroy'])->name('destroy');
+            
         });
     });
 

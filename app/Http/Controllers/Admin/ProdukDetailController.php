@@ -14,6 +14,16 @@ use Illuminate\View\View;
 
 class ProdukDetailController extends Controller
 {
+    // Menampilkan tampilan daftar varian/detail untuk suatu produk.
+    public function index(Produk $produk): View
+    {
+        $detailList = $produk->detail()->orderBy('nama_varian', 'asc')->get();
+        return view('admin.produk_detail.index', [
+            'produk' => $produk,
+            'detailList' => $detailList
+        ]);
+    }
+    
     // Menampilkan form untuk membuat varian/detail baru.
     public function create(Produk $produk): View
     {

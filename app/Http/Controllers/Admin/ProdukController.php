@@ -20,7 +20,7 @@ class ProdukController extends Controller
         $produkList = Produk::with('kategori', 'detail')
                             ->withCount('detail')
                             ->orderBy('nama', 'asc')
-                            ->get();
+                            ->paginate(10);
 
         return view('admin.produk.index', [
             'produkList' => $produkList
