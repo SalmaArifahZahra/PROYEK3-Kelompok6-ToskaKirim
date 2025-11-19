@@ -54,6 +54,7 @@
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Produk</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kategori</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Deskripsi</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
@@ -66,6 +67,9 @@
                         </td>
                         <td class="px-6 py-4 text-sm font-medium text-gray-800">
                             {{ $produk->nama }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            {{ $produk->kategori->nama ?? '-' }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
                             {{ Str::limit($produk->deskripsi, 100) }}
