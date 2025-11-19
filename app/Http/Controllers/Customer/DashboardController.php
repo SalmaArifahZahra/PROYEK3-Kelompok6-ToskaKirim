@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Models\Kategori;
+use App\Models\Produk;
 
 class DashboardController extends Controller
 {
@@ -14,7 +16,12 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
-        // Asumsi Anda punya view di: resources/views/customer/dashboard.blade.php
-        return view('customer.dashboard');
+        // kategori card sesuai dengan sort nama kategori  -salma
+        return view('customer.dashboard', [
+            'kategori' => Kategori::orderBy('nama_kategori', 'asc')->get(),
+            'produk'   => Produk::with('detail')
+                ->take(12)
+                ->get(),
+        ]);
     }
 }
