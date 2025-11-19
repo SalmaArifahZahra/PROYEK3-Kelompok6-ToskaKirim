@@ -53,45 +53,37 @@
                         <th class="px-6 py-4 text-left">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Foto</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Produk</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kategori</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Harga</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Stok</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Varian</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Deskripsi</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @forelse($produkDetails as $detail)
+                    @forelse($produkList as $produk)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </td>
-                        <td class="px-6 py-4">
-                            <img src="{{ asset('storage/' . $detail->foto) }}"
-                                 alt="{{ $detail->nama_varian }}"
-                                 class="w-16 h-16 object-cover rounded-lg">
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-800">
-                            {{ $detail->produk->nama }}
+                        <td class="px-6 py-4 text-sm font-medium text-gray-800">
+                            {{ $produk->nama }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $detail->produk->kategori->nama ?? '-' }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-800">
-                            Rp {{ number_format($detail->harga_jual, 0, ',', '.') }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-800">
-                            {{ $detail->stok }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $detail->nama_varian }}
+                            {{ Str::limit($produk->deskripsi, 100) }}
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
+                                <!-- Detail Button -->
+                                <a href="{{ route('admin.produk.edit', $produk->id_produk) }}" class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Detail">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </a>
+
                                 <!-- Edit Button -->
-                                <button class="p-2 text-gray-600 hover:text-[#5BC6BC] hover:bg-gray-100 rounded-lg transition-colors">
+                                <button class="p-2 text-gray-600 hover:text-[#5BC6BC] hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -99,18 +91,22 @@
                                 </button>
 
                                 <!-- Delete Button -->
-                                <button class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                                <form action="{{ route('admin.produk.destroy', $produk->id_produk) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus produk ini beserta semua variannya?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
                             Belum ada data produk
                         </td>
                     </tr>
@@ -121,20 +117,20 @@
     </div>
 
     <!-- Pagination -->
-    @if($produkDetails->hasPages())
+    @if(method_exists($produkList, 'hasPages') && $produkList->hasPages())
     <div class="flex items-center justify-between mt-6">
         <!-- Showing info -->
         <div class="text-sm text-gray-700">
-            Showing <span class="font-semibold text-gray-900">{{ $produkDetails->firstItem() }}</span>
-            to <span class="font-semibold text-gray-900">{{ $produkDetails->lastItem() }}</span>
-            of <span class="font-semibold text-gray-900">{{ $produkDetails->total() }}</span> results
+            Showing <span class="font-semibold text-gray-900">{{ $produkList->firstItem() }}</span>
+            to <span class="font-semibold text-gray-900">{{ $produkList->lastItem() }}</span>
+            of <span class="font-semibold text-gray-900">{{ $produkList->total() }}</span> results
         </div>
 
         <!-- Pagination buttons -->
         <nav aria-label="Page navigation">
             <ul class="inline-flex -space-x-px text-sm">
                 {{-- Previous Button --}}
-                @if ($produkDetails->onFirstPage())
+                @if ($produkList->onFirstPage())
                     <li>
                         <span class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-400 bg-white border border-e-0 border-gray-300 rounded-s-lg cursor-not-allowed">
                             Previous
@@ -142,15 +138,15 @@
                     </li>
                 @else
                     <li>
-                        <a href="{{ $produkDetails->previousPageUrl() }}" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-700 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-[#5BC6BC] hover:text-white transition-colors">
+                        <a href="{{ $produkList->previousPageUrl() }}" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-700 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-[#5BC6BC] hover:text-white transition-colors">
                             Previous
                         </a>
                     </li>
                 @endif
 
                 {{-- Page Numbers --}}
-                @foreach ($produkDetails->getUrlRange(1, $produkDetails->lastPage()) as $page => $url)
-                    @if ($page == $produkDetails->currentPage())
+                @foreach ($produkList->getUrlRange(1, $produkList->lastPage()) as $page => $url)
+                    @if ($page == $produkList->currentPage())
                         <li>
                             <span aria-current="page" class="flex items-center justify-center px-3 h-8 text-white border border-[#5BC6BC] bg-[#5BC6BC]">
                                 {{ $page }}
@@ -166,9 +162,9 @@
                 @endforeach
 
                 {{-- Next Button --}}
-                @if ($produkDetails->hasMorePages())
+                @if ($produkList->hasMorePages())
                     <li>
-                        <a href="{{ $produkDetails->nextPageUrl() }}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-700 bg-white border border-gray-300 rounded-e-lg hover:bg-[#5BC6BC] hover:text-white transition-colors">
+                        <a href="{{ $produkList->nextPageUrl() }}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-700 bg-white border border-gray-300 rounded-e-lg hover:bg-[#5BC6BC] hover:text-white transition-colors">
                             Next
                         </a>
                     </li>
