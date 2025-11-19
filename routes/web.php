@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AlamatUserController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController; 
 // Import Controller Admin
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -43,22 +43,22 @@ Route::middleware(['auth'])->group(function () {
 
     // --- Rute Customer ---
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function () {
-
+        
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
         // Alur 'Lengkapi Profil' setelah register
         Route::get('/profile/complete', [AlamatUserController::class, 'create'])
-            ->name('profile.complete');
-
+             ->name('profile.complete');
+        
         // CRUD Alamat Lengkap
         Route::resource('alamat', AlamatUserController::class);
         Route::post('/alamat/{alamat}/set-utama', [AlamatUserController::class, 'setUtama'])
-            ->name('alamat.setUtama');
+             ->name('alamat.setUtama');
     });
 
     // --- Rute Admin & Superadmin ---
     Route::middleware('role:admin,superadmin')->prefix('admin')->name('admin.')->group(function () {
-
+        
         // Rute landing page Admin
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
@@ -67,9 +67,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);
-
+        
         // Rute Varian/Detail Produk (Nested)
-        Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function () {
+        Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function() {
             Route::get('/create', [AdminProdukDetailController::class, 'create'])->name('create');
             Route::post('/', [AdminProdukDetailController::class, 'store'])->name('store');
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
@@ -82,7 +82,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
         // Rute landing page Superadmin
         Route::get('/dashboard', [AdminUserController::class, 'dashboard'])->name('users.dashboard');
-
+        
         // Rute CRUD User
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
@@ -91,4 +91,5 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
+
 });

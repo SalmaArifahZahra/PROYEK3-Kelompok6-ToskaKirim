@@ -1,4 +1,4 @@
-<nav class="bg-[#5BC6BC] shadow-md sticky top-0 z-50">
+<nav class="bg-[#5BC6BC] shadow-md">
     <div class="max-w-9xl mx-auto px-7 py-3 flex items-center justify-between">
 
         <div class="flex items-center">
