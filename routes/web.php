@@ -54,6 +54,12 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('alamat', AlamatUserController::class);
         Route::post('/alamat/{alamat}/set-utama', [AlamatUserController::class, 'setUtama'])
              ->name('alamat.setUtama');
+
+        // Kategori & Sub-Kategori
+        Route::get('/kategori/{kategori}', [KategoriController::class, 'index'])
+             ->name('kategori.index');
+        Route::get('/sub-kategori/{subKategori}', [KategoriController::class, 'show'])
+             ->name('kategori.show');
     });
 
     // --- Rute Admin & Superadmin ---

@@ -18,7 +18,7 @@ class DashboardController extends Controller
     {
         // kategori card sesuai dengan sort nama kategori  -salma
         return view('customer.dashboard', [
-            'kategori' => Kategori::orderBy('nama_kategori', 'asc')->get(),
+            'kategori' => Kategori::orderBy('nama_kategori', 'asc')->whereNull('parent_id')->get(),
             'produk'   => Produk::with('detail')
                 ->take(12)
                 ->get(),
