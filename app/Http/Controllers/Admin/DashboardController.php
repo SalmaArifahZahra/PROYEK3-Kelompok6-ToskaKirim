@@ -8,10 +8,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    /**
-     * Menampilkan halaman dashboard admin.
-     * Sesuai rute: GET /admin/dashboard
-     */
+    // Menampilkan halaman dashboard admin.
     public function index(): View
     {
         return view('admin.dashboard');

@@ -12,7 +12,6 @@ class DashboardController extends Controller
 {
     /**
      * Menampilkan halaman dashboard customer.
-     * Sesuai rute: GET /customer/home
      */
     public function index(): View
     {

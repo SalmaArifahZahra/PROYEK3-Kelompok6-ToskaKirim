@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,9 +57,9 @@ Route::middleware(['auth'])->group(function () {
              ->name('alamat.setUtama');
 
         // Kategori & Sub-Kategori
-        Route::get('/kategori/{kategori}', [KategoriController::class, 'index'])
+        Route::get('/kategori/{kategori}', [CustomerKategoriController::class, 'index'])
              ->name('kategori.index');
-        Route::get('/sub-kategori/{subKategori}', [KategoriController::class, 'show'])
+        Route::get('/sub-kategori/{subKategori}', [CustomerKategoriController::class, 'show'])
              ->name('kategori.show');
     });
 
