@@ -30,7 +30,10 @@ class ProdukController extends Controller
     // Menampilkan form untuk membuat produk (induk) baru.
     public function create(): View
     {
-        $kategoriList = Kategori::orderBy('nama_kategori', 'asc')->get();
+        $kategoriList = Kategori::with('children')
+                                ->whereNull('parent_id')
+                                ->orderBy('nama_kategori', 'asc')
+                                ->get();
         
         return view('admin.produk.create', [
             'kategoriList' => $kategoriList

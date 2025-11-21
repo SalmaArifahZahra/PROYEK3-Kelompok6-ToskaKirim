@@ -26,7 +26,11 @@ class KategoriController extends Controller
     // Menampilkan form untuk membuat kategori baru.
     public function create(): View
     {
-        return view('admin.kategori.create');
+        $parentKategori = Kategori::whereNull('parent_id')->get();
+    
+        return view('admin.kategori.create', [
+            'parentKategori' => $parentKategori
+        ]);
     }
 
     // Menyimpan kategori baru ke database.
@@ -35,6 +39,7 @@ class KategoriController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_kategori' => 'required|string|max:100|unique:kategori,nama_kategori',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'parent_id' => 'nullable|exists:kategori,id_kategori',
         ]);
 
         if ($validator->fails()) {
@@ -42,6 +47,10 @@ class KategoriController extends Controller
         }
 
         $data = $validator->validated();
+
+        if ($request->filled('parent_id') && $request->filled('id_kategori') && $request->input('parent_id') == $request->input('id_kategori')) {
+            return back()->withErrors(['parent_id' => 'Parent tidak boleh sama dengan kategori itu sendiri.'])->withInput();
+        }
 
         if ($request->hasFile('foto')) {
             $path = $request->file('foto')->store('kategori', 'public');
@@ -63,8 +72,14 @@ class KategoriController extends Controller
     // Menampilkan form untuk mengedit kategori.
     public function edit(Kategori $kategori): View
     {
+        $parentKategori = Kategori::whereNull('parent_id')
+                    ->where('id_kategori', '!=', $kategori->id_kategori)
+                    ->orderBy('nama_kategori')
+                    ->get();
+
         return view('admin.kategori.edit', [
-            'kategori' => $kategori
+            'kategori' => $kategori,
+            'parentKategori' => $parentKategori
         ]);
     }
 
@@ -79,6 +94,7 @@ class KategoriController extends Controller
                 Rule::unique('kategori', 'nama_kategori')->ignore($kategori->id_kategori, 'id_kategori')
             ],
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'parent_id' => 'nullable|exists:kategori,id_kategori',
         ]);
 
         if ($validator->fails()) {
@@ -86,6 +102,11 @@ class KategoriController extends Controller
         }
 
         $data = $validator->validated();
+
+        // Prevent self-parenting: parent_id cannot equal the category's own id
+        if (isset($data['parent_id']) && $data['parent_id'] == $kategori->id_kategori) {
+            return back()->withErrors(['parent_id' => 'Parent tidak boleh sama dengan kategori itu sendiri.'])->withInput();
+        }
 
         if ($request->hasFile('foto')) {
             if ($kategori->foto) {
