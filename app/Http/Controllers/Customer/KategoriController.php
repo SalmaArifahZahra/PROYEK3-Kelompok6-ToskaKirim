@@ -41,7 +41,6 @@ class KategoriController extends Controller
         $produkList = Produk::where('id_kategori', $subKategori->id_kategori)
                             ->with('detail')
                             ->get();
-
         return view('customer.kategori.show', [
             'kategoriUtama' => $kategoriUtama,
             'activeSubKategori' => $subKategori,
