@@ -1,0 +1,53 @@
+@extends('layouts.layout_superadmin')
+
+@section('title', 'Metode Pembayaran')
+
+@section('content')
+    <div class="mb-6 flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-700">Control Payment</h2>
+        <a href="{{ route('superadmin.payments.create') }}" class="px-4 py-2 bg-[#2A9D8F] text-white rounded hover:bg-[#21867a]">
+            + Tambah Metode
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Bank/E-Wallet</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Rekening</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse($payments as $payment)
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $payment->nama_bank }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $payment->jenis }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $payment->nomor_rekening ?? '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($payment->gambar)
+                                <img src="{{ asset('storage/' . $payment->gambar) }}" class="h-10 w-auto rounded" alt="Logo">
+                            @else
+                                <span class="text-gray-400">No Image</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <form action="#" method="POST" onsubmit="return confirm('Hapus metode ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">Belum ada metode pembayaran.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+@endsection

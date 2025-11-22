@@ -6,12 +6,15 @@ use App\Http\Controllers\AlamatUserController;
 use App\Http\Controllers\DashboardController; 
 // Import Controller Admin
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\KategoriController as AdminKategoriController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
+use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
+use App\Http\Controllers\Superadmin\MetodePembayaranController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,18 +81,22 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // --- Rute Superadmin ---
-    Route::middleware('role:superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
-        // Rute landing page Superadmin
-        Route::get('/dashboard', [AdminUserController::class, 'dashboard'])->name('users.dashboard');
-        
+    Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    
+        // Dashboard (Halaman Awal setelah Login)
+        Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
+
+        Route::resource('users', SuperAdminUserController::class);
+
+        Route::resource('payments', MetodePembayaranController::class);
+
         // Rute CRUD User
-        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
-        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
-        Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+        // Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+        // Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        // Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+        // Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        // Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
 
 });
+    
