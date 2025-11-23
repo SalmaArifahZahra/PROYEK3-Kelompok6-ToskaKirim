@@ -9,7 +9,7 @@
     <!-- Header Section -->
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.produk.index') }}" class="text-2xl font text-gray-800">Produk</a>
+            <a href="{{ route('admin.produk.index') }}" class="text-2xl font text-gray-800 hover:text-[#5BC6BC]">Produk</a>
             <span class="text-xl text-gray-400">></span>
             <h2 class="text-2xl font-bold text-gray-800">{{ $produk->nama }}</h2>
         </div>
@@ -41,13 +41,13 @@
                 </svg>
             </button>
 
-            <!-- Tambah Produk Button -->
-            <button class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
+            <!-- Tambah Varian Produk Button -->
+            <a href="{{ route('admin.produk.detail.create', $produk->id_produk) }}" class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                <span class="font-medium">Tambah Produk</span>
-            </button>
+                <span class="font-medium">Tambah Varian Produk</span>
+            </a>
         </div>
     </div>
 
@@ -77,7 +77,7 @@
                         <td class="px-6 py-4">
                             @if($detail->foto)
                             <img
-                                src="{{ asset('storage/' . $detail->foto) }}"
+                                src="{{ asset($detail->foto) }}"
                                 alt="{{ $detail->nama_varian }}"
                                 class="w-16 h-16 object-cover rounded">
                             @else
@@ -103,16 +103,6 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <!-- Detail Button -->
-                                <button class="text-gray-600 hover:text-blue-600 transition-colors" title="Detail">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </button>
-
                                 <!-- Edit Button -->
                                 <button class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -50,8 +50,10 @@ class ProdukDetailController extends Controller
         $data = $validator->validated();
 
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('produk_detail', 'public');
-            $data['foto'] = $path;
+            $file = $request->file('foto');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('produk'), $filename);
+            $data['foto'] = 'produk/' . $filename;
         }
 
         $data['id_produk'] = $produk->id_produk;
@@ -89,11 +91,13 @@ class ProdukDetailController extends Controller
         $data = $validator->validated();
 
         if ($request->hasFile('foto')) {
-            if ($detail->foto) {
-                Storage::disk('public')->delete($detail->foto);
+            if ($detail->foto && file_exists(public_path($detail->foto))) {
+                unlink(public_path($detail->foto));
             }
-            $path = $request->file('foto')->store('produk_detail', 'public');
-            $data['foto'] = $path;
+            $file = $request->file('foto');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('produk'), $filename);
+            $data['foto'] = 'produk/' . $filename;
         }
 
         $detail->update($data);
