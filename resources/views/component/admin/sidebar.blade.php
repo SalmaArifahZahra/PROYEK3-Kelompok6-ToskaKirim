@@ -31,7 +31,8 @@
             </a>
 
             <!-- Kategori -->
-            <a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+            <a href="/admin/kategori"
+               class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                       {{ request()->is('admin/kategori*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
