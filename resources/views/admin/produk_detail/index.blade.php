@@ -79,7 +79,7 @@
                             <img
                                 src="{{ asset($detail->foto) }}"
                                 alt="{{ $detail->nama_varian }}"
-                                class="w-16 h-16 object-cover rounded">
+                                class="w-16 h-16 object-contain rounded">
                             @else
                             <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,12 +104,12 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <!-- Edit Button -->
-                                <button class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Edit">
+                                <a href="{{ route('admin.produk.detail.edit', [$produk->id_produk, $detail->id_varian]) }}" class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                </button>
+                                </a>
 
                                 <!-- Delete Button -->
                                 <form method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus varian ini?')">

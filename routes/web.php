@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AlamatUserController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController; 
 // Import Controller Admin
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -12,8 +12,7 @@ use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
-use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
-use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -44,30 +43,22 @@ Route::middleware(['auth'])->group(function () {
 
     // --- Rute Customer ---
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function () {
-
-        //Dashboard Customer
+        
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/produk/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
 
         // Alur 'Lengkapi Profil' setelah register
         Route::get('/profile/complete', [AlamatUserController::class, 'create'])
-            ->name('profile.complete');
-
+             ->name('profile.complete');
+        
         // CRUD Alamat Lengkap
         Route::resource('alamat', AlamatUserController::class);
         Route::post('/alamat/{alamat}/set-utama', [AlamatUserController::class, 'setUtama'])
-            ->name('alamat.setUtama');
-
-        // Kategori & Sub-Kategori
-        Route::get('/kategori/{kategori}', [CustomerKategoriController::class, 'index'])
-            ->name('kategori.index');
-        Route::get('/sub-kategori/{subKategori}', [CustomerKategoriController::class, 'show'])
-            ->name('kategori.show');
+             ->name('alamat.setUtama');
     });
 
     // --- Rute Admin & Superadmin ---
     Route::middleware('role:admin,superadmin')->prefix('admin')->name('admin.')->group(function () {
-
+        
         // Rute landing page Admin
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
@@ -76,17 +67,18 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);
-
+        
         // Rute Produk Detail Index
         Route::get('produk/{produk}/detail', [AdminProdukDetailController::class, 'index'])->name('produk_detail.index');
-
+        
         // Rute Varian/Detail Produk (Nested)
-        Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function () {
+        Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function() {
             Route::get('/create', [AdminProdukDetailController::class, 'create'])->name('create');
             Route::post('/', [AdminProdukDetailController::class, 'store'])->name('store');
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
             Route::put('/{detail}', [AdminProdukDetailController::class, 'update'])->name('update');
             Route::delete('/{detail}', [AdminProdukDetailController::class, 'destroy'])->name('destroy');
+            
         });
     });
 
@@ -94,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
         // Rute landing page Superadmin
         Route::get('/dashboard', [AdminUserController::class, 'dashboard'])->name('users.dashboard');
-
+        
         // Rute CRUD User
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
@@ -103,4 +95,5 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
+
 });

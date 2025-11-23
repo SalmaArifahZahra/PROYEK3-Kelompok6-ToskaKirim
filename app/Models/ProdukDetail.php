@@ -11,7 +11,7 @@ class ProdukDetail extends Model
     use HasFactory;
 
     protected $table = 'produk_detail';
-    protected $primaryKey = 'id_produk_detail';
+    protected $primaryKey = 'id_varian';
 
     protected $fillable = [
         'id_produk',
