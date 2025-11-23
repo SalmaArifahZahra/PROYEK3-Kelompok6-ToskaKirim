@@ -80,10 +80,10 @@
                             @endforeach
                         </select>
 
-                        <button type="button"
+                        <a href="{{ route('admin.kategori.create') }}" type="button"
                                 class="px-4 py-3 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors whitespace-nowrap font-medium">
                             + Kategori Baru
-                        </button>
+                        </a>
                     </div>
                     @error('id_kategori')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
