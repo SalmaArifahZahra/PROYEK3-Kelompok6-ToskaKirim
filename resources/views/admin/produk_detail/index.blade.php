@@ -1,6 +1,6 @@
 @extends('layouts.layout_admin')
 
-@section('title', 'Produk')
+@section('title', 'Produk Detail')
 
 @section('content')
 
@@ -8,7 +8,11 @@
 
     <!-- Header Section -->
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800">Produk</h1>
+        <div class="flex items-center gap-2">
+            <h1 class="text-2xl text-gray-800">Produk</h1>
+            <span class="text-xl text-gray-400">></span>
+            <h2 class="text-2xl font-bold text-gray-800">{{ $produk->nama }}</h2>
+        </div>
     </div>
 
     <!-- Search Bar and Actions -->
@@ -56,52 +60,72 @@
                         <th class="px-6 py-4 text-left">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Produk</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kategori</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Deskripsi</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Foto</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Varian</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Harga Modal</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Harga Jual</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Stok</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @forelse($produkList as $produk)
+                    @forelse($produk->detail as $detail)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </td>
+                        <td class="px-6 py-4">
+                            @if($detail->foto)
+                            <img
+                                src="{{ asset('storage/' . $detail->foto) }}"
+                                alt="{{ $detail->nama_varian }}"
+                                class="w-16 h-16 object-cover rounded">
+                            @else
+                            <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-sm font-medium text-gray-800">
-                            {{ $produk->nama }}
+                            {{ $detail->nama_varian }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $produk->kategori->nama ?? '-' }}
+                            Rp. {{ number_format($detail->harga_modal, 0, ',', '.') }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ Str::limit($produk->deskripsi, 100) }}
+                            Rp. {{ number_format($detail->harga_jual, 0, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            {{ $detail->stok }}
                         </td>
                         <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-3">
                                 <!-- Detail Button -->
-                                <a href="{{ route('admin.produk_detail.index', $produk->id_produk) }}" class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Detail">
+                                <button class="text-gray-600 hover:text-blue-600 transition-colors" title="Detail">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
-                                </a>
+                                </button>
 
                                 <!-- Edit Button -->
-                                <a href="{{ route('admin.produk.edit', $produk->id_produk) }}" class="p-2 text-gray-600 hover:text-[#5BC6BC] hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
+                                <button class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                </a>
+                                </button>
 
                                 <!-- Delete Button -->
-                                <form action="{{ route('admin.produk.destroy', $produk->id_produk) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus produk ini beserta semua variannya?')">
+                                <form method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus varian ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                    <button type="submit" class="text-gray-600 hover:text-red-600 transition-colors" title="Hapus">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -113,8 +137,8 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                            Belum ada data produk
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            Belum ada data varian produk
                         </td>
                     </tr>
                     @endforelse
@@ -122,70 +146,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Pagination -->
-    @if(method_exists($produkList, 'hasPages') && $produkList->hasPages())
-    <div class="flex items-center justify-between mt-6">
-        <!-- Showing info -->
-        <div class="text-sm text-gray-700">
-            Showing <span class="font-semibold text-gray-900">{{ $produkList->firstItem() }}</span>
-            to <span class="font-semibold text-gray-900">{{ $produkList->lastItem() }}</span>
-            of <span class="font-semibold text-gray-900">{{ $produkList->total() }}</span> results
-        </div>
-
-        <!-- Pagination buttons -->
-        <nav aria-label="Page navigation">
-            <ul class="inline-flex -space-x-px text-sm">
-                {{-- Previous Button --}}
-                @if ($produkList->onFirstPage())
-                    <li>
-                        <span class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-400 bg-white border border-e-0 border-gray-300 rounded-s-lg cursor-not-allowed">
-                            Previous
-                        </span>
-                    </li>
-                @else
-                    <li>
-                        <a href="{{ $produkList->previousPageUrl() }}" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-700 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-[#5BC6BC] hover:text-white transition-colors">
-                            Previous
-                        </a>
-                    </li>
-                @endif
-
-                {{-- Page Numbers --}}
-                @foreach ($produkList->getUrlRange(1, $produkList->lastPage()) as $page => $url)
-                    @if ($page == $produkList->currentPage())
-                        <li>
-                            <span aria-current="page" class="flex items-center justify-center px-3 h-8 text-white border border-[#5BC6BC] bg-[#5BC6BC]">
-                                {{ $page }}
-                            </span>
-                        </li>
-                    @else
-                        <li>
-                            <a href="{{ $url }}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-700 bg-white border border-gray-300 hover:bg-[#5BC6BC] hover:text-white transition-colors">
-                                {{ $page }}
-                            </a>
-                        </li>
-                    @endif
-                @endforeach
-
-                {{-- Next Button --}}
-                @if ($produkList->hasMorePages())
-                    <li>
-                        <a href="{{ $produkList->nextPageUrl() }}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-700 bg-white border border-gray-300 rounded-e-lg hover:bg-[#5BC6BC] hover:text-white transition-colors">
-                            Next
-                        </a>
-                    </li>
-                @else
-                    <li>
-                        <span class="flex items-center justify-center px-3 h-8 leading-tight text-gray-400 bg-white border border-gray-300 rounded-e-lg cursor-not-allowed">
-                            Next
-                        </span>
-                    </li>
-                @endif
-            </ul>
-        </nav>
-    </div>
-    @endif
 
 </div>
 
