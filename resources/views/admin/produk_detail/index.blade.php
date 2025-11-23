@@ -9,7 +9,7 @@
     <!-- Header Section -->
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <h1 class="text-2xl text-gray-800">Produk</h1>
+            <a href="{{ route('admin.produk.index') }}" <h1 class="text-2xl font text-gray-800">Produk</h1></a>
             <span class="text-xl text-gray-400">></span>
             <h2 class="text-2xl font-bold text-gray-800">{{ $produk->nama }}</h2>
         </div>
