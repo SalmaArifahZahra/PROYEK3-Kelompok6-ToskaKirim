@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailContro
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
 use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
+use App\Http\Controllers\Customer\KeranjangController as CustomerKeranjangController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -47,7 +48,10 @@ Route::middleware(['auth'])->group(function () {
 
         //Dashboard Customer
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/produk/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
+
+        Route::prefix('produk')->group(function () {
+            Route::get('/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
+        });
 
         // Alur 'Lengkapi Profil' setelah register
         Route::get('/profile/complete', [AlamatUserController::class, 'create'])
