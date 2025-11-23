@@ -10,7 +10,7 @@
     <nav class="flex" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 text-sm text-gray-700">
             <li>
-                <a href="{{ route('admin.produk.index') }}" <h1 class="text-2xl font text-gray-800">Produk</h1></a>
+                <a href="{{ route('admin.produk.index') }}" class="text-2xl font text-gray-800">Produk</a>
             </li>
             <li>
                 <span class="mx-2">&gt;</span>
