@@ -74,7 +74,7 @@ Route::middleware(['auth'])->group(function () {
         // Rute Varian/Detail Produk (Nested)
         Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function() {
             Route::get('/create', [AdminProdukDetailController::class, 'create'])->name('create');
-            Route::post('/', [AdminProdukDetailController::class, 'store'])->name('store');
+            Route::post('/', action: [AdminProdukDetailController::class, 'store'])->name('store');
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
             Route::put('/{detail}', [AdminProdukDetailController::class, 'update'])->name('update');
             Route::delete('/{detail}', [AdminProdukDetailController::class, 'destroy'])->name('destroy');

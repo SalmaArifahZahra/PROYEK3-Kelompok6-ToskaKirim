@@ -30,7 +30,7 @@
         <div class="bg-white rounded-lg shadow-md p-8 inline-block">
             <h2 class="text-2xl font-semibold text-[#5BC6BC] mb-8">Edit Varian Produk</h2>
 
-        <form action="{{ route('admin.produk.detail.update', [$produk->id_produk, $detail->id_varian]) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.produk.detail.update', [$produk->id_produk, $detail->id_produk_detail]) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
