@@ -112,7 +112,7 @@
                                 </a>
 
                                 <!-- Delete Button -->
-                                <form method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus varian ini?')">
+                                <form action="{{ route('admin.produk.detail.destroy', [$produk->id_produk, $detail->id_produk_detail]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus varian ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-gray-600 hover:text-red-600 transition-colors" title="Hapus">

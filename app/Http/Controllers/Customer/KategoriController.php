@@ -13,7 +13,7 @@ class KategoriController extends Controller
     public function index(Kategori $kategori): View
     {
         if ($kategori->parent_id !== null) {
-            return redirect()->route('customer.kategori.show', $kategori->id_kategori);
+            return view ('customer.kategori.show', $kategori->id_kategori);
         }
 
         $subKategoris = $kategori->children;

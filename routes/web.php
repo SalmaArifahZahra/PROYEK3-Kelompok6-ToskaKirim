@@ -12,7 +12,9 @@ use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
-
+use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
+use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
+use App\Http\Controllers\Customer\KeranjangController as CustomerKeranjangController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -46,6 +48,10 @@ Route::middleware(['auth'])->group(function () {
         
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
+        Route::prefix('produk')->group(function () {
+            Route::get('/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
+        });
+
         // Alur 'Lengkapi Profil' setelah register
         Route::get('/profile/complete', [AlamatUserController::class, 'create'])
              ->name('profile.complete');
@@ -72,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('produk/{produk}/detail', [AdminProdukDetailController::class, 'index'])->name('produk_detail.index');
         
         // Rute Varian/Detail Produk (Nested)
-        Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function() {
+        Route::prefix('produk/{produk:id_produk}/detail')->name('produk.detail.')->group(function() {
             Route::get('/create', [AdminProdukDetailController::class, 'create'])->name('create');
             Route::post('/', action: [AdminProdukDetailController::class, 'store'])->name('store');
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
