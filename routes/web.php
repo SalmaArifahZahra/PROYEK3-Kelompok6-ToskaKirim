@@ -67,6 +67,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('kategori.index');
         Route::get('/sub-kategori/{subKategori}', [CustomerKategoriController::class, 'show'])
             ->name('kategori.show');
+
+        
     });
 
     // --- Rute Admin & Superadmin ---

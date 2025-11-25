@@ -3,7 +3,7 @@ kategori/show.blade:
 
 @section('title', 'Kategori - ' . $activeSubKategori->nama_kategori)
 
-// Produk Berdasarkan Subkategori yang dipilih
+ {{-- Produk Berdasarkan Subkategori yang dipilih --}}
 @section('content')
 <div class="max-w-6xl mx-auto flex gap-6">
 
