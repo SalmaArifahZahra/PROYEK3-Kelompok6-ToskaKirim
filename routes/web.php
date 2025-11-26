@@ -70,6 +70,18 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute Kategori (Full CRUD)
         Route::resource('kategori', AdminKategoriController::class);
+        
+        // Rute Sub-Kategori Index
+        Route::get('kategori/{kategori}/subkategori', [\App\Http\Controllers\Admin\SubKategoriController::class, 'index'])->name('kategori.subkategori.index');
+        
+        // Rute Sub-Kategori (Nested)
+        Route::prefix('kategori/{kategori:id_kategori}/subkategori')->name('kategori.subkategori.')->group(function() {
+            Route::get('/create', [\App\Http\Controllers\Admin\SubKategoriController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\SubKategoriController::class, 'store'])->name('store');
+            Route::get('/{subkategori}/edit', [\App\Http\Controllers\Admin\SubKategoriController::class, 'edit'])->name('edit');
+            Route::put('/{subkategori}', [\App\Http\Controllers\Admin\SubKategoriController::class, 'update'])->name('update');
+            Route::delete('/{subkategori}', [\App\Http\Controllers\Admin\SubKategoriController::class, 'destroy'])->name('destroy');
+        });
 
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);

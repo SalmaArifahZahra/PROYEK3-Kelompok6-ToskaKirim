@@ -1,6 +1,6 @@
 @extends('layouts.layout_admin')
 
-@section('title', 'Kategori')
+@section('title', 'Sub-Kategori')
 
 @section('content')
 
@@ -8,7 +8,11 @@
 
     <!-- Header Section -->
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800">Kategori</h1>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.kategori.index') }}" class="text-2xl font text-gray-800 hover:text-[#5BC6BC]">Kategori</a>
+            <span class="text-xl text-gray-400">></span>
+            <h2 class="text-2xl font-bold text-gray-800">{{ $kategori->nama_kategori }}</h2>
+        </div>
     </div>
 
     <!-- Search Bar and Actions -->
@@ -17,7 +21,7 @@
         <div class="bg-white rounded-lg shadow-md p-4 w-1/2">
             <div class="relative">
                 <input type="text"
-                       placeholder="Search for Kategori"
+                       placeholder="Search for Sub-Kategori"
                        class="w-full pl-4 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5BC6BC] focus:border-transparent">
                 <button class="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,12 +41,12 @@
                 </svg>
             </button>
 
-            <!-- Tambah Kategori Button -->
-            <a href="{{ route('admin.kategori.create') }}" class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
+            <!-- Tambah Sub-Kategori Button -->
+            <a href="{{ route('admin.kategori.subkategori.create', $kategori->id_kategori) }}" class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                <span class="font-medium">Tambah Kategori</span>
+                <span class="font-medium">Tambah Sub-Kategori</span>
             </a>
         </div>
     </div>
@@ -57,21 +61,21 @@
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Foto</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Kategori</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Sub-Kategori</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @forelse($kategoriList as $kategori)
+                    @forelse($subKategoriList as $subkategori)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </td>
                         <td class="px-6 py-4">
-                            @if($kategori->foto)
+                            @if($subkategori->foto)
                             <img
-                                src="{{ asset($kategori->foto) }}"
-                                alt="{{ $kategori->nama_kategori }}"
+                                src="{{ asset($subkategori->foto) }}"
+                                alt="{{ $subkategori->nama_kategori }}"
                                 class="w-16 h-16 object-contain rounded">
                             @else
                             <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
@@ -83,19 +87,12 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-sm font-medium text-gray-800">
-                            {{ $kategori->nama_kategori }}
+                            {{ $subkategori->nama_kategori }}
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <!-- Sub-Kategori Button (3 dots) -->
-                                <a href="{{ route('admin.kategori.subkategori.index', $kategori->id_kategori) }}" class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Sub-Kategori">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                    </svg>
-                                </a>
-
                                 <!-- Edit Button -->
-                                <a href="{{ route('admin.kategori.edit', $kategori->id_kategori) }}" class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Edit">
+                                <a href="{{ route('admin.kategori.subkategori.edit', [$kategori->id_kategori, $subkategori->id_kategori]) }}" class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -103,7 +100,7 @@
                                 </a>
 
                                 <!-- Delete Button -->
-                                <form action="{{ route('admin.kategori.destroy', $kategori->id_kategori) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                <form action="{{ route('admin.kategori.subkategori.destroy', [$kategori->id_kategori, $subkategori->id_kategori]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus sub-kategori ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-gray-600 hover:text-red-600 transition-colors" title="Hapus">
@@ -119,7 +116,7 @@
                     @empty
                     <tr>
                         <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                            Belum ada data kategori
+                            Belum ada data sub-kategori
                         </td>
                     </tr>
                     @endforelse
