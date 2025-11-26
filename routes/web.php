@@ -68,7 +68,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sub-kategori/{subKategori}', [CustomerKategoriController::class, 'show'])
             ->name('kategori.show');
 
-        
+        Route::post(
+            '/keranjang/add',
+            [CustomerKeranjangController::class, 'add']
+        )->name('keranjang.add')->middleware('auth');
     });
 
     // --- Rute Admin & Superadmin ---

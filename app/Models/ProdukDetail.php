@@ -28,8 +28,8 @@ class ProdukDetail extends Model
         'stok' => 'integer',
     ];
 
-    public function produk(): BelongsTo
+    public function produk()
     {
-        return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
+        return $this->belongsTo(ProdukDetail::class, 'id_produk_detail', 'id_produk_detail');
     }
 }

@@ -7,57 +7,54 @@ use Illuminate\Support\Facades\DB;
 
 class KeranjangSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         DB::table('keranjang')->insert([
             [
-                'id_user' => 3, // Budi Santoso
-                'id_varian' => 1, // Keripik Kentang Original
+                'id_user' => 3,
+                'id_produk_detail' => 1,
                 'quantity' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 3, // Budi Santoso
-                'id_varian' => 5, // Teh Botol Original
+                'id_user' => 3,
+                'id_produk_detail' => 5,
                 'quantity' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 4, // Siti Nurhaliza
-                'id_varian' => 9, // Nasi Goreng Biasa
+                'id_user' => 4,
+                'id_produk_detail' => 9,
                 'quantity' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 4, // Siti Nurhaliza
-                'id_varian' => 7, // Jus Jeruk
+                'id_user' => 4,
+                'id_produk_detail' => 7,
                 'quantity' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 5, // Ahmad Rizky
-                'id_varian' => 15, // Brownies Original
+                'id_user' => 5,
+                'id_produk_detail' => 15,
                 'quantity' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 6, // Dewi Lestari
-                'id_varian' => 17, // Apel Merah
+                'id_user' => 6,
+                'id_produk_detail' => 17,
                 'quantity' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 6, // Dewi Lestari
-                'id_varian' => 19, // Kangkung
+                'id_user' => 6,
+                'id_produk_detail' => 19,
                 'quantity' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
