@@ -7,17 +7,12 @@
 <div class="space-y-6">
 
     <!-- Breadcrumb -->
-    <nav class="flex" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 text-sm text-gray-700">
-            <li>
-                <a href="{{ route('admin.produk.index') }}" class="text-2xl font text-gray-800 hover:text-[#5BC6BC]">Produk</a>
-            </li>
-            <li>
-                <span class="mx-2">&gt;</span>
-            </li>
-            <li class="text-2xl font-bold text-gray-800">Edit Produk</li>
-        </ol>
-    </nav>
+    @include('component.admin.breadcrumb', [
+        'items' => [
+            ['label' => 'Produk', 'url' => route('admin.produk.index')],
+            ['label' => 'Edit Produk']
+        ]
+    ])
 
     <!-- Form Card -->
     <div class="bg-white rounded-lg shadow-md p-8">
@@ -68,12 +63,11 @@
                     <div class="flex gap-3">
                         <select id="id_kategori"
                                 name="id_kategori"
-                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] focus:outline-none appearance-none @error('id_kategori') border-red-500 @enderror"
-                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236b7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] focus:outline-none @error('id_kategori') border-red-500 @enderror"
                                 required>
                             <option value="">Tak berkategori</option>
                             @foreach($kategoriList as $kategori)
-                                <option value="{{ $kategori->id_kategori }}" 
+                                <option value="{{ $kategori->id_kategori }}"
                                     {{ old('id_kategori', $produk->id_kategori) == $kategori->id_kategori ? 'selected' : '' }}>
                                     {{ $kategori->nama_kategori }}
                                 </option>
