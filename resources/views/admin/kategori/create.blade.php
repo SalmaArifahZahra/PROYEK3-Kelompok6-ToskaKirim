@@ -7,17 +7,12 @@
 <div class="space-y-6">
 
     <!-- Breadcrumb -->
-    <nav class="flex" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 text-sm text-gray-700">
-            <li>
-                <a href="{{ route('admin.kategori.index') }}" class="text-2xl font text-gray-800 hover:text-[#5BC6BC]">Kategori</a>
-            </li>
-            <li>
-                <span class="mx-2">&gt;</span>
-            </li>
-            <li class="text-2xl font-bold text-gray-800">Tambah Kategori</li>
-        </ol>
-    </nav>
+    @include('component.admin.breadcrumb', [
+        'items' => [
+            ['label' => 'Kategori', 'url' => route('admin.kategori.index')],
+            ['label' => 'Tambah Kategori']
+        ]
+    ])
 
     <!-- Form Card -->
     <div class="flex justify-center">
@@ -53,40 +48,11 @@
 
                     <!-- Right Column - Foto Kategori -->
                     <div class="w-auto">
-                        <label class="block text-sm font-medium text-gray-900 mb-2">
-                            Foto Kategori
-                        </label>
-                        <div class="flex flex-col">
-                            <!-- Preview Image -->
-                            <div class="w-64 h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                                <img id="preview-image"
-                                     src=""
-                                     alt="Preview"
-                                     class="hidden w-full h-full object-contain">
-                                <div id="preview-placeholder" class="text-gray-400">
-                                    <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Upload Button -->
-                            <label for="foto" class="cursor-pointer text-[#5BC6BC] hover:text-[#4aa89e] font-medium text-center">
-                                Upload Foto
-                                <input type="file"
-                                       id="foto"
-                                       name="foto"
-                                       accept="image/*"
-                                       class="hidden"
-                                       onchange="previewImage(event)">
-                            </label>
-                            @error('foto')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @include('component.admin.image_upload', [
+                            'inputId' => 'foto',
+                            'name' => 'foto',
+                            'label' => 'Foto Kategori'
+                        ])
                     </div>
                 </div>
 
@@ -104,25 +70,5 @@
             </form>
         </div>
     </div>
-
-</div>
-
-<script>
-function previewImage(event) {
-    const file = event.target.files[0];
-    const preview = document.getElementById('preview-image');
-    const placeholder = document.getElementById('preview-placeholder');
-    
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.classList.remove('hidden');
-            placeholder.classList.add('hidden');
-        }
-        reader.readAsDataURL(file);
-    }
-}
-</script>
 
 @endsection

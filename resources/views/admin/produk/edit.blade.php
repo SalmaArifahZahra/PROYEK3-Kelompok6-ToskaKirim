@@ -7,17 +7,12 @@
 <div class="space-y-6">
 
     <!-- Breadcrumb -->
-    <nav class="flex" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 text-sm text-gray-700">
-            <li>
-                <a href="{{ route('admin.produk.index') }}" class="text-2xl font text-gray-800 hover:text-[#5BC6BC]">Produk</a>
-            </li>
-            <li>
-                <span class="mx-2">&gt;</span>
-            </li>
-            <li class="text-2xl font-bold text-gray-800">Edit Produk</li>
-        </ol>
-    </nav>
+    @include('component.admin.breadcrumb', [
+        'items' => [
+            ['label' => 'Produk', 'url' => route('admin.produk.index')],
+            ['label' => 'Edit Produk']
+        ]
+    ])
 
     <!-- Form Card -->
     <div class="bg-white rounded-lg shadow-md p-8">
@@ -65,21 +60,19 @@
                     <label class="block text-sm font-medium text-gray-900 mb-2">
                         Kategori (Pilih Kategori → Sub-Kategori)
                     </label>
-                    
-                    <div class="mb-3">
-                        <label for="parent_id" class="block text-xs font-medium text-gray-700 mb-1">
-                            Kategori Utama
-                        </label>
-                        <div class="flex gap-2">
-                            <select id="parent_id" name="parent_id"
-                                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] outline-none">
-                                <option value="">Pilih Kategori Utama</option>
-                                @foreach($parentCategories as $category)
-                                    <option value="{{ $category->id_kategori }}" data-children="{{ json_encode($category->children) }}" {{ $currentParentId == $category->id_kategori ? 'selected' : '' }}>
-                                        {{ $category->nama_kategori }}
-                                    </option>
-                                @endforeach
-                            </select>
+                    <div class="flex gap-3">
+                        <select id="id_kategori"
+                                name="id_kategori"
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] focus:outline-none @error('id_kategori') border-red-500 @enderror"
+                                required>
+                            <option value="">Tak berkategori</option>
+                            @foreach($kategoriList as $kategori)
+                                <option value="{{ $kategori->id_kategori }}"
+                                    {{ old('id_kategori', $produk->id_kategori) == $kategori->id_kategori ? 'selected' : '' }}>
+                                    {{ $kategori->nama_kategori }}
+                                </option>
+                            @endforeach
+                        </select>
 
                             <a href="{{ route('admin.kategori.create') }}"
                                     class="px-4 py-3 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors whitespace-nowrap font-medium text-sm">
