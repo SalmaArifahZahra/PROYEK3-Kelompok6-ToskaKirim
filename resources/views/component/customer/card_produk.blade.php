@@ -1,7 +1,9 @@
 {{-- card produk item --}}
 <div class="w-full max-w-6xl mx-auto mt-10 px-4">
 
-    <h2 class="text-xl font-medium mb-4">Produk Pilihan</h2>
+    @if (!isset($hideTitle) || $hideTitle === false)
+        <h2 class="text-xl font-medium mb-4">Produk Pilihan</h2>
+    @endif
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         @foreach ($produk as $item)
