@@ -47,25 +47,8 @@
                             @enderror
                         </div>
 
-                        <!-- Parent Kategori -->
-                        <div>
-                            <label for="parent_id" class="block text-sm font-medium text-gray-900 mb-2">
-                                Parent Kategori
-                            </label>
-                            <select id="parent_id"
-                                    name="parent_id"
-                                    class="w-full px-4 py-3 border border-[#5BC6BC] rounded-lg focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] focus:outline-none @error('parent_id') border-red-500 @enderror">
-                                <option value="">Pilih Parent (Opsional)</option>
-                                @foreach($parentKategori as $parent)
-                                    <option value="{{ $parent->id_kategori }}" {{ old('parent_id') == $parent->id_kategori ? 'selected' : '' }}>
-                                        {{ $parent->nama_kategori }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('parent_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <!-- No parent selector for top-level kategori -->
+                        <!-- Top-level categories are created here; use Sub-Kategori page to add children -->
                     </div>
 
                     <!-- Right Column - Foto Kategori -->

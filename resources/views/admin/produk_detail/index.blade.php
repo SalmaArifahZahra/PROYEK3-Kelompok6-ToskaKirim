@@ -112,7 +112,7 @@
                                 </a>
 
                                 <!-- Delete Button -->
-                                <form action="{{ route('admin.produk.detail.destroy', [$produk->id_produk, $detail->id_produk_detail]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus varian ini?')">
+                                <form action="{{ route('admin.produk.detail.destroy', [$produk->id_produk, $detail->id_produk_detail]) }}" method="POST" class="inline swal-delete">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-gray-600 hover:text-red-600 transition-colors" title="Hapus">
@@ -140,3 +140,55 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Handle delete forms with SweetAlert confirmation
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form.swal-delete').forEach(function(form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                var nama = form.getAttribute('data-nama') || 'produk ini';
+
+                Swal.fire({
+                    title: 'Yakin ingin menghapus? ',
+                    text: "Data ini akan terhapus permanen",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e3342f',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // Show session success message via SweetAlert
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: "{{ addslashes(session('success')) }}",
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @endif
+
+        // Show first validation error (if any)
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi kesalahan',
+                html: `@foreach ($errors->all() as $err) <div>- {{ addslashes($err) }}</div> @endforeach`,
+            });
+        @endif
+    });
+</script>
+@endpush

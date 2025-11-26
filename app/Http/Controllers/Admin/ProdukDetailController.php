@@ -60,7 +60,7 @@ class ProdukDetailController extends Controller
 
         ProdukDetail::create($data);
 
-        return redirect()->route('admin.produk.edit', $produk->id_produk)
+        return redirect()->route('admin.produk_detail.index', $produk->id_produk)
                          ->with('success', 'Varian produk baru berhasil ditambahkan.');
     }
 
@@ -102,8 +102,7 @@ class ProdukDetailController extends Controller
 
         $detail->update($data);
 
-        return redirect()->route('admin.produk.edit', $produk->id_produk)
-                         ->with('success', 'Varian produk berhasil diperbarui.');
+        return redirect()->route('admin.produk_detail.index', $produk->id_produk)->with('success', 'Varian produk berhasil diperbarui.');
     }
 
     // Menghapus varian/detail.
@@ -115,7 +114,6 @@ class ProdukDetailController extends Controller
 
         $detail->delete();
 
-        return redirect()->route('admin.produk.edit', $produk->id_produk)
-                         ->with('success', 'Varian produk berhasil dihapus.');
+        return redirect()->route('admin.produk_detail.index', $produk->id_produk)->with('success', 'Varian produk berhasil dihapus.');
     }
 }

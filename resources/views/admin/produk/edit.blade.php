@@ -60,30 +60,55 @@
                     @enderror
                 </div>
 
-                <!-- Kategori -->
+                <!-- Kategori (Two-Step Selection) -->
                 <div>
-                    <label for="id_kategori" class="block text-sm font-medium text-gray-900 mb-2">
-                        Kategori
+                    <label class="block text-sm font-medium text-gray-900 mb-2">
+                        Kategori (Pilih Kategori → Sub-Kategori)
                     </label>
-                    <div class="flex gap-3">
-                        <select id="id_kategori"
-                                name="id_kategori"
-                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] focus:outline-none appearance-none @error('id_kategori') border-red-500 @enderror"
-                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236b7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
-                                required>
-                            <option value="">Tak berkategori</option>
-                            @foreach($kategoriList as $kategori)
-                                <option value="{{ $kategori->id_kategori }}" 
-                                    {{ old('id_kategori', $produk->id_kategori) == $kategori->id_kategori ? 'selected' : '' }}>
-                                    {{ $kategori->nama_kategori }}
-                                </option>
-                            @endforeach
-                        </select>
+                    
+                    <div class="mb-3">
+                        <label for="parent_id" class="block text-xs font-medium text-gray-700 mb-1">
+                            Kategori Utama
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="parent_id" name="parent_id"
+                                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] outline-none">
+                                <option value="">Pilih Kategori Utama</option>
+                                @foreach($parentCategories as $category)
+                                    <option value="{{ $category->id_kategori }}" data-children="{{ json_encode($category->children) }}" {{ $currentParentId == $category->id_kategori ? 'selected' : '' }}>
+                                        {{ $category->nama_kategori }}
+                                    </option>
+                                @endforeach
+                            </select>
 
-                        <a href="{{ route('admin.kategori.create') }}" type="button"
-                                class="px-4 py-3 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors whitespace-nowrap font-medium">
-                            + Kategori Baru
-                        </a>
+                            <a href="{{ route('admin.kategori.create') }}"
+                                    class="px-4 py-3 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors whitespace-nowrap font-medium text-sm">
+                                    +
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_kategori" class="block text-xs font-medium text-gray-700 mb-1">
+                            Sub-Kategori
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="id_kategori" 
+                                    name="id_kategori"
+                                    data-selected="{{ $currentSubId ?? '' }}" 
+                                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] outline-none @error('id_kategori') border-red-500 @enderror"
+                                    required>
+                                <option value="">Pilih Kategori Utama Terlebih Dahulu</option>
+                            </select>
+                            
+                            <button type="button" 
+                                    id="btn-add-subkategori" 
+                                    disabled 
+                                    class="px-4 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed transition-colors font-bold"
+                                    title="Tambah Sub Kategori Baru">
+                                +
+                            </button>
+                        </div>
                     </div>
                     @error('id_kategori')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -108,3 +133,101 @@
 </div>
 
 @endsection
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const parentSelect = document.getElementById('parent_id');
+        const subCategorySelect = document.getElementById('id_kategori');
+        const btnAddSubkategori = document.getElementById('btn-add-subkategori');
+
+        // Ambil nilai yang seharusnya dipilih dari atribut data (dari Blade)
+        const preSelectedSubId = subCategorySelect.getAttribute('data-selected');
+
+        function populateSubCategories(selectedOption) {
+            // Reset
+            subCategorySelect.innerHTML = '<option value="">Pilih Sub-Kategori</option>';
+            
+            if (!selectedOption || !selectedOption.value) {
+                disableAddButton();
+                return;
+            }
+
+            enableAddButton();
+            
+            const childrenData = selectedOption.getAttribute('data-children');
+            if (childrenData) {
+                try {
+                    const children = JSON.parse(childrenData);
+                    children.forEach(child => {
+                        const option = document.createElement('option');
+                        
+                        // --- PERBAIKAN DISINI ---
+                        // Database kamu menggunakan 'id_kategori' dan 'nama_kategori'
+                        // Bukan 'id' dan 'nama'
+                        option.value = child.id_kategori; 
+                        option.textContent = child.nama_kategori; 
+                        // ------------------------
+                        
+                        // Logic Selected: Gunakan id_kategori juga untuk perbandingan
+                        if (String(child.id_kategori) === String(preSelectedSubId)) {
+                            option.selected = true;
+                        }
+
+                        subCategorySelect.appendChild(option);
+                    });
+                } catch (e) {
+                    console.error('Error parsing children data:', e);
+                }
+            }
+        }
+
+        // Helper untuk styling tombol
+        function enableAddButton() {
+            btnAddSubkategori.disabled = false;
+            btnAddSubkategori.classList.remove('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
+            btnAddSubkategori.classList.add('bg-[#5BC6BC]', 'text-white', 'hover:bg-[#4aa89e]', 'transition-colors');
+        }
+
+        function disableAddButton() {
+            btnAddSubkategori.disabled = true;
+            btnAddSubkategori.classList.remove('bg-[#5BC6BC]', 'text-white', 'hover:bg-[#4aa89e]');
+            btnAddSubkategori.classList.add('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
+        }
+
+        // Event Listener: Saat Parent Berubah
+        parentSelect.addEventListener('change', function() {
+            // Saat user mengganti parent manual, kita update option anak
+            // TAPI, kita tidak lagi memaksa memilih preSelectedSubId (karena parentnya beda)
+            // Jadi dropdown anak akan reset ke "Pilih Sub-Kategori"
+            const selectedOption = this.options[this.selectedIndex];
+            
+            // Hack kecil: Kosongkan preSelectedSubId sementara agar tidak auto-select 
+            // nilai lama jika user ganti parent
+            // Kecuali saat first load (inisialisasi)
+            if (this.dataset.isInitialized) {
+                 subCategorySelect.setAttribute('data-selected', ''); 
+            }
+            
+            populateSubCategories(selectedOption);
+        });
+
+        // --- INISIALISASI SAAT LOAD PAGE ---
+        if (parentSelect.value) {
+            // Tandai bahwa ini sedang inisialisasi
+            const selectedOption = parentSelect.options[parentSelect.selectedIndex];
+            populateSubCategories(selectedOption);
+            parentSelect.dataset.isInitialized = "true"; // Flag selesai init
+        }
+
+        // Logic Tombol Tambah Sub Kategori (Tetap sama seperti kode Anda)
+        btnAddSubkategori.addEventListener('click', function(e) {
+            e.preventDefault();
+            const selectedParentId = parentSelect.value;
+            if (selectedParentId) {
+                // Pastikan rute ini ada dan benar
+                 // window.location.href = ...
+                 console.log("Redirect ke create sub kategori id: " + selectedParentId);
+            }
+        });
+    });
+</script>
