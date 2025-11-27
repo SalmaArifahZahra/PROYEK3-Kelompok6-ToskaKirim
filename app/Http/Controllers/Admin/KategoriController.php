@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kategori;
+use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 
 class KategoriController extends Controller
 {
@@ -66,21 +68,16 @@ class KategoriController extends Controller
     }
 
     // Menampilkan form untuk mengedit kategori.
-    public function edit(Produk $produk): View
+    public function edit(Kategori $kategori): View
     {
-        if (!$currentParentId && $produk->kategori) {
-            if ($produk->kategori->parent_id) {
-                $currentParentId = $produk->kategori->parent_id;
-            } else {
-                $currentParentId = $produk->kategori->id_kategori;
-            }
-        }
+        $parentCategories = Kategori::whereNull('parent_id')
+                            ->where('id_kategori', '!=', $kategori->id_kategori)
+                            ->orderBy('nama_kategori', 'asc')
+                            ->get();
 
-        return view('admin.produk.edit', [
-            'produk' => $produk,
-            'parentCategories' => $parentCategories,
-            'currentParentId' => $currentParentId,
-            'currentSubId' => $currentSubId,
+        return view('admin.kategori.edit', [
+            'kategori' => $kategori,
+            'parentCategories' => $parentCategories
         ]);
     }
 
@@ -119,14 +116,32 @@ class KategoriController extends Controller
     }
 
     // Menghapus kategori dari database.
-    public function destroy(Kategori $kategori): RedirectResponse
+    public function destroy(Kategori $kategori)
     {
-        if ($kategori->foto) {
-            Storage::disk('public')->delete($kategori->foto);
+        try {
+            if ($kategori->children()->count() > 0) {
+                return back()->with('error', 'Gagal menghapus! Kategori ini masih memiliki Sub-Kategori. Hapus sub-kategori terlebih dahulu.');
+            }
+
+            if ($kategori->produk()->count() > 0) {
+                return back()->with('error', 'Gagal menghapus! Kategori ini masih digunakan oleh Produk. Hapus produk terkait terlebih dahulu.');
+            }
+
+            if ($kategori->foto) {
+                Storage::disk('public')->delete($kategori->foto);
+            }
+            
+            $kategori->delete();
+            
+            return redirect()->route('admin.kategori.index')
+                            ->with('success', 'Kategori berhasil dihapus.');
+                            
+        } catch (QueryException $e) {
+            if ($e->getCode() == "23000") {
+                return back()->with('error', 'Gagal menghapus! Data ini masih terhubung dengan data lain (Constraint Violation).');
+            }
+            
+            return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
-
-        $kategori->delete();
-
-        return redirect()->route('admin.kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

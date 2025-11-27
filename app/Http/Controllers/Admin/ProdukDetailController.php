@@ -108,10 +108,6 @@ class ProdukDetailController extends Controller
     // Menghapus varian/detail.
     public function destroy(Produk $produk, ProdukDetail $detail): RedirectResponse
     {
-        if ($detail->foto) {
-            Storage::disk('public')->delete($detail->foto);
-        }
-
         $detail->delete();
 
         return redirect()->route('admin.produk_detail.index', $produk->id_produk)->with('success', 'Varian produk berhasil dihapus.');

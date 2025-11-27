@@ -1,30 +1,26 @@
-{{-- Table Action Buttons Component --}}
-<div class="flex items-center gap-3">
-    @if(isset($showDetail) && $showDetail)
-        <!-- Detail Button -->
-        <a href="{{ $detailUrl }}" class="p-2 text-gray-600 hover:text-[#5BC6BC] hover:bg-gray-100 rounded-lg transition-colors" title="Detail">
-            <i class="fas fa-eye"></i>
+<div class="flex items-center space-x-2">
+    {{-- Tombol Edit --}}
+    @if(isset($editUrl))
+        <a href="{{ $editUrl }}" class="text-blue-500 hover:text-blue-700 transition-colors" title="Edit">
+            <i class="fas fa-edit"></i>
         </a>
     @endif
 
+    {{-- Tombol Delete --}}
+    @if(isset($deleteUrl))
+        <form action="{{ $deleteUrl }}" method="POST" class="swal-delete inline-block" data-nama="kategori ini">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="text-red-600 hover:text-red-800 transition-colors">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+    @endif
+    
+    {{-- Tombol Ellipsis --}}
     @if(isset($showEllipsis) && $showEllipsis)
-        <!-- Ellipsis Button (Sub-kategori/More) -->
-        <a href="{{ $ellipsisUrl }}" class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="{{ $ellipsisTitle ?? 'More' }}">
+        <a href="{{ $showEllipsis }}" class="text-gray-500 hover:text-gray-700 transition-colors" title="{{ $ellipsisTitle ?? 'Detail' }}">
             <i class="fas fa-ellipsis-v"></i>
         </a>
     @endif
-
-    <!-- Edit Button -->
-    <a href="{{ $editUrl }}" class="text-gray-600 hover:text-[#5BC6BC] transition-colors" title="Edit">
-        <i class="fas fa-edit"></i>
-    </a>
-
-    <!-- Delete Button -->
-    <form action="{{ $deleteUrl }}" method="POST" class="inline" onsubmit="return confirm('{{ $confirmMessage ?? 'Yakin ingin menghapus?' }}')">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="text-gray-600 hover:text-red-600 transition-colors" title="Hapus">
-            <i class="fas fa-trash"></i>
-        </button>
-    </form>
 </div>

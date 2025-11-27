@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\KategoriController as AdminKategoriController;
+use App\Http\Controllers\Admin\SubKategoriController as AdminSubKategoriController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 // Import Controller Customer
@@ -80,15 +81,15 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('kategori', AdminKategoriController::class);
         
         // Rute Sub-Kategori Index
-        Route::get('kategori/{kategori}/subkategori', [\App\Http\Controllers\Admin\SubKategoriController::class, 'index'])->name('kategori.subkategori.index');
+        Route::get('kategori/{kategori}/subkategori', [AdminSubKategoriController::class, 'index'])->name('kategori.subkategori.index');
         
         // Rute Sub-Kategori (Nested)
         Route::prefix('kategori/{kategori:id_kategori}/subkategori')->name('kategori.subkategori.')->group(function() {
-            Route::get('/create', [\App\Http\Controllers\Admin\SubKategoriController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\SubKategoriController::class, 'store'])->name('store');
-            Route::get('/{subkategori}/edit', [\App\Http\Controllers\Admin\SubKategoriController::class, 'edit'])->name('edit');
-            Route::put('/{subkategori}', [\App\Http\Controllers\Admin\SubKategoriController::class, 'update'])->name('update');
-            Route::delete('/{subkategori}', [\App\Http\Controllers\Admin\SubKategoriController::class, 'destroy'])->name('destroy');
+            Route::get('/create', [AdminSubKategoriController::class, 'create'])->name('create');
+            Route::post('/', [AdminSubKategoriController::class, 'store'])->name('store');
+            Route::get('/{subkategori}/edit', [AdminSubKategoriController::class, 'edit'])->name('edit');
+            Route::put('/{subkategori}', [AdminSubKategoriController::class, 'update'])->name('update');
+            Route::delete('/{subkategori}', [AdminSubKategoriController::class, 'destroy'])->name('destroy');
         });
 
         // Rute Produk Induk (Full CRUD)

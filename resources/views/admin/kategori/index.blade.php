@@ -66,8 +66,8 @@
                         </td>
                         <td class="px-6 py-4">
                             @include('component.admin.table_actions', [
-                                'showEllipsis' => true,
-                                'ellipsisUrl' => route('admin.kategori.subkategori.index', $kategori->id_kategori),
+                                'showEllipsis' => route('admin.kategori.subkategori.index', $kategori->id_kategori),
+                                'detailUrl' => route('admin.kategori.subkategori.index', $kategori->id_kategori),
                                 'ellipsisTitle' => 'Sub-Kategori',
                                 'editUrl' => route('admin.kategori.edit', $kategori->id_kategori),
                                 'deleteUrl' => route('admin.kategori.destroy', $kategori->id_kategori),
@@ -97,36 +97,36 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         
-        // --- 1. HANDLE DELETE CONFIRMATION ---
-        // Mencari semua form dengan class 'swal-delete'
-        const deleteForms = document.querySelectorAll('form.swal-delete');
+        // --- 1. HANDLE TOMBOL HAPUS (KONFIRMASI) ---
+        // Cari semua form yang punya class 'swal-delete'
+        const deleteForms = document.querySelectorAll('.swal-delete'); // Selektor class lebih aman
         
         deleteForms.forEach(function(form) {
             form.addEventListener('submit', function (e) {
-                e.preventDefault(); // Mencegah submit langsung
-
-                // Ambil nama item dari atribut data (jika ada), atau default
-                const nama = form.getAttribute('data-nama') || 'data ini';
+                e.preventDefault(); // Stop submit normal
+                
+                // Ambil nama dari atribut data, atau default
+                const nama = this.getAttribute('data-nama') || 'data ini';
 
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
                     text: "Menghapus " + nama + " tidak dapat dibatalkan!",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33', // Warna merah untuk hapus
-                    cancelButtonColor: '#3085d6', // Warna biru untuk batal
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Ya, Hapus!',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Jika user klik Ya, submit form secara manual
-                        form.submit();
+                        // Jika user klik Ya, baru submit form secara manual
+                        this.submit();
                     }
                 });
             });
         });
 
-        // --- 2. SUCCESS ALERT (SESSION) ---
+        // --- 2. ALERT SUKSES ---
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -137,22 +137,33 @@
             });
         @endif
 
-        // --- 3. ERROR ALERT (VALIDATION/SESSION) ---
-        @if($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Terjadi Kesalahan',
-                html: '<ul class="text-left">@foreach ($errors->all() as $error)<li>- {{ $error }}</li>@endforeach</ul>',
-            });
-        @endif
-        
+        // --- 3. ALERT ERROR (GAGAL HAPUS / DATABASE ERROR) ---
+        // Ini bagian yang menangkap return back()->with('error', ...) dari controller
         @if(session('error'))
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal!',
                 text: "{{ session('error') }}",
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Tutup'
             });
         @endif
+
+        // --- 4. ALERT ERROR VALIDASI (INPUT TIDAK VALID) ---
+        @if($errors->any())
+            let errorHtml = '<ul class="text-left pl-5">';
+            @foreach ($errors->all() as $error)
+                errorHtml += '<li>- {{ $error }}</li>';
+            @endforeach
+            errorHtml += '</ul>';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Input Tidak Valid',
+                html: errorHtml,
+            });
+        @endif
+
     });
 </script>
 @endpush
