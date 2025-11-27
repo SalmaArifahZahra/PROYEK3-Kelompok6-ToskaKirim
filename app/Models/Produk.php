@@ -58,5 +58,5 @@ class Produk extends Model
         return $this->detail->first()->harga_jual ?? 0;
     }
 
-    
+
 }
