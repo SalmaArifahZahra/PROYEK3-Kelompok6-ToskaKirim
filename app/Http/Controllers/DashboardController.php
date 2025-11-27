@@ -18,7 +18,7 @@ class DashboardController extends Controller
         \Log::info('User login - Role: ' . $user->peran->value);
 
         if ($user->peran === RoleEnum::SUPERADMIN) {
-            return redirect()->route('superadmin.users.dashboard');
+            return redirect()->route('superadmin.dashboard');
         } elseif ($user->peran === RoleEnum::ADMIN) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->peran === RoleEnum::CUSTOMER) {
