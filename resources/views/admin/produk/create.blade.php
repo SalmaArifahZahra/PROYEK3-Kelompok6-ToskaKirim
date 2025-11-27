@@ -93,9 +93,11 @@
                                 <option value="">Pilih Kategori Utama Terlebih Dahulu</option>
                             </select>
                             
-                            <button type="button" id="btn-add-subkategori" disabled class="px-4 py-3 bg-gray-300 text-gray-600 rounded-lg whitespace-nowrap font-medium text-sm cursor-not-allowed">
+                            <a id="btn-add-subkategori" href="#"
+                               class="px-4 py-3 bg-gray-300 text-gray-600 rounded-lg whitespace-nowrap font-medium text-sm cursor-not-allowed pointer-events-none transition-colors flex items-center justify-center"
+                               title="Pilih Kategori Utama Terlebih Dahulu">
                                 +
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -127,6 +129,7 @@
         const parentSelect = document.getElementById('parent_id');
         const subCategorySelect = document.getElementById('id_kategori');
         const btnAddSubkategori = document.getElementById('btn-add-subkategori');
+        const routePattern = "{{ route('admin.kategori.subkategori.create', 'PLACEHOLDER_ID') }}";
 
         // Fungsi untuk mengisi dropdown sub kategori
         function populateSubCategories(selectedOption) {
@@ -137,7 +140,7 @@
                 return;
             }
 
-            enableAddButton();
+            enableAddButton(selectedOption.value);
             
             // Ambil data anak dari atribut data-children
             const childrenData = selectedOption.getAttribute('data-children');
@@ -158,16 +161,19 @@
         }
 
         // Helper untuk styling tombol tambah sub
-        function enableAddButton() {
-            btnAddSubkategori.disabled = false;
-            btnAddSubkategori.classList.remove('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
-            btnAddSubkategori.classList.add('bg-[#5BC6BC]', 'text-white', 'hover:bg-[#4aa89e]', 'transition-colors');
+        function enableAddButton(parentId) {
+            const newUrl = routePattern.replace('PLACEHOLDER_ID', parentId);
+            btnAddSubkategori.href = newUrl;
+            btnAddSubkategori.classList.remove('bg-gray-300', 'text-gray-600', 'cursor-not-allowed', 'pointer-events-none');
+            btnAddSubkategori.classList.add('bg-[#5BC6BC]', 'text-white', 'hover:bg-[#4aa89e]');
+            btnAddSubkategori.title = 'Tambah Sub-Kategori';
         }
 
         function disableAddButton() {
-            btnAddSubkategori.disabled = true;
+            btnAddSubkategori.href = '#';
             btnAddSubkategori.classList.remove('bg-[#5BC6BC]', 'text-white', 'hover:bg-[#4aa89e]');
-            btnAddSubkategori.classList.add('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
+            btnAddSubkategori.classList.add('bg-gray-300', 'text-gray-600', 'cursor-not-allowed', 'pointer-events-none');
+            btnAddSubkategori.title = 'Pilih Kategori Utama Terlebih Dahulu';
         }
 
         // Event Listener: Saat Parent Berubah

@@ -20,39 +20,26 @@
         <div class="bg-white rounded-lg shadow-md p-8 inline-block">
             <h2 class="text-2xl font-semibold text-[#5BC6BC] mb-8">Edit Sub-Kategori</h2>
 
-            <form action="{{ route('admin.kategori.subkategori.update', [$kategori->id_kategori, $subkategori->id_kategori]) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.kategori.subkategori.update', [$kategori->id_kategori, $subkategori->id_kategori]) }}" method="POST">
                 @csrf
                 @method('PUT')
 
-                <div class="flex gap-8">
-                    <!-- Left Column -->
-                    <div class="space-y-6">
-                        <!-- Nama Sub-Kategori -->
-                        <div class="w-96">
-                            <label for="nama_kategori" class="block text-sm font-medium text-gray-900 mb-2">
-                                Nama Sub-Kategori
-                            </label>
-                            <input type="text"
-                                   id="nama_kategori"
-                                   name="nama_kategori"
-                                   value="{{ old('nama_kategori', $subkategori->nama_kategori) }}"
-                                   placeholder="Masukkan nama sub-kategori"
-                                   class="w-full px-4 py-3 border border-[#5BC6BC] rounded-lg focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] focus:outline-none @error('nama_kategori') border-red-500 @enderror"
-                                   required>
-                            @error('nama_kategori')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <!-- Right Column - Foto -->
-                    <div class="flex flex-col items-center">
-                        @include('component.admin.image_upload', [
-                            'inputId' => 'foto',
-                            'name' => 'foto',
-                            'label' => 'Foto',
-                            'existingImage' => $subkategori->foto ? asset($subkategori->foto) : null
-                        ])
+                <div class="space-y-6">
+                    <!-- Nama Sub-Kategori -->
+                    <div class="w-96">
+                        <label for="nama_kategori" class="block text-sm font-medium text-gray-900 mb-2">
+                            Nama Sub-Kategori
+                        </label>
+                        <input type="text"
+                               id="nama_kategori"
+                               name="nama_kategori"
+                               value="{{ old('nama_kategori', $subkategori->nama_kategori) }}"
+                               placeholder="Masukkan nama sub-kategori"
+                               class="w-full px-4 py-3 border border-[#5BC6BC] rounded-lg focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] focus:outline-none @error('nama_kategori') border-red-500 @enderror"
+                               required>
+                        @error('nama_kategori')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
