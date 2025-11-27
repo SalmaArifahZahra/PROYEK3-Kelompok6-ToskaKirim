@@ -30,13 +30,13 @@ class ProdukController extends Controller
     // Menampilkan form untuk membuat produk (induk) baru.
     public function create(): View
     {
-        $kategoriList = Kategori::with('children')
-                                ->whereNull('parent_id')
-                                ->orderBy('nama_kategori', 'asc')
-                                ->get();
+        $parentCategories = Kategori::whereNull('parent_id')
+                            ->with('children') 
+                            ->orderBy('nama_kategori', 'asc')
+                            ->get();
         
         return view('admin.produk.create', [
-            'kategoriList' => $kategoriList
+            'parentCategories' => $parentCategories
         ]);
     }
 
@@ -63,12 +63,28 @@ class ProdukController extends Controller
     // Menampilkan form untuk mengedit produk (induk).
     public function edit(Produk $produk): View
     {
-        $produk->load('kategori', 'detail');
-        $kategoriList = Kategori::orderBy('nama_kategori', 'asc')->get();
+        $produk->load('kategori');
+        $parentCategories = Kategori::whereNull('parent_id')
+                            ->with('children') 
+                            ->orderBy('nama_kategori', 'asc')
+                            ->get();
+
+        $currentSubId = old('id_kategori', $produk->id_kategori);
+        $currentParentId = old('parent_id');
+
+        if (!$currentParentId && $produk->kategori) {
+            if ($produk->kategori->parent_id) {
+                $currentParentId = $produk->kategori->parent_id;
+            } else {
+                $currentParentId = $produk->kategori->id_kategori;
+            }
+        }
 
         return view('admin.produk.edit', [
             'produk' => $produk,
-            'kategoriList' => $kategoriList
+            'parentCategories' => $parentCategories,
+            'currentParentId' => $currentParentId,
+            'currentSubId' => $currentSubId,
         ]);
     }
 

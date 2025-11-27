@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Produk extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'produk';
     protected $primaryKey = 'id_produk';
@@ -36,10 +37,21 @@ class Produk extends Model
         return $this->hasOne(ProdukDetail::class, 'id_produk', 'id_produk')->oldest();
     }
 
-    public function getFotoAttribute()
+    public function getFotoUrlAttribute()
     {
-        return $this->detail->first()->foto ?? 'default.jpg';
+        $detail = $this->detail->first();
+
+        if ($detail && $detail->foto) {
+            if (str_starts_with($detail->foto, 'produk/')) {
+                return asset($detail->foto);
+            }
+
+            return asset('produk/' . $detail->foto);
+        }
+
+        return asset('images/icon_toska.png');
     }
+
 
     public function getHargaAttribute()
     {

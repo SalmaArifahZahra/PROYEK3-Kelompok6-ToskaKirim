@@ -13,7 +13,7 @@ class KategoriController extends Controller
     public function index(Kategori $kategori): View
     {
         if ($kategori->parent_id !== null) {
-            return redirect()->route('customer.kategori.show', $kategori->id_kategori);
+            return $this->show($kategori);
         }
 
         $subKategoris = $kategori->children;
@@ -22,8 +22,8 @@ class KategoriController extends Controller
         $kategoriIds[] = $kategori->id_kategori;
 
         $produkList = Produk::whereIn('id_kategori', $kategoriIds)
-                            ->with('detail')
-                            ->get();
+            ->with('detail')
+            ->get();
 
         return view('customer.kategori.index', [
             'kategoriUtama' => $kategori,
@@ -39,8 +39,8 @@ class KategoriController extends Controller
         $subKategoris = $kategoriUtama ? $kategoriUtama->children : collect([]);
 
         $produkList = Produk::where('id_kategori', $subKategori->id_kategori)
-                            ->with('detail')
-                            ->get();
+            ->with('detail')
+            ->get();
         return view('customer.kategori.show', [
             'kategoriUtama' => $kategoriUtama,
             'activeSubKategori' => $subKategori,

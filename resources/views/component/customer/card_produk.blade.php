@@ -1,22 +1,17 @@
 {{-- card produk item --}}
 <div class="w-full max-w-6xl mx-auto mt-10 px-4">
 
-    <h2 class="text-xl font-medium mb-4">Produk Pilihan</h2>
+    @if (!isset($hideTitle) || $hideTitle === false)
+        <h2 class="text-xl font-medium mb-4">Produk Pilihan</h2>
+    @endif
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         @foreach ($produk as $item)
-            @php
-                $foto = optional($item->detail->first())->foto ?? '/images/no-image.png';
-            @endphp
-
             <a href="{{ route('customer.produk.detail', $item->id_produk) }}"
-                class="w-full bg-white p-6 rounded-xl border border-transparent
-                       transition-all duration-300
-                       hover:border-[#3A767E] hover:shadow-sm
-                       active:border-[#3A767E] active:scale-[0.98]">
+                class="w-full bg-white p-6 rounded-xl border border-transparent transition-all duration-300 hover:border-[#3A767E] hover:shadow-sm active:border-[#3A767E] active:scale-[0.98]">
 
                 <div class="w-full h-40 mb-4">
-                    <img src="{{ asset($foto) }}" alt="{{ $item->nama }}"
+                    <img src="{{ $item->foto_url }}" alt="{{ $item->nama }}"
                         class="rounded-lg w-full h-full object-contain" />
                 </div>
 

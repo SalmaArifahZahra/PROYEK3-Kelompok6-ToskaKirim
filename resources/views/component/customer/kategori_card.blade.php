@@ -5,7 +5,7 @@
     <div class="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
 
         @foreach ($kategori ?? [] as $item)
-            <a href="#" class="min-w-[150px] block">
+            <a href="{{ route('customer.kategori.index', $item->id_kategori) }}" class="min-w-[150px] block">
                 <div
                     class="relative border border-[#5BC6BC] rounded-xl p-4  flex flex-col justify-between h-32 hover:shadow-md transition">
 
