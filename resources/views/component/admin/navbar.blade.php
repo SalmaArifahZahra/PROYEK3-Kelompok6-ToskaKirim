@@ -9,10 +9,7 @@
         <!-- User Info -->
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+                <i class="fas fa-user text-white text-lg"></i>
                 <div class="text-white text-sm">
                     <p class="font-medium">Hello,</p>
                     <p class="text-xs opacity-90">Admin</p>

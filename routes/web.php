@@ -3,11 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AlamatUserController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController; 
 // Import Controller Admin
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\KategoriController as AdminKategoriController;
+use App\Http\Controllers\Admin\SubKategoriController as AdminSubKategoriController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 // Import Controller Customer
@@ -45,8 +46,7 @@ Route::middleware(['auth'])->group(function () {
 
     // --- Rute Customer ---
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function () {
-
-        //Dashboard Customer
+        
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
         Route::prefix('produk')->group(function () {
@@ -55,8 +55,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Alur 'Lengkapi Profil' setelah register
         Route::get('/profile/complete', [AlamatUserController::class, 'create'])
-            ->name('profile.complete');
-
+             ->name('profile.complete');
+        
         // CRUD Alamat Lengkap
         Route::resource('alamat', AlamatUserController::class);
         Route::post('/alamat/{alamat}/set-utama', [AlamatUserController::class, 'setUtama'])
@@ -76,26 +76,39 @@ Route::middleware(['auth'])->group(function () {
 
     // --- Rute Admin & Superadmin ---
     Route::middleware('role:admin,superadmin')->prefix('admin')->name('admin.')->group(function () {
-
+        
         // Rute landing page Admin
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Rute Kategori (Full CRUD)
         Route::resource('kategori', AdminKategoriController::class);
+        
+        // Rute Sub-Kategori Index
+        Route::get('kategori/{kategori}/subkategori', [AdminSubKategoriController::class, 'index'])->name('kategori.subkategori.index');
+        
+        // Rute Sub-Kategori (Nested)
+        Route::prefix('kategori/{kategori:id_kategori}/subkategori')->name('kategori.subkategori.')->group(function() {
+            Route::get('/create', [AdminSubKategoriController::class, 'create'])->name('create');
+            Route::post('/', [AdminSubKategoriController::class, 'store'])->name('store');
+            Route::get('/{subkategori}/edit', [AdminSubKategoriController::class, 'edit'])->name('edit');
+            Route::put('/{subkategori}', [AdminSubKategoriController::class, 'update'])->name('update');
+            Route::delete('/{subkategori}', [AdminSubKategoriController::class, 'destroy'])->name('destroy');
+        });
 
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);
-
+        
         // Rute Produk Detail Index
         Route::get('produk/{produk}/detail', [AdminProdukDetailController::class, 'index'])->name('produk_detail.index');
-
+        
         // Rute Varian/Detail Produk (Nested)
-        Route::prefix('produk/{produk}/detail')->name('produk.detail.')->group(function () {
+        Route::prefix('produk/{produk:id_produk}/detail')->name('produk.detail.')->group(function() {
             Route::get('/create', [AdminProdukDetailController::class, 'create'])->name('create');
-            Route::post('/', [AdminProdukDetailController::class, 'store'])->name('store');
+            Route::post('/', action: [AdminProdukDetailController::class, 'store'])->name('store');
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
             Route::put('/{detail}', [AdminProdukDetailController::class, 'update'])->name('update');
             Route::delete('/{detail}', [AdminProdukDetailController::class, 'destroy'])->name('destroy');
+            
         });
     });
 
@@ -103,7 +116,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
         // Rute landing page Superadmin
         Route::get('/dashboard', [AdminUserController::class, 'dashboard'])->name('users.dashboard');
-
+        
         // Rute CRUD User
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
@@ -112,4 +125,5 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
+
 });
