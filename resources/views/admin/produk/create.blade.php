@@ -2,6 +2,10 @@
 
 @section('title', 'Tambah Produk')
 
+@section('styles')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endsection
+
 @section('content')
 
 <div class="space-y-6">
@@ -129,9 +133,17 @@
         const parentSelect = document.getElementById('parent_id');
         const subCategorySelect = document.getElementById('id_kategori');
         const btnAddSubkategori = document.getElementById('btn-add-subkategori');
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi kesalahan',
+                html: '@foreach($errors->all() as $error)<div>- {{ $error }}</div>@endforeach',
+                confirmButtonColor: '#5BC6BC'
+            });
+        @endif
+
         const routePattern = "{{ route('admin.kategori.subkategori.create', 'PLACEHOLDER_ID') }}";
 
-        // Fungsi untuk mengisi dropdown sub kategori
         function populateSubCategories(selectedOption) {
             subCategorySelect.innerHTML = '<option value="">Pilih Sub-Kategori</option>';
             
@@ -142,7 +154,6 @@
 
             enableAddButton(selectedOption.value);
             
-            // Ambil data anak dari atribut data-children
             const childrenData = selectedOption.getAttribute('data-children');
             
             if (childrenData) {
@@ -160,7 +171,6 @@
             }
         }
 
-        // Helper untuk styling tombol tambah sub
         function enableAddButton(parentId) {
             const newUrl = routePattern.replace('PLACEHOLDER_ID', parentId);
             btnAddSubkategori.href = newUrl;
@@ -176,7 +186,6 @@
             btnAddSubkategori.title = 'Pilih Kategori Utama Terlebih Dahulu';
         }
 
-        // Event Listener: Saat Parent Berubah
         parentSelect.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             populateSubCategories(selectedOption);
@@ -186,7 +195,6 @@
             const selectedOption = parentSelect.options[parentSelect.selectedIndex];
             populateSubCategories(selectedOption);
 
-            // Restore old value untuk sub kategori
             const oldSubCategoryId = '{{ old("id_kategori") }}';
             if (oldSubCategoryId) {
                 subCategorySelect.value = oldSubCategoryId;

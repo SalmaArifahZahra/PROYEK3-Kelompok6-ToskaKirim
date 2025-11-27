@@ -104,10 +104,8 @@
 @endsection
 
 @push('scripts')
-<!-- SweetAlert2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Handle delete forms with SweetAlert confirmation
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('form.swal-delete').forEach(function(form) {
             form.addEventListener('submit', function (e) {
@@ -132,7 +130,6 @@
             });
         });
 
-        // Show session success message via SweetAlert
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -143,7 +140,6 @@
             });
         @endif
 
-        // Show first validation error (if any)
         @if($errors->any())
             Swal.fire({
                 icon: 'error',
