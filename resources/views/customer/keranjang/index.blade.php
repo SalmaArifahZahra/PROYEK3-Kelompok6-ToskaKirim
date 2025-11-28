@@ -1,131 +1,174 @@
 @extends('layouts.layout_customer')
 
-@section('title', 'Keranjang Saya')
+@section('title', 'Keranjang Belanja')
 
 @section('content')
-    <div class="max-w-6xl mx-auto p-4">
-        <h2 class="text-2xl font-bold mb-6">Keranjang Belanja</h2>
+
+    <div class="max-w-6xl mx-auto mt-6">
+
+        <h1 class="text-2xl font-semibold mb-6">Keranjang Belanja</h1>
 
         @if ($keranjang->isEmpty())
-            <p class="text-center text-gray-500">Keranjang Anda kosong.</p>
+
+            <p class="text-center text-gray-500 py-10">Keranjang kosong.</p>
         @else
-            @foreach ($keranjang as $item)
-                <div class="flex items-start bg-white shadow-md rounded-lg p-4 mb-4 border">
+            <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex font-semibold text-gray-700">
+                <div class="w-2/6">Produk</div>
+                <div class="w-1/6">Harga Satuan</div>
+                <div class="w-1/6">Kuantitas</div>
+                <div class="w-1/6">Total Harga</div>
+                <div class="w-1/6 text-center">Aksi</div>
+            </div>
 
+            <div class="mt-2 space-y-4">
 
-                    <div class="w-28 h-28 mr-4">
-                        <img src="{{ $item->produkDetail->produk->foto_url }}" alt="Product Image"
-                            class="w-full h-full object-contain rounded-lg">
-                    </div>
+                @foreach ($keranjang as $item)
+                    @php
+                        $produkDetail = $item->produkDetail;
+                        $produk = $produkDetail->produk;
+                        $totalHarga = $item->quantity * $produkDetail->harga_jual;
+                    @endphp
 
-                    {{-- {{ dd($item->produkDetail->produk->foto_url) }} --}}
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold">{{ $item->produkDetail->produk->nama }}</h3>
+                    <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-start">
 
-                        <div class="mt-2">
-                            <label class="text-sm text-gray-500">Variation:</label>
-                            <select class="border rounded-md p-1 text-sm">
-                                <option>{{ $item->produkDetail->nama_varian }}</option>
-                            </select>
-                        </div>
+                        <div class="w-2/6 flex gap-4">
 
-                        <div class="mt-2">
-                            <label class="text-sm text-gray-500">Ukuran:</label>
-                            <select class="border rounded-md p-1 text-sm">
-                                <option>{{ $item->produkDetail->ukuran ?? '1000ml' }}</option>
-                            </select>
-                        </div>
-                    </div>
+                            <img src="{{ $produk->foto_url }}" class="w-20 h-20 rounded object-contain">
 
-                    <div class="text-right w-48">
-                        <p class="text-gray-600">Rp {{ number_format($item->produkDetail->harga_jual, 0, ',', '.') }}</p>
-
-                        <div class="flex items-center justify-end mt-2">
-                            <div class="flex items-center gap-2">
-                                <button class="minusBtn w-8 h-8 border rounded flex items-center justify-center">-</button>
-                                <input type="number" value="{{ $item->quantity }}" min="1"
-                                    class="qtyInput w-14 border rounded text-center">
-                                <button class="plusBtn w-8 h-8 border rounded flex items-center justify-center">+</button>
+                            <div>
+                                <p class="font-medium">{{ $produk->nama }}</p>
+                                <p class="text-sm text-gray-500">Varian: {{ $produkDetail->nama_varian }}</p>
                             </div>
                         </div>
 
-
-                        <p class="mt-2 text-red-600 font-bold">
-                            Rp {{ number_format($item->produkDetail->harga_jual * $item->quantity, 0, ',', '.') }}
-                        </p>
-
-                        <form id="DeleteForm" action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
-                            method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" id="DeleteBtn"
-                                class="hover:bg-[#dc2626] text-white font-medium px-6 py-3 rounded-lg transition-colors">
-                                Hapus
-                            </button>
-                        </form>
+                        <div class="w-1/6 flex items-center font-bold text-red-600 total-item"
+                            id="total-{{ $item->id_produk_detail }}" data-price="{{ $produkDetail->harga_jual }}">
+                            Rp {{ number_format($totalHarga) }}
+                        </div>
 
 
+                        <div class="w-1/6 flex items-center">
+                            <div class="flex items-center gap-2">
+
+                                <button class="minusBtn px-3 py-1 border rounded flex-shrink-0"
+                                    data-id="{{ $item->id_produk_detail }}">-</button>
+
+                                <input type="number" value="{{ $item->quantity }}" min="1"
+                                    class="qtyInput w-14 text-center border rounded flex-shrink-0"
+                                    data-id="{{ $item->id_produk_detail }}">
+
+                                <button class="plusBtn px-3 py-1 border rounded flex-shrink-0"
+                                    data-id="{{ $item->id_produk_detail }}">+</button>
+
+                            </div>
+                        </div>
+
+                        <div class="w-1/6 flex items-center font-bold text-red-600"
+                            id="total-{{ $item->id_produk_detail }}">
+                            Rp {{ number_format($totalHarga) }}
+                        </div>
+
+                        <div class="w-1/6 flex justify-center items-center">
+                            <form action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
+                                method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button"
+                                    class="btn-delete px-3 py-1 border border-red-500 text-red-500 rounded hover:bg-red-50">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
 
                     </div>
-                </div>
-            @endforeach
+                @endforeach
 
-            <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow mt-6 border">
+            </div>
+            <div class="mt-6 bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-between">
 
-                <div>
-                    <input type="checkbox" id="selectAll" class="mr-2">
-                    <label for="selectAll">Pilih Semua ({{ count($keranjang) }})</label>
-                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="selectAll" class="w-4 h-4">
+                    <label for="selectAll" class="text-gray-700">Pilih Semua ({{ $keranjang->count() }})</label>
 
-                <div class="text-right">
-                    <p class="font-semibold">Total ({{ count($keranjang) }} produk):
-                        <span class="text-red-600">
-                            Rp
-                            {{ number_format($keranjang->sum(fn($i) => $i->produkDetail->harga_jual * $i->quantity), 0, ',', '.') }}
-                        </span>
-                    </p>
-                    <button class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg">
-                        Checkout
+                    <button id="deleteSelected" class="ml-4 text-red-500 hover:underline">
+                        Hapus
                     </button>
                 </div>
+
+                <div class="flex items-center gap-6">
+                    <div class="text-right">
+                        <p class="text-gray-600 text-sm">Total (<span id="selectedCount">0</span> produk):</p>
+                        <p class="text-red-600 font-bold text-xl">Rp <span id="grandTotal">0</span></p>
+                    </div>
+                    {{-- <a href="{{ route('customer.produk.checkout') }}"
+                        class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600">
+                        Checkout
+                    </a> --}}
+
+                </div>
             </div>
+
+
         @endif
+
     </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.minusBtn').forEach((btn, index) => {
+
+            function updateTotal(id, qty) {
+                const totalEl = document.getElementById('total-' + id);
+                const price = parseFloat(totalEl.dataset.price);
+                totalEl.textContent = 'Rp ' + (price * qty).toLocaleString('id-ID');
+                updateSelectedInfo();
+            }
+
+
+            document.querySelectorAll('.plusBtn, .minusBtn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    let qtyInput = this.closest('div').querySelector('.qtyInput');
-                    let val = parseInt(qtyInput.value) || 1;
-                    if (val > 1) qtyInput.value = val - 1;
+                    const id = this.dataset.id;
+                    const input = document.querySelector('.qtyInput[data-id="' + id + '"]');
+                    let val = parseInt(input.value);
+
+                    if (this.classList.contains('plusBtn')) val++;
+                    if (this.classList.contains('minusBtn') && val > 1) val--;
+
+                    input.value = val;
+                    updateTotal(id, val);
                 });
             });
 
-            document.querySelectorAll('.plusBtn').forEach((btn, index) => {
-                btn.addEventListener('click', function() {
-                    let qtyInput = this.closest('div').querySelector('.qtyInput');
-                    let val = parseInt(qtyInput.value) || 1;
-                    qtyInput.value = val + 1;
+            document.querySelectorAll('.qtyInput').forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.value < 1) this.value = 1;
+                    updateTotal(this.dataset.id, parseInt(this.value));
                 });
             });
-        });
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function() {
 
-        document.getElementById('DeleteBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Apakah kamu yakin ingin menghapus produk ini?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('DeleteForm').submit();
-                }
+                    let form = this.closest("form");
+
+                    Swal.fire({
+                        title: 'Yakin ingin menghapus?',
+                        text: "Produk ini akan dihapus dari keranjang.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+
+                });
             });
+
+
         });
     </script>
 

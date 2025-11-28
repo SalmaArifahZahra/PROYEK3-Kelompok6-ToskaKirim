@@ -16,6 +16,8 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
 use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
 use App\Http\Controllers\Customer\KeranjangController as CustomerKeranjangController;
+use App\Http\Controllers\Customer\CheckoutController  as CheckoutCustomerController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -74,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
             Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
             Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
+            Route::get('/checkout', [CheckoutCustomerController::class, 'index'])->name('checkout');
         });
 
         Route::post('/checkout', [CustomerKeranjangController::class, 'checkout'])

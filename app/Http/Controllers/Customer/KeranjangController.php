@@ -13,41 +13,41 @@ class KeranjangController extends Controller
 
     public function index()
     {
-        $keranjang = Keranjang::with(['produkDetail.produk'])
-            ->where('id_user', Auth::id())
+        $keranjang = Keranjang::with('produk.detail')
             ->get();
 
-        return view('customer.keranjang.index', compact('keranjang'));
-    }
+        $produks = $keranjang->map(function ($item) {
+            return $item->produk;
+        })->filter();
 
+        return view('customer.keranjang.index', compact('keranjang', 'produks'));
+    }
+    
     public function add(Request $request)
     {
         $request->validate([
-            'id_produk_detail' => 'required|exists:id_produk_detail',
-            'quantity' => 'required|integer|min:1'
+            'id_produk_detail' => 'required|exists:produk_detail,id_produk_detail',
+            'quantity' => 'required|integer|min:1',
         ]);
 
-        $id_user = Auth::id();
+        $userId = Auth::id();
 
-        $existingItem = Keranjang::where('id_user', $id_user)
-            ->where('id_produk_detail', $request->id_produk_detail)
-            ->first();
-
-        if ($existingItem) {
-            // Jika produk sudah di keranjang → tambahkan quantity-nya
-            $existingItem->quantity += $request->quantity;
-            $existingItem->save();
-        } else {
-            // Jika belum ada → tambahkan baris baru
-            Keranjang::create([
-                'id_user' => $id_user,
+        $keranjang = Keranjang::updateOrCreate(
+            [
+                'id_user' => $userId,
                 'id_produk_detail' => $request->id_produk_detail,
+            ],
+            [
                 'quantity' => $request->quantity
-            ]);
-        }
+            ]
+        );
 
-        return response()->json(['message' => 'Produk berhasil dimasukkan ke keranjang']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Produk berhasil ditambahkan ke keranjang',
+        ]);
     }
+
 
     public function destroy($id_produk_detail)
     {

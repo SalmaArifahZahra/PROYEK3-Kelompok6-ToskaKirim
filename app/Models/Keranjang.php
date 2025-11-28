@@ -11,7 +11,6 @@ class Keranjang extends Model
     use HasFactory;
 
     protected $table = 'keranjang';
-
     protected $primaryKey = 'id_produk_detail';
     public $incrementing = false;
     protected $keyType = 'int';
@@ -34,5 +33,10 @@ class Keranjang extends Model
     public function produkDetail(): BelongsTo
     {
         return $this->belongsTo(ProdukDetail::class, 'id_produk_detail', 'id_produk_detail');
+    }
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
     }
 }
