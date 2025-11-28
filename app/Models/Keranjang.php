@@ -11,10 +11,11 @@ class Keranjang extends Model
     use HasFactory;
 
     protected $table = 'keranjang';
-    
+
     //composite key
-    public $incrementing = false; 
+    public $incrementing = false;
     protected $primaryKey = null;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'id_user',

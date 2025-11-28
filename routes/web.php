@@ -68,10 +68,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sub-kategori/{subKategori}', [CustomerKategoriController::class, 'show'])
             ->name('kategori.show');
 
-        Route::get('/keranjang', [CustomerKeranjangController::class, 'index'])
-            ->name('keranjang.index');
-        Route::post('/keranjang/add', [CustomerKeranjangController::class, 'add'])
-            ->name('keranjang.add');
+        // Keranjang Belanja Customer
+        Route::prefix('keranjang')->name('keranjang.')->group(function () {
+            Route::get('/', [CustomerKeranjangController::class, 'index'])->name('index');
+            Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
+            Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
+            Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
+        });
+
+        Route::post('/checkout', [CustomerKeranjangController::class, 'checkout'])
+            ->name('checkout.store');
     });
 
     // --- Rute Admin & Superadmin ---

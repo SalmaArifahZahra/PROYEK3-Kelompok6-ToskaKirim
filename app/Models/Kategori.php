@@ -23,7 +23,6 @@ class Kategori extends Model
     {
         return $this->hasMany(Produk::class, 'id_kategori', 'id_kategori');
     }
-
     public function parent()
     {
         return $this->belongsTo(Kategori::class, 'parent_id', 'id_kategori');
