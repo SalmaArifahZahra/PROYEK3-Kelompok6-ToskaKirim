@@ -37,14 +37,6 @@ class PesananDetailController extends Controller
      */
     public function verify(Pesanan $pesanan): RedirectResponse
     {
-        // TODO: Implementasi logic verifikasi
-        // Contoh:
-        // if ($pesanan->status_pesanan->value !== 'menunggu_verifikasi') {
-        //     return back()->with('error', 'Pesanan tidak dapat diverifikasi.');
-        // }
-        //
-        // $pesanan->pembayaran->update(['status_pembayaran' => 'verified']);
-        // $pesanan->update(['status_pesanan' => 'diproses']);
 
         return back()->with('success', 'Pembayaran berhasil diverifikasi.');
     }
@@ -58,13 +50,6 @@ class PesananDetailController extends Controller
      */
     public function process(Pesanan $pesanan): RedirectResponse
     {
-        // TODO: Implementasi logic proses pesanan
-        // Contoh:
-        // if ($pesanan->status_pesanan->value === 'menunggu_verifikasi') {
-        //     $pesanan->update(['status_pesanan' => 'diproses']);
-        // } elseif ($pesanan->status_pesanan->value === 'diproses') {
-        //     $pesanan->update(['status_pesanan' => 'dikirim']);
-        // }
 
         return back()->with('success', 'Status pesanan berhasil diupdate.');
     }
@@ -77,13 +62,6 @@ class PesananDetailController extends Controller
      */
     public function complete(Pesanan $pesanan): RedirectResponse
     {
-        // TODO: Implementasi logic selesaikan pesanan
-        // Contoh:
-        // if ($pesanan->status_pesanan->value !== 'dikirim') {
-        //     return back()->with('error', 'Pesanan harus dalam status dikirim.');
-        // }
-        //
-        // $pesanan->update(['status_pesanan' => 'selesai']);
 
         return back()->with('success', 'Pesanan berhasil diselesaikan.');
     }
@@ -97,18 +75,6 @@ class PesananDetailController extends Controller
      */
     public function cancel(Pesanan $pesanan): RedirectResponse
     {
-        // TODO: Implementasi logic batalkan pesanan
-        // Contoh:
-        // if (!in_array($pesanan->status_pesanan->value, ['menunggu_pembayaran', 'menunggu_verifikasi'])) {
-        //     return back()->with('error', 'Pesanan tidak dapat dibatalkan.');
-        // }
-        //
-        // // Kembalikan stok produk
-        // foreach ($pesanan->detail as $item) {
-        //     $item->produkDetail->increment('stok', $item->kuantitas);
-        // }
-        //
-        // $pesanan->update(['status_pesanan' => 'dibatalkan']);
 
         return back()->with('success', 'Pesanan berhasil dibatalkan.');
     }
