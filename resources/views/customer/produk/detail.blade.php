@@ -58,7 +58,6 @@
                 </div>
 
                 <div class="flex gap-3 mt-5">
-                    <!-- single correct button -->
                     <button id="btnAddCart" class="bg-green-500 text-white py-4 px-4 rounded-lg flex items-center gap-2"
                         type="button">
                         <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -107,7 +106,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            // highlight thumb click -> change main image (optional UX)
             document.querySelectorAll('.thumb-image').forEach(img => {
                 img.addEventListener('click', () => {
                     const src = img.dataset.src;
@@ -117,7 +115,6 @@
                 });
             });
 
-            // variant selection
             let selectedVarian = null;
             const buttons = document.querySelectorAll('.btn-var');
 
@@ -130,7 +127,6 @@
                 });
             });
 
-            // qty control
             const qtyInput = document.getElementById('qtyInput');
             document.getElementById('minusBtn').addEventListener('click', () => {
                 const val = parseInt(qtyInput.value) || 1;
@@ -141,9 +137,7 @@
                 qtyInput.value = val + 1;
             });
 
-            // add to cart
             document.getElementById('btnAddCart').addEventListener('click', function() {
-
                 if (!selectedVarian) {
                     Swal.fire({
                         icon: 'warning',
@@ -154,7 +148,6 @@
                 }
 
                 const qtyVal = parseInt(qtyInput.value) || 1;
-
                 fetch("{{ route('customer.keranjang.add') }}", {
                         method: 'POST',
                         headers: {

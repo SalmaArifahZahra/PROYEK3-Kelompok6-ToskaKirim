@@ -41,21 +41,30 @@
                         <p class="text-gray-600">Rp {{ number_format($item->produkDetail->harga_jual, 0, ',', '.') }}</p>
 
                         <div class="flex items-center justify-end mt-2">
-                            <button class="px-2 border rounded">-</button>
-                            <input type="text" value="{{ $item->quantity }}"
-                                class="w-10 text-center border mx-1 rounded" />
-                            <button class="px-2 border rounded">+</button>
+                            <div class="flex items-center gap-2">
+                                <button class="minusBtn w-8 h-8 border rounded flex items-center justify-center">-</button>
+                                <input type="number" value="{{ $item->quantity }}" min="1"
+                                    class="qtyInput w-14 border rounded text-center">
+                                <button class="plusBtn w-8 h-8 border rounded flex items-center justify-center">+</button>
+                            </div>
                         </div>
+
 
                         <p class="mt-2 text-red-600 font-bold">
                             Rp {{ number_format($item->produkDetail->harga_jual * $item->quantity, 0, ',', '.') }}
                         </p>
 
-                        <form action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}" method="POST">
+                        <form id="DeleteForm" action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
+                            method="POST">
                             @csrf
                             @method('DELETE')
-                            <button class="mt-2 text-sm text-red-500 hover:underline">Hapus</button>
+                            <button type="submit" id="DeleteBtn"
+                                class="hover:bg-[#dc2626] text-white font-medium px-6 py-3 rounded-lg transition-colors">
+                                Hapus
+                            </button>
                         </form>
+
+
 
                     </div>
                 </div>
@@ -80,7 +89,44 @@
                     </button>
                 </div>
             </div>
-
         @endif
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.minusBtn').forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    let qtyInput = this.closest('div').querySelector('.qtyInput');
+                    let val = parseInt(qtyInput.value) || 1;
+                    if (val > 1) qtyInput.value = val - 1;
+                });
+            });
+
+            document.querySelectorAll('.plusBtn').forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    let qtyInput = this.closest('div').querySelector('.qtyInput');
+                    let val = parseInt(qtyInput.value) || 1;
+                    qtyInput.value = val + 1;
+                });
+            });
+        });
+
+        document.getElementById('DeleteBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Apakah kamu yakin ingin menghapus produk ini?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('DeleteForm').submit();
+                }
+            });
+        });
+    </script>
+
 @endsection

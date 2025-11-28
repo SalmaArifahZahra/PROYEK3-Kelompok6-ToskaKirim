@@ -12,10 +12,9 @@ class Keranjang extends Model
 
     protected $table = 'keranjang';
 
-    //composite key
+    protected $primaryKey = 'id_produk_detail';
     public $incrementing = false;
-    protected $primaryKey = null;
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     protected $fillable = [
         'id_user',

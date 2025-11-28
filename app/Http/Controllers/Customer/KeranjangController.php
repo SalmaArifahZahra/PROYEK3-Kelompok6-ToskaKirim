@@ -23,7 +23,7 @@ class KeranjangController extends Controller
     public function add(Request $request)
     {
         $request->validate([
-            'id_produk_detail' => 'required|exists:produk_detail,id_produk_detail',
+            'id_produk_detail' => 'required|exists:id_produk_detail',
             'quantity' => 'required|integer|min:1'
         ]);
 
