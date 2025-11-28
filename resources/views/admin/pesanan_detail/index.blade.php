@@ -59,12 +59,8 @@
                         <p class="font-semibold text-gray-900">{{ $pesanan->waktu_pesanan->format('d M Y, H:i') }}</p>
                     </div>
                     <div>
-                        <p class="text-gray-500">Customer</p>
-                        <p class="font-semibold text-gray-900">{{ $pesanan->user->name ?? 'Guest' }}</p>
-                    </div>
-                    <div>
                         <p class="text-gray-500">Email</p>
-                        <p class="font-semibold text-gray-900">{{ $pesanan->user->email ?? '-' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $pesanan->user->email }}</p>
                     </div>
                 </div>
             </div>
@@ -119,7 +115,7 @@
                             <h3 class="font-semibold text-gray-900">{{ $item->produkDetail->produk->nama }}</h3>
                             <p class="text-sm text-gray-600">Varian: {{ $item->produkDetail->nama_varian }}</p>
                             <p class="text-sm text-gray-600">
-                                Rp {{ number_format($item->harga_beli, 0, ',', '.') }} × {{ $item->kuantitas }}
+                                Rp {{ number_format($item->harga_saat_beli, 0, ',', '.') }} × {{ $item->kuantitas }}
                             </p>
                         </div>
                         
