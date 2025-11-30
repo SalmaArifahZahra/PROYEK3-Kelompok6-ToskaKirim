@@ -40,7 +40,8 @@
             </a>
 
             <!-- Pesanan -->
-            <a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+            <a href="{{ route('admin.pesanan.index') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                       {{ request()->is('admin/pesanan*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                 <i class="fas fa-shopping-bag text-lg"></i>
                 <span class="font-medium">Pesanan</span>

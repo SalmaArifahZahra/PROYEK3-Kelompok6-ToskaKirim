@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
 use App\Http\Controllers\Superadmin\MetodePembayaranController;
+use App\Http\Controllers\Admin\PesananController as AdminPesananController;
+use App\Http\Controllers\Admin\PesananDetailController as AdminPesananDetailController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
@@ -118,6 +120,18 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
             Route::put('/{detail}', [AdminProdukDetailController::class, 'update'])->name('update');
             Route::delete('/{detail}', [AdminProdukDetailController::class, 'destroy'])->name('destroy');
+        });
+
+        // Rute Pesanan
+        Route::get('pesanan', [AdminPesananController::class, 'index'])->name('pesanan.index');
+        
+        // Rute Pesanan Detail (nested)
+        Route::prefix('pesanan/{pesanan:id_pesanan}')->name('pesanan_detail.')->group(function() {
+            Route::get('/', [AdminPesananDetailController::class, 'index'])->name('index');
+            Route::post('/verify', [AdminPesananDetailController::class, 'verify'])->name('verify');
+            Route::post('/process', [AdminPesananDetailController::class, 'process'])->name('process');
+            Route::post('/complete', [AdminPesananDetailController::class, 'complete'])->name('complete');
+            Route::post('/cancel', [AdminPesananDetailController::class, 'cancel'])->name('cancel');
         });
     });
 
