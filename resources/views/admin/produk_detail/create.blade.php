@@ -2,6 +2,10 @@
 
 @section('title', 'Tambah Varian Produk')
 
+@section('styles')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endsection
+
 @section('content')
 
 <div class="space-y-6">
@@ -132,3 +136,16 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi kesalahan',
+            html: '@foreach($errors->all() as $error)<div>- {{ $error }}</div>@endforeach',
+            confirmButtonColor: '#5BC6BC'
+        });
+    @endif
+</script>
+@endpush

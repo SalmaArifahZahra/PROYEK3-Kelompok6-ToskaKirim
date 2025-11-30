@@ -2,7 +2,6 @@
 
 @section('title', 'Produk')
 
-{{-- Tambahkan CDN SweetAlert2 jika belum ada di layout_admin --}}
 @section('styles')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
@@ -60,12 +59,10 @@
                             {{ Str::limit($produk->deskripsi, 50) }}
                         </td>
                         <td class="px-6 py-4">
-                            {{-- Kita kirim parameter data-nama untuk SweetAlert --}}
                             @include('component.admin.table_actions', [
-                                // 'showEllipsis' => route('admin.produk_detail.index', $produk->id_produk), // Jika ingin ke detail
                                 'editUrl' => route('admin.produk.edit', $produk->id_produk),
                                 'deleteUrl' => route('admin.produk.destroy', $produk->id_produk),
-                                'dataNama' => $produk->nama // Variabel tambahan untuk custom component (lihat di bawah)
+                                'dataNama' => $produk->nama
                             ])
                         </td>
                     </tr>
@@ -86,18 +83,15 @@
 
     @if(method_exists($produkList, 'hasPages') && $produkList->hasPages())
         <div class="mt-6">
-            {{ $produkList->links() }} 
-            {{-- Atau gunakan kode manual pagination Anda yang sebelumnya --}}
+            {{ $produkList->links() }}
         </div>
     @endif
 
 </div>
 
-{{-- SCRIPT SWEETALERT --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         
-        // 1. Cek Flash Message Success (Dari Controller)
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -108,7 +102,6 @@
             });
         @endif
 
-        // 2. Cek Flash Message Error
         @if(session('error'))
             Swal.fire({
                 icon: 'error',
@@ -118,8 +111,6 @@
             });
         @endif
 
-        // 3. Handle Tombol Delete dengan Class 'swal-delete'
-        // Kita gunakan Event Delegation agar aman untuk element dinamis
         const deleteForms = document.querySelectorAll('.swal-delete');
         
         deleteForms.forEach(form => {

@@ -99,7 +99,7 @@
         
         // --- 1. HANDLE TOMBOL HAPUS (KONFIRMASI) ---
         // Cari semua form yang punya class 'swal-delete'
-        const deleteForms = document.querySelectorAll('.swal-delete'); // Selektor class lebih aman
+        const deleteForms = document.querySelectorAll('.swal-delete');
         
         deleteForms.forEach(function(form) {
             form.addEventListener('submit', function (e) {
@@ -126,7 +126,6 @@
             });
         });
 
-        // --- 2. ALERT SUKSES ---
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -138,7 +137,7 @@
         @endif
 
         // --- 3. ALERT ERROR (GAGAL HAPUS / DATABASE ERROR) ---
-        // Ini bagian yang menangkap return back()->with('error', ...) dari controller
+        // Bagian yang menangkap return back()->with('error', ...) dari controller
         @if(session('error'))
             Swal.fire({
                 icon: 'error',

@@ -31,6 +31,6 @@ class ProdukDetail extends Model
 
     public function produk()
     {
-        return $this->belongsTo(ProdukDetail::class, 'id_produk_detail', 'id_produk_detail');
+        return $this->belongsTo(Produk::class, 'id_produk');
     }
 }

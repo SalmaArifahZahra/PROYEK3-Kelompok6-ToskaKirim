@@ -17,9 +17,10 @@
                 </div>
             </div>
 
-            <a href="#" class="text-white text-xl hover:text-gray-100 transition">
+            <a href="{{ route('customer.keranjang.index') }}" class="text-white text-xl hover:text-gray-100 transition">
                 <i class="fas fa-shopping-cart"></i>
             </a>
+
 
             <a href="/" class="text-white font-medium hover:text-[#174552] transition">Home</a>
 

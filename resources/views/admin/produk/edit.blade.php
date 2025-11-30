@@ -2,6 +2,10 @@
 
 @section('title', 'Edit Produk')
 
+@section('styles')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endsection
+
 @section('content')
 
 <div class="space-y-6">
@@ -51,10 +55,9 @@
                                     class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-[#5BC6BC] outline-none">
                                 <option value="">Pilih Kategori Utama</option>
                                 @foreach($parentCategories as $category)
-                                    <option value="{{ $category->id_kategori }}"
-                                            {{-- Simpan data anak sebagai JSON di sini --}}
-                                            data-children="{{ json_encode($category->children) }}"
-                                            {{ ($currentParentId == $category->id_kategori) ? 'selected' : '' }}>
+                                <option value="{{ $category->id_kategori }}"
+                                        data-children="{{ json_encode($category->children) }}"
+                                        {{ ($currentParentId == $category->id_kategori) ? 'selected' : '' }}>
                                         {{ $category->nama_kategori }}
                                     </option>
                                 @endforeach
@@ -155,16 +158,13 @@
             }
         }
 
-        // Event Listener: Saat Parent Berubah
         parentSelect.addEventListener('change', function() {
-            // Reset pilihan sub kategori lama saat ganti parent
             subCategorySelect.setAttribute('data-selected', ''); 
             
             const selectedOption = this.options[this.selectedIndex];
             updateUIState(selectedOption);
         });
 
-        // Inisialisasi Saat Load Halaman
         if (parentSelect.value) {
             const selectedOption = parentSelect.options[parentSelect.selectedIndex];
             updateUIState(selectedOption);

@@ -41,7 +41,6 @@
                         <th class="px-6 py-4 text-left">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Foto</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Sub-Kategori</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
@@ -52,18 +51,6 @@
                         <td class="px-6 py-4">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </td>
-                        <td class="px-6 py-4">
-                            @if($subkategori->foto)
-                            <img
-                                src="{{ asset($subkategori->foto) }}"
-                                alt="{{ $subkategori->nama_kategori }}"
-                                class="w-16 h-16 object-contain rounded">
-                            @else
-                            <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
-                                <i class="fas fa-image text-gray-400 text-2xl"></i>
-                            </div>
-                            @endif
-                        </td>
                         <td class="px-6 py-4 text-sm font-medium text-gray-800">
                             {{ $subkategori->nama_kategori }}
                         </td>
@@ -71,13 +58,13 @@
                             @include('component.admin.table_actions', [
                                 'editUrl' => route('admin.kategori.subkategori.edit', [$kategori->id_kategori, $subkategori->id_kategori]),
                                 'deleteUrl' => route('admin.kategori.subkategori.destroy', [$kategori->id_kategori, $subkategori->id_kategori]),
-                                'confirmMessage' => 'Yakin ingin menghapus sub-kategori ini?'
+                                'dataNama' => $subkategori->nama_kategori
                             ])
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="3" class="px-6 py-12 text-center text-gray-500">
                             Belum ada data sub-kategori
                         </td>
                     </tr>
@@ -90,3 +77,52 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        const deleteForms = document.querySelectorAll('.swal-delete');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const itemName = this.getAttribute('data-nama');
+                
+                Swal.fire({
+                    title: 'Yakin ingin menghapus?',
+                    text: `Sub-kategori "${itemName}" akan dihapus permanen`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#5BC6BC',
+                    cancelButtonColor: '#d33'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#5BC6BC'
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#5BC6BC'
+            });
+        @endif
+    });
+</script>
+@endpush

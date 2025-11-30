@@ -42,9 +42,6 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        <!-- No parent selector for top-level kategori -->
-                        <!-- Use Sub-Kategori management for children -->
                     </div>
 
                     <!-- Right Column - Foto Kategori -->
@@ -74,3 +71,17 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi kesalahan',
+            html: '@foreach($errors->all() as $error)<div>- {{ $error }}</div>@endforeach',
+            confirmButtonColor: '#5BC6BC'
+        });
+    @endif
+</script>
+@endpush

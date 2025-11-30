@@ -58,7 +58,8 @@ class SubKategoriController extends Controller
         Kategori::create($data);
 
         return redirect()->route('admin.kategori.subkategori.index', $kategori->id_kategori)
-                         ->with('success', 'Sub-kategori berhasil ditambahkan.');
+
+        ->with('success', 'Sub-kategori berhasil ditambahkan.');
     }
 
     // Menampilkan form untuk mengedit sub-kategori.
