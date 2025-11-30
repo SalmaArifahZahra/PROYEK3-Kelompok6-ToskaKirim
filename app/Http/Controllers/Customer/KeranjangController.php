@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class KeranjangController extends Controller
 {
-
     public function index()
     {
         $keranjang = Keranjang::with('produk.detail')
@@ -20,9 +19,15 @@ class KeranjangController extends Controller
             return $item->produk;
         })->filter();
 
-        return view('customer.keranjang.index', compact('keranjang', 'produks'));
+        $keranjang = Keranjang::with('produk.detail')
+            ->where('id_user', Auth::id())
+            ->get();
+
+        $cartCount = $keranjang->sum('quantity');
+        
+        return view('customer.keranjang.index', compact('keranjang', 'produks', 'cartCount'));
     }
-    
+
     public function add(Request $request)
     {
         $request->validate([

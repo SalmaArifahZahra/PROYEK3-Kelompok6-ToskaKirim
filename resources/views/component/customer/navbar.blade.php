@@ -16,10 +16,18 @@
                     </button>
                 </div>
             </div>
-
-            <a href="{{ route('customer.keranjang.index') }}" class="text-white text-xl hover:text-gray-100 transition">
+            
+            <a href="{{ route('customer.keranjang.index') }}"
+                class="relative text-white text-xl hover:text-gray-100 transition">
                 <i class="fas fa-shopping-cart"></i>
+
+                @if ($cartCount > 0)
+                    <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                        {{ $cartCount }}
+                    </span>
+                @endif
             </a>
+
 
 
             <a href="/" class="text-white font-medium hover:text-[#174552] transition">Home</a>
