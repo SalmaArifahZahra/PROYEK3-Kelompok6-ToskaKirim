@@ -25,8 +25,8 @@ class PesananController extends Controller
         $status = $request->query('status');
 
         $query = Pesanan::where('id_user', Auth::id())
-                        ->with(['detail.produkDetail', 'pembayaran'])
-                        ->latest('waktu_pesanan');
+            ->with(['detail.produkDetail', 'pembayaran'])
+            ->latest('waktu_pesanan');
 
         if ($status) {
             $query->where('status_pesanan', $status);
@@ -46,7 +46,7 @@ class PesananController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         // Cek alamat utama
         $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
         if (!$alamatUtama) {
@@ -64,7 +64,7 @@ class PesananController extends Controller
         try {
             // Dummy Ongkir, nanti diganti dengan perhitungan real
             $ongkir = Ongkir::create([
-                'jarak' => 0, 
+                'jarak' => 0,
                 'tarif_per_km' => 0,
                 'total_ongkir' => 15000 // Asumsi flat rate sementara
             ]);
@@ -94,9 +94,8 @@ class PesananController extends Controller
 
             DB::commit();
 
-            return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
-                             ->with('success', 'Pesanan berhasil dibuat. Silahkan lakukan pembayaran.');
-
+            return redirect("customer/pesanan/" . $pesanan->id_pesanan)
+                ->with('success', 'Pesanan berhasil dibuat. Silahkan lakukan pembayaran.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage());
@@ -107,14 +106,14 @@ class PesananController extends Controller
     public function show($id)
     {
         $pesanan = Pesanan::where('id_user', Auth::id())
-                        ->with(['detail.produkDetail.produk', 'ongkir', 'pembayaran'])
-                        ->findOrFail($id);
+            ->with(['detail.produkDetail.produk', 'ongkir', 'pembayaran'])
+            ->findOrFail($id);
 
-        $pengaturan = Pengaturan::first(); 
+        $pengaturan = Pengaturan::first();
 
         // Hitung Deadline (Waktu Pesanan + 24 Jam)
         $deadline = Carbon::parse($pesanan->waktu_pesanan)->addHours(24);
-        $deadlineTimestamp = $deadline->timestamp * 1000; 
+        $deadlineTimestamp = $deadline->timestamp * 1000;
 
         return view('customer.pesanan.show', compact('pesanan', 'pengaturan', 'deadline', 'deadlineTimestamp'));
     }
@@ -152,20 +151,21 @@ class PesananController extends Controller
             ]);
         });
 
-        return redirect()->route('customer.pesanan.index')
-                         ->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
+        // return redirect()->('customer.pesanan.index')
+        return redirect('customer/pesanan')
+            ->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
     }
-    
+
     // Batalkan Pesanan
     public function cancel($id)
     {
         $pesanan = Pesanan::where('id_user', Auth::id())->findOrFail($id);
-        
-        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN && StautsPembayaranEnum::MENUNGGU_VERIFIKASI) {
+
+        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN && StatusPembayaranEnum::MENUNGGU_VERIFIKASI) {
             $pesanan->update(['status_pesanan' => StatusPesananEnum::DIBATALKAN]);
             return back()->with('success', 'Pesanan berhasil dibatalkan.');
         }
-        
+
         return back()->with('error', 'Pesanan tidak dapat dibatalkan.');
     }
 }

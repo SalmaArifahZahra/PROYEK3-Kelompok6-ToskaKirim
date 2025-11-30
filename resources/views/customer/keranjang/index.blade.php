@@ -13,6 +13,11 @@
             <p class="text-center text-gray-500 py-10">Keranjang kosong.</p>
         @else
             <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex font-semibold text-gray-700">
+
+                <div class="w-1/12 flex justify-center">
+                    <input type="checkbox" id="selectAllTop" class="w-4 h-4">
+                </div>
+
                 <div class="w-2/6">Produk</div>
                 <div class="w-1/6">Harga Satuan</div>
                 <div class="w-1/6">Kuantitas</div>
@@ -29,19 +34,19 @@
                         $totalHarga = $item->quantity * $produkDetail->harga_jual;
                     @endphp
 
-                    <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center"> {{-- Note: items-start diganti items-center agar rapi --}}
+                    <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center">
 
-                        {{-- KOLOM 1: PRODUK (FOTO & NAMA) --}}
+                        <div class="w-1/12 flex justify-center">
+                            <input type="checkbox" class="itemCheckbox w-4 h-4" data-id="{{ $item->id_produk_detail }}">
+                        </div>
+
                         <div class="w-2/6">
-                            {{-- Bungkus dengan anchor tag (a) --}}
                             <a href="{{ route('customer.produk.detail', $produk->id_produk) }}" class="flex gap-4 group">
-                                
-                                {{-- Tambahkan efek hover pada gambar --}}
-                                <img src="{{ $produk->foto_url }}" 
+
+                                <img src="{{ $produk->foto_url }}"
                                     class="w-20 h-20 rounded object-contain group-hover:opacity-80 transition-opacity duration-300">
 
                                 <div class="flex flex-col justify-center">
-                                    {{-- Tambahkan efek hover pada nama --}}
                                     <p class="font-medium group-hover:text-orange-500 transition-colors duration-300">
                                         {{ $produk->nama }}
                                     </p>
@@ -50,33 +55,29 @@
                             </a>
                         </div>
 
-                        {{-- KOLOM 2: HARGA SATUAN --}}
                         <div class="w-1/6 font-semibold text-gray-700">
                             Rp {{ number_format($produkDetail->harga_jual) }}
                         </div>
 
-                        {{-- KOLOM 3: KUANTITAS --}}
                         <div class="w-1/6 flex items-center">
                             <div class="flex items-center gap-2">
-                                <button class="minusBtn px-3 py-1 border rounded flex-shrink-0 hover:bg-gray-100"
+                                <button class="minusBtn px-3 py-1 border rounded  hover:bg-gray-100"
                                     data-id="{{ $item->id_produk_detail }}">-</button>
 
                                 <input type="number" value="{{ $item->quantity }}" min="1"
-                                    class="qtyInput w-14 text-center border rounded flex-shrink-0"
+                                    class="qtyInput w-14 text-center border rounded "
                                     data-id="{{ $item->id_produk_detail }}">
 
-                                <button class="plusBtn px-3 py-1 border rounded flex-shrink-0 hover:bg-gray-100"
+                                <button class="plusBtn px-3 py-1 border rounded  hover:bg-gray-100"
                                     data-id="{{ $item->id_produk_detail }}">+</button>
                             </div>
                         </div>
 
-                        {{-- KOLOM 4: TOTAL HARGA --}}
-                        <div class="w-1/6 font-bold text-red-600"
-                            id="total-{{ $item->id_produk_detail }}" data-price="{{ $produkDetail->harga_jual }}">
+                        <div class="w-1/6 font-bold text-red-600" id="total-{{ $item->id_produk_detail }}"
+                            data-price="{{ $produkDetail->harga_jual }}">
                             Rp {{ number_format($totalHarga) }}
                         </div>
 
-                        {{-- KOLOM 5: AKSI --}}
                         <div class="w-1/6 flex justify-center items-center">
                             <form action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
                                 method="POST">
@@ -177,7 +178,63 @@
                 });
             });
 
+            function updateSelectedInfo() {
+                let selectedCount = 0;
+                let grandTotal = 0;
 
+                document.querySelectorAll('.itemCheckbox').forEach(chk => {
+                    if (chk.checked) {
+                        selectedCount++;
+
+                        const id = chk.dataset.id;
+                        const qty = parseInt(document.querySelector('.qtyInput[data-id="' + id + '"]')
+                            .value);
+                        const price = parseFloat(document.getElementById('total-' + id).dataset.price);
+
+                        grandTotal += qty * price;
+                    }
+                });
+
+                document.getElementById('selectedCount').textContent = selectedCount;
+                document.getElementById('grandTotal').textContent = grandTotal.toLocaleString('id-ID');
+            }
+
+
+
+            document.getElementById('selectAllTop').addEventListener('change', function() {
+                const checked = this.checked;
+
+                document.getElementById('selectAll').checked = checked;
+                document.querySelectorAll('.itemCheckbox').forEach(chk => chk.checked = checked);
+
+                updateSelectedInfo();
+            });
+
+
+
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checked = this.checked;
+
+                document.getElementById('selectAllTop').checked = checked;
+                document.querySelectorAll('.itemCheckbox').forEach(chk => chk.checked = checked);
+
+                updateSelectedInfo();
+            });
+
+
+
+            document.querySelectorAll('.itemCheckbox').forEach(chk => {
+                chk.addEventListener('change', function() {
+
+                    const all = document.querySelectorAll('.itemCheckbox').length;
+                    const checked = document.querySelectorAll('.itemCheckbox:checked').length;
+
+                    document.getElementById('selectAll').checked = (all === checked);
+                    document.getElementById('selectAllTop').checked = (all === checked);
+
+                    updateSelectedInfo();
+                });
+            });
         });
     </script>
 
