@@ -10,10 +10,11 @@ use App\Http\Controllers\Admin\KategoriController as AdminKategoriController;
 use App\Http\Controllers\Admin\SubKategoriController as AdminSubKategoriController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
-use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
-use App\Http\Controllers\Superadmin\MetodePembayaranController;
 use App\Http\Controllers\Admin\PesananController as AdminPesananController;
 use App\Http\Controllers\Admin\PesananDetailController as AdminPesananDetailController;
+// Import Controller Superadmin
+use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
+use App\Http\Controllers\Superadmin\MetodePembayaranController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;

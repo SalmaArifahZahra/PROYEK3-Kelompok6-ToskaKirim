@@ -29,52 +29,61 @@
                         $totalHarga = $item->quantity * $produkDetail->harga_jual;
                     @endphp
 
-                    <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-start">
+                    <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center"> {{-- Note: items-start diganti items-center agar rapi --}}
 
-                        <div class="w-2/6 flex gap-4">
+                        {{-- KOLOM 1: PRODUK (FOTO & NAMA) --}}
+                        <div class="w-2/6">
+                            {{-- Bungkus dengan anchor tag (a) --}}
+                            <a href="{{ route('customer.produk.detail', $produk->id_produk) }}" class="flex gap-4 group">
+                                
+                                {{-- Tambahkan efek hover pada gambar --}}
+                                <img src="{{ $produk->foto_url }}" 
+                                    class="w-20 h-20 rounded object-contain group-hover:opacity-80 transition-opacity duration-300">
 
-                            <img src="{{ $produk->foto_url }}" class="w-20 h-20 rounded object-contain">
-
-                            <div>
-                                <p class="font-medium">{{ $produk->nama }}</p>
-                                <p class="text-sm text-gray-500">Varian: {{ $produkDetail->nama_varian }}</p>
-                            </div>
+                                <div class="flex flex-col justify-center">
+                                    {{-- Tambahkan efek hover pada nama --}}
+                                    <p class="font-medium group-hover:text-orange-500 transition-colors duration-300">
+                                        {{ $produk->nama }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">Varian: {{ $produkDetail->nama_varian }}</p>
+                                </div>
+                            </a>
                         </div>
 
-                        <div class="w-1/6 flex items-center font-bold text-red-600 total-item"
-                            id="total-{{ $item->id_produk_detail }}" data-price="{{ $produkDetail->harga_jual }}">
-                            Rp {{ number_format($totalHarga) }}
+                        {{-- KOLOM 2: HARGA SATUAN --}}
+                        <div class="w-1/6 font-semibold text-gray-700">
+                            Rp {{ number_format($produkDetail->harga_jual) }}
                         </div>
 
-
+                        {{-- KOLOM 3: KUANTITAS --}}
                         <div class="w-1/6 flex items-center">
                             <div class="flex items-center gap-2">
-
-                                <button class="minusBtn px-3 py-1 border rounded flex-shrink-0"
+                                <button class="minusBtn px-3 py-1 border rounded flex-shrink-0 hover:bg-gray-100"
                                     data-id="{{ $item->id_produk_detail }}">-</button>
 
                                 <input type="number" value="{{ $item->quantity }}" min="1"
                                     class="qtyInput w-14 text-center border rounded flex-shrink-0"
                                     data-id="{{ $item->id_produk_detail }}">
 
-                                <button class="plusBtn px-3 py-1 border rounded flex-shrink-0"
+                                <button class="plusBtn px-3 py-1 border rounded flex-shrink-0 hover:bg-gray-100"
                                     data-id="{{ $item->id_produk_detail }}">+</button>
-
                             </div>
                         </div>
 
-                        <div class="w-1/6 flex items-center font-bold text-red-600"
-                            id="total-{{ $item->id_produk_detail }}">
+                        {{-- KOLOM 4: TOTAL HARGA --}}
+                        <div class="w-1/6 font-bold text-red-600"
+                            id="total-{{ $item->id_produk_detail }}" data-price="{{ $produkDetail->harga_jual }}">
                             Rp {{ number_format($totalHarga) }}
                         </div>
 
+                        {{-- KOLOM 5: AKSI --}}
                         <div class="w-1/6 flex justify-center items-center">
                             <form action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
                                 method="POST">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button"
-                                    class="btn-delete px-3 py-1 border border-red-500 text-red-500 rounded hover:bg-red-50">
+                                    class="btn-delete px-3 py-1 border border-red-500 text-red-500 rounded hover:bg-red-50 transition-colors">
                                     Hapus
                                 </button>
                             </form>
