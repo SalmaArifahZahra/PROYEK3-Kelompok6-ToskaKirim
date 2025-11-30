@@ -50,8 +50,7 @@ class PesananController extends Controller
         // Cek alamat utama
         $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
         if (!$alamatUtama) {
-            return redirect()->route('customer.profile.complete')
-                             ->with('error', 'Mohon lengkapi alamat pengiriman terlebih dahulu.');
+            return back()->with('error', 'Silahkan atur alamat utama sebelum melakukan pemesanan.');
         }
 
         $produkVarian = ProdukDetail::findOrFail($request->id_produk_detail);
@@ -162,7 +161,7 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::where('id_user', Auth::id())->findOrFail($id);
         
-        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN) {
+        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN && StautsPembayaranEnum::MENUNGGU_VERIFIKASI) {
             $pesanan->update(['status_pesanan' => StatusPesananEnum::DIBATALKAN]);
             return back()->with('success', 'Pesanan berhasil dibatalkan.');
         }
