@@ -81,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
             Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
             Route::get('/checkout', [CheckoutCustomerController::class, 'index'])->name('checkout');
+            
         });
 
         Route::post('/checkout', [CustomerKeranjangController::class, 'checkout'])
@@ -125,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute Pesanan
         Route::get('pesanan', [AdminPesananController::class, 'index'])->name('pesanan.index');
-        
+
         // Rute Pesanan Detail (nested)
         Route::prefix('pesanan/{pesanan:id_pesanan}')->name('pesanan_detail.')->group(function() {
             Route::get('/', [AdminPesananDetailController::class, 'index'])->name('index');
@@ -134,10 +135,12 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/complete', [AdminPesananDetailController::class, 'complete'])->name('complete');
             Route::post('/cancel', [AdminPesananDetailController::class, 'cancel'])->name('cancel');
         });
+
+
     });
 
     Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
-    
+
         // Dashboard (Halaman Awal setelah Login)
         Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
 

@@ -39,4 +39,13 @@ class Keranjang extends Model
     {
         return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
     }
+
+    public static function totalCartCount()
+    {
+        if (!\Illuminate\Support\Facades\Auth::check()) {
+            return 0;
+        }
+        return self::where('id_user', \Illuminate\Support\Facades\Auth::id())
+            ->sum('quantity');
+    }
 }
