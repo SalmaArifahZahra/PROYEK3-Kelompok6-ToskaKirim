@@ -105,9 +105,10 @@ class PesananController extends Controller
     // Menampilkan Detail Pesanan
     public function show($id)
     {
-        $pesanan = Pesanan::where('id_user', Auth::id())
+        $pesanan = \App\Models\Pesanan::where('id_pesanan', $id)
             ->with(['detail.produkDetail.produk', 'ongkir', 'pembayaran'])
             ->findOrFail($id);
+
 
         $pengaturan = Pengaturan::first();
 

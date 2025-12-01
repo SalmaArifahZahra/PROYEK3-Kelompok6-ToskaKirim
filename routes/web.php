@@ -20,7 +20,7 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
 use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
 use App\Http\Controllers\Customer\KeranjangController as CustomerKeranjangController;
-use App\Http\Controllers\Customer\CheckoutController  as CheckoutCustomerController;
+use App\Http\Controllers\Customer\PesananController  as CustomerPesananController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,12 +80,13 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
             Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
             Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
-            Route::get('/checkout', [CheckoutCustomerController::class, 'index'])->name('checkout');
-            
         });
 
-        Route::post('/checkout', [CustomerKeranjangController::class, 'checkout'])
-            ->name('checkout.store');
+        // Checkout & Pesanan
+        Route::prefix('pesanan')->name('pesanan.')->group(function () {
+            Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
+            Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show'); // <- ini yang hilang
+        });
     });
 
     // --- Rute Admin & Superadmin ---
@@ -128,15 +129,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('pesanan', [AdminPesananController::class, 'index'])->name('pesanan.index');
 
         // Rute Pesanan Detail (nested)
-        Route::prefix('pesanan/{pesanan:id_pesanan}')->name('pesanan_detail.')->group(function() {
+        Route::prefix('pesanan/{pesanan:id_pesanan}')->name('pesanan_detail.')->group(function () {
             Route::get('/', [AdminPesananDetailController::class, 'index'])->name('index');
             Route::post('/verify', [AdminPesananDetailController::class, 'verify'])->name('verify');
             Route::post('/process', [AdminPesananDetailController::class, 'process'])->name('process');
             Route::post('/complete', [AdminPesananDetailController::class, 'complete'])->name('complete');
             Route::post('/cancel', [AdminPesananDetailController::class, 'cancel'])->name('cancel');
         });
-
-
     });
 
     Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
