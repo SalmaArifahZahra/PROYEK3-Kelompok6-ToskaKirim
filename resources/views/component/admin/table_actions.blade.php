@@ -1,4 +1,11 @@
 <div class="flex items-center space-x-2">
+    {{-- Tombol Detail/Lihat Varian --}}
+    @if(isset($detailUrl))
+        <a href="{{ $detailUrl }}" class="text-[#5BC6BC] hover:text-[#4aa89e] transition-colors" title="Lihat Varian">
+            <i class="fas fa-eye"></i>
+        </a>
+    @endif
+
     {{-- Tombol Edit --}}
     @if(isset($editUrl))
         <a href="{{ $editUrl }}" class="text-blue-500 hover:text-blue-700 transition-colors" title="Edit">

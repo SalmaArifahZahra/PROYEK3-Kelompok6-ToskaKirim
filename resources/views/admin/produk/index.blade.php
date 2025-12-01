@@ -60,6 +60,7 @@
                         </td>
                         <td class="px-6 py-4">
                             @include('component.admin.table_actions', [
+                                'detailUrl' => route('admin.produk_detail.index', $produk->id_produk),
                                 'editUrl' => route('admin.produk.edit', $produk->id_produk),
                                 'deleteUrl' => route('admin.produk.destroy', $produk->id_produk),
                                 'dataNama' => $produk->nama
