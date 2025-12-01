@@ -177,15 +177,21 @@
                             {{ ucfirst($pesanan->pembayaran->status_pembayaran->value) }}
                         </span>
                     </div>
-                    @if($pesanan->pembayaran->bukti_transfer)
                     <div>
-                        <p class="text-gray-500 mb-2">Bukti Transfer</p>
-                        <img src="{{ asset($pesanan->pembayaran->bukti_transfer) }}" 
-                             alt="Bukti Transfer" 
-                             class="w-full rounded-lg border border-gray-200 cursor-pointer hover:opacity-90"
-                             onclick="window.open(this.src, '_blank')">
+                        @if($pesanan->pembayaran->bukti_bayar)
+                        <button type="button"
+                                onclick="showBuktiPembayaran('{{ asset($pesanan->pembayaran->bukti_bayar) }}')"
+                                class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                            <i class="fas fa-receipt mr-2"></i>
+                            Lihat Bukti Pembayaran
+                        </button>
+                        @else
+                        <div class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-lg text-sm text-center italic">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Belum melakukan pembayaran
+                        </div>
+                        @endif
                     </div>
-                    @endif
                 </div>
             </div>
             @endif
@@ -276,6 +282,21 @@
             confirmButtonColor: '#5BC6BC'
         });
     @endif
+
+    function showBuktiPembayaran(imageUrl) {
+        Swal.fire({
+            title: 'Bukti Pembayaran',
+            imageUrl: imageUrl,
+            imageAlt: 'Bukti Pembayaran',
+            imageHeight: 400,
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: 600,
+            customClass: {
+                image: 'rounded-lg'
+            }
+        });
+    }
 
     function confirmCancel(pesananId) {
         Swal.fire({
