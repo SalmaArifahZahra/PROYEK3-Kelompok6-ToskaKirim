@@ -10,15 +10,17 @@
 
 <div class="space-y-6">
 
-    <nav class="flex" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 text-sm text-gray-700">
-            <li>
-                <a href="{{ route('admin.produk.index') }}" class="text-2xl font text-gray-800 hover:text-[#5BC6BC]">Produk</a>
-            </li>
-            <li><span class="mx-2">&gt;</span></li>
-            <li class="text-2xl font-bold text-gray-800">Edit Produk</li>
-        </ol>
-    </nav>
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Produk', 'url' => route('admin.produk.selectKategori')]
+        ];
+        if($kategori) {
+            $breadcrumbItems[] = ['label' => $kategori->nama_kategori, 'url' => route('admin.produk.index', ['kategori' => $kategori->id_kategori])];
+        }
+        $breadcrumbItems[] = ['label' => 'Edit Produk'];
+    @endphp
+    
+    @include('component.admin.breadcrumb', ['items' => $breadcrumbItems])
 
     <div class="bg-white rounded-lg shadow-md p-8">
         <h2 class="text-2xl font-semibold text-[#5BC6BC] mb-8">Edit Produk</h2>
@@ -96,7 +98,7 @@
             </div>
 
             <div class="flex justify-end gap-4 mt-10">
-                <a href="{{ route('admin.produk.index') }}"
+                <a href="{{ $kategori ? route('admin.produk.index', ['kategori' => $kategori->id_kategori]) : route('admin.produk.selectKategori') }}"
                    class="px-8 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Batal
                 </a>

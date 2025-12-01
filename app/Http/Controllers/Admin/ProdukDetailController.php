@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Produk;
 use App\Models\ProdukDetail;
+use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -15,20 +16,36 @@ use Illuminate\View\View;
 class ProdukDetailController extends Controller
 {
     // Menampilkan tampilan daftar varian/detail untuk suatu produk.
-    public function index(Produk $produk): View
+    public function index(Request $request, Produk $produk): View
     {
+        $kategoriId = $request->get('kategori');
+        $kategori = null;
+        
+        if ($kategoriId) {
+            $kategori = Kategori::find($kategoriId);
+        }
+        
         $detailList = $produk->detail()->orderBy('nama_varian', 'asc')->get();
         return view('admin.produk_detail.index', [
             'produk' => $produk,
-            'detailList' => $detailList
+            'detailList' => $detailList,
+            'kategori' => $kategori
         ]);
     }
     
     // Menampilkan form untuk membuat varian/detail baru.
-    public function create(Produk $produk): View
+    public function create(Request $request, Produk $produk): View
     {
+        $kategoriId = $request->get('kategori');
+        $kategori = null;
+        
+        if ($kategoriId) {
+            $kategori = Kategori::find($kategoriId);
+        }
+        
         return view('admin.produk_detail.create', [
-            'produk' => $produk
+            'produk' => $produk,
+            'kategori' => $kategori
         ]);
     }
 
@@ -59,17 +76,32 @@ class ProdukDetailController extends Controller
         $data['id_produk'] = $produk->id_produk;
 
         ProdukDetail::create($data);
+        
+        // Ambil kategori untuk redirect
+        $kategoriParam = $request->get('kategori');
+        $routeParams = ['produk' => $produk->id_produk];
+        if ($kategoriParam) {
+            $routeParams['kategori'] = $kategoriParam;
+        }
 
-        return redirect()->route('admin.produk_detail.index', $produk->id_produk)
+        return redirect()->route('admin.produk_detail.index', $routeParams)
                          ->with('success', 'Varian produk baru berhasil ditambahkan.');
     }
 
     // Menampilkan form untuk mengedit varian/detail.
-    public function edit(Produk $produk, ProdukDetail $detail): View
+    public function edit(Request $request, Produk $produk, ProdukDetail $detail): View
     {
+        $kategoriId = $request->get('kategori');
+        $kategori = null;
+        
+        if ($kategoriId) {
+            $kategori = Kategori::find($kategoriId);
+        }
+        
         return view('admin.produk_detail.edit', [
             'produk' => $produk,
-            'detail' => $detail
+            'detail' => $detail,
+            'kategori' => $kategori
         ]);
     }
 
@@ -101,15 +133,31 @@ class ProdukDetailController extends Controller
         }
 
         $detail->update($data);
+        
+        // Ambil kategori untuk redirect
+        $kategoriParam = $request->get('kategori');
+        $routeParams = ['produk' => $produk->id_produk];
+        if ($kategoriParam) {
+            $routeParams['kategori'] = $kategoriParam;
+        }
 
-        return redirect()->route('admin.produk_detail.index', $produk->id_produk)->with('success', 'Varian produk berhasil diperbarui.');
+        return redirect()->route('admin.produk_detail.index', $routeParams)
+                         ->with('success', 'Varian produk berhasil diperbarui.');
     }
 
     // Menghapus varian/detail.
-    public function destroy(Produk $produk, ProdukDetail $detail): RedirectResponse
+    public function destroy(Request $request, Produk $produk, ProdukDetail $detail): RedirectResponse
     {
         $detail->delete();
+        
+        // Ambil kategori untuk redirect
+        $kategoriParam = $request->get('kategori');
+        $routeParams = ['produk' => $produk->id_produk];
+        if ($kategoriParam) {
+            $routeParams['kategori'] = $kategoriParam;
+        }
 
-        return redirect()->route('admin.produk_detail.index', $produk->id_produk)->with('success', 'Varian produk berhasil dihapus.');
+        return redirect()->route('admin.produk_detail.index', $routeParams)
+                         ->with('success', 'Varian produk berhasil dihapus.');
     }
 }

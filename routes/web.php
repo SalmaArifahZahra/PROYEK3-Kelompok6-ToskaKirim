@@ -109,6 +109,9 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{subkategori}', [AdminSubKategoriController::class, 'destroy'])->name('destroy');
         });
 
+        // Rute Produk - Pilih Kategori
+        Route::get('produk/select-kategori', [AdminProdukController::class, 'selectKategori'])->name('produk.selectKategori');
+
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);
 

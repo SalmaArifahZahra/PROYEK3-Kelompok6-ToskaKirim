@@ -47,7 +47,7 @@
                 </div>
             @endif
 
-            <a href="{{ route('admin.produk.index') }}"
+            <a href="{{ route('admin.produk.selectKategori') }}"
                class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                      {{ request()->routeIs('admin.produk.*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                 <i class="fas fa-box text-lg"></i>

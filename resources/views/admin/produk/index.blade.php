@@ -10,8 +10,21 @@
 
 <div class="space-y-6">
 
+    @include('component.admin.breadcrumb', [
+        'items' => [
+            ['label' => 'Produk', 'url' => route('admin.produk.selectKategori')],
+            ['label' => $kategori->nama_kategori ?? 'Semua Produk']
+        ]
+    ])
+
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800">Produk</h1>
+        <div>
+            <p class="text-sm text-gray-600">
+                <a href="{{ route('admin.produk.selectKategori') }}" class="text-[#5BC6BC] hover:underline">
+                    <i class="fas fa-arrow-left mr-1"></i> Kembali ke Pilih Kategori
+                </a>
+            </p>
+        </div>
     </div>
 
     <div class="flex items-center justify-between">
@@ -22,7 +35,7 @@
                 <i class="fas fa-trash text-xl"></i>
             </button>
 
-            <a href="{{ route('admin.produk.create') }}" class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
+            <a href="{{ route('admin.produk.create', ['kategori' => $kategori->id_kategori]) }}" class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
                 <i class="fas fa-plus"></i>
                 <span class="font-medium">Tambah Produk</span>
             </a>
@@ -38,7 +51,7 @@
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Produk</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kategori</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Sub-Kategori</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Deskripsi</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
@@ -53,15 +66,23 @@
                             {{ $produk->nama }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $produk->kategori->nama_kategori ?? '-' }}
+                            @if($produk->kategori)
+                                @if($produk->kategori->parent_id)
+                                    {{ $produk->kategori->nama_kategori }}
+                                @else
+                                    <span class="text-gray-400 italic">-</span>
+                                @endif
+                            @else
+                                <span class="text-gray-400 italic">-</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
                             {{ Str::limit($produk->deskripsi, 50) }}
                         </td>
                         <td class="px-6 py-4">
                             @include('component.admin.table_actions', [
-                                'detailUrl' => route('admin.produk_detail.index', $produk->id_produk),
-                                'editUrl' => route('admin.produk.edit', $produk->id_produk),
+                                'detailUrl' => route('admin.produk_detail.index', ['produk' => $produk->id_produk, 'kategori' => $kategori->id_kategori]),
+                                'editUrl' => route('admin.produk.edit', ['produk' => $produk->id_produk, 'kategori' => $kategori->id_kategori]),
                                 'deleteUrl' => route('admin.produk.destroy', $produk->id_produk),
                                 'dataNama' => $produk->nama
                             ])
