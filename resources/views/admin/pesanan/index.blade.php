@@ -38,10 +38,50 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">ID Pesanan</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Penerima</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Waktu Pesanan</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Grand Total</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.pesanan.index', array_merge(request()->except(['sort_by', 'sort_order']), ['sort_by' => 'id_pesanan', 'sort_order' => ($sortBy ?? '') === 'id_pesanan' && ($sortOrder ?? '') === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                ID Pesanan
+                                @if(($sortBy ?? '') === 'id_pesanan')
+                                    <i class="fas fa-sort-{{ ($sortOrder ?? '') === 'asc' ? 'up' : 'down' }} text-[#5BC6BC]"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-400"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.pesanan.index', array_merge(request()->except(['sort_by', 'sort_order']), ['sort_by' => 'penerima_nama', 'sort_order' => ($sortBy ?? '') === 'penerima_nama' && ($sortOrder ?? '') === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Penerima
+                                @if(($sortBy ?? '') === 'penerima_nama')
+                                    <i class="fas fa-sort-{{ ($sortOrder ?? '') === 'asc' ? 'up' : 'down' }} text-[#5BC6BC]"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-400"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.pesanan.index', array_merge(request()->except(['sort_by', 'sort_order']), ['sort_by' => 'waktu_pesanan', 'sort_order' => ($sortBy ?? '') === 'waktu_pesanan' && ($sortOrder ?? '') === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Waktu Pesanan
+                                @if(($sortBy ?? '') === 'waktu_pesanan')
+                                    <i class="fas fa-sort-{{ ($sortOrder ?? '') === 'asc' ? 'up' : 'down' }} text-[#5BC6BC]"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-400"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.pesanan.index', array_merge(request()->except(['sort_by', 'sort_order']), ['sort_by' => 'grand_total', 'sort_order' => ($sortBy ?? '') === 'grand_total' && ($sortOrder ?? '') === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Grand Total
+                                @if(($sortBy ?? '') === 'grand_total')
+                                    <i class="fas fa-sort-{{ ($sortOrder ?? '') === 'asc' ? 'up' : 'down' }} text-[#5BC6BC]"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-400"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
