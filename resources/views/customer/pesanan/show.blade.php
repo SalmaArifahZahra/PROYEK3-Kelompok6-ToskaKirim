@@ -1,189 +1,166 @@
-{{-- @if ($pesanan->status_pesanan == 'menunggu_pembayaran')
-    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-center">
-        <p class="text-orange-600 font-medium mb-1">Selesaikan Pembayaran Dalam:</p>
-
-        <div id="countdown-timer"
-             class="text-2xl font-bold text-orange-700 tracking-wider"
-             data-deadline="{{ $deadlineTimestamp }}">
-             Loading...
-        </div>
-
-        <p class="text-xs text-gray-500 mt-2">
-            Batas Akhir: {{ \Carbon\Carbon::parse($deadline)->format('d M Y, H:i') }} WIB
-        </p>
-    </div>
-@endif
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const timerEl = document.getElementById('countdown-timer');
-
-        // Cek jika elemen ada (hanya muncul saat status menunggu_pembayaran)
-        if (timerEl) {
-            const deadlineTime = parseInt(timerEl.getAttribute('data-deadline'));
-            const updateTimer = setInterval(function() {
-                const now = new Date().getTime();
-
-                const distance = deadlineTime - now;
-
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                const formattedTime =
-                    (hours < 10 ? "0" + hours : hours) + " : " +
-                    (minutes < 10 ? "0" + minutes : minutes) + " : " +
-                    (seconds < 10 ? "0" + seconds : seconds);
-
-                timerEl.innerHTML = formattedTime;
-
-                if (distance < 0) {
-                    clearInterval(updateTimer);
-                    timerEl.innerHTML = "WAKTU HABIS";
-                    timerEl.classList.add('text-red-600');
-
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                }
-            }, 1000); // Update setiap 1000ms (1 detik)
-        }
-    });
-</script>
-@endpush --}}
-
 @extends('layouts.layout_customer')
 
+@section('title', 'Detail Pesanan')
+
 @section('content')
-<div class="max-w-4xl mx-auto py-8">
 
+    @if ($pesanan->status_pesanan == 'menunggu_pembayaran')
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-center">
+            <p class="text-orange-600 font-medium mb-1">Selesaikan Pembayaran Dalam:</p>
 
-        <h1 class="text-2xl font-bold mb-6">Detail Pesanan</h1>
-
-        @if ($pesanan->status_pesanan->value == 'menunggu_pembayaran')
-            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-center">
-                <p class="text-orange-600 font-medium mb-1">Selesaikan Pembayaran Dalam:</p>
-
-                <div id="countdown-timer" class="text-2xl font-bold text-orange-700 tracking-wider"
-                    data-deadline="{{ $deadlineTimestamp }}">
-                    Loading...
-                </div>
-
-                <p class="text-xs text-gray-500 mt-2">
-                    Batas Akhir: {{ \Carbon\Carbon::parse($deadline)->format('d M Y, H:i') }} WIB
-                </p>
+            <div id="countdown-timer" class="text-2xl font-bold text-orange-700 tracking-wider"
+                data-deadline="{{ $deadlineTimestamp }}">
+                Loading...
             </div>
-        @endif
 
-        <div class="bg-white shadow rounded-lg p-6 mb-6">
-            <h2 class="text-lg font-semibold mb-4">Informasi Pesanan</h2>
-
-            <div class="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                    <p class="text-gray-500">No. Pesanan</p>
-                    <p class="font-medium">{{ $pesanan->kode_pesanan }}</p>
-                </div>
-
-                <div>
-                    <p class="text-gray-500">Tanggal</p>
-                    <p class="font-medium">
-                        {{ $pesanan->created_at->format('d M Y H:i') }} WIB
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-gray-500">Status</p>
-                    <span @class([
-                        'px-3 py-1 rounded-full text-xs font-semibold',
-                        'bg-yellow-100 text-yellow-700' =>
-                            $pesanan->status_pesanan->value == 'menunggu_pembayaran',
-                        'bg-blue-100 text-blue-700' => $pesanan->status_pesanan->value == 'diproses',
-                        'bg-green-100 text-green-700' => $pesanan->status_pesanan->value == 'selesai',
-                        'bg-gray-100 text-gray-600' => !in_array($pesanan->status_pesanan->value, [
-                            'menunggu_pembayaran',
-                            'diproses',
-                            'selesai',
-                        ]),
-                    ])>
-                        {{ ucfirst(str_replace('_', ' ', $pesanan->status_pesanan->value)) }}
-                    </span>
-                </div>
-
-                <div>
-                    <p class="text-gray-500">Total Pembayaran</p>
-                    <p class="font-medium">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</p>
-                </div>
-            </div>
+            <p class="text-xs text-gray-500 mt-2">
+                Batas Akhir: {{ \Carbon\Carbon::parse($deadline)->format('d M Y, H:i') }} WIB
+            </p>
         </div>
+    @endif
 
-        <div class="bg-white shadow rounded-lg p-6 mb-6">
-            <h2 class="text-lg font-semibold mb-4">Item Pesanan</h2>
+    <div class="max-w-5xl mx-auto my-8 px-4">
+        <nav class="text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center gap-2">
+                <li><a href="{{ route('customer.keranjang.index') }}" class="hover:underline">Home</a></li>
+                <li>/</li>
+                <li><a href="{{ route('customer.keranjang.index') }}" class="hover:underline">Keranjang</a></li>
+                <li>/</li>
+                <li class="text-slate-700 font-medium">Pesanan</li>
+            </ol>
+        </nav>
 
-            <div class="space-y-4">
-                @foreach ($pesanan->detail as $item)
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <div>
-                            <p class="font-medium">{{ $item->produk->nama ?? '' }}</p>
-                            <p class="text-xs text-gray-500">Qty: {{ $item->jumlah }}</p>
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="p-6">
+                <div class="mb-6">
+                    <h3 class="text-slate-700 font-medium mb-3">Produk Dipesan</h3>
+
+                    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                        <div
+                            class="grid grid-cols-12 bg-slate-50 border-b border-slate-200 py-3 px-4 text-sm font-semibold text-slate-600">
+                            <div class="col-span-6">Produk</div>
+                            <div class="col-span-2 text-right">Harga Satuan</div>
+                            <div class="col-span-2 text-center">Jumlah</div>
+                            <div class="col-span-2 text-right">Subtotal Produk</div>
                         </div>
-                        <p class="font-semibold">
-                            Rp {{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}
-                        </p>
+
+                        @foreach ($pesanan->detail as $detail)
+                            @php
+                                $prodDetail = $detail->produkDetail;
+                                $produk = $prodDetail->produk;
+                            @endphp
+
+                            <div class="grid grid-cols-12 items-center bg-teal-50 border-b border-slate-200 py-4 px-4">
+                                <div class="col-span-6 flex items-center gap-3">
+                                    <img src="{{ $produk->foto_url ?? ($prodDetail->foto ? asset('produk/' . $prodDetail->foto) : asset('images/icon_toska.png')) }}"
+                                        class="w-16 h-16 rounded object-cover" alt="">
+
+                                    <div>
+                                        <div class="font-medium text-slate-800 text-sm">{{ $produk->nama }}</div>
+                                        <div class="text-xs text-slate-500">variasi: {{ $prodDetail->nama_varian ?? '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-span-2 text-right text-sm font-medium text-slate-700">
+                                    Rp {{ number_format($detail->harga_saat_beli ?? $prodDetail->harga_jual, 0, ',', '.') }}
+                                </div>
+
+                                <div class="col-span-2 text-center text-sm font-medium text-slate-700">
+                                    {{ $detail->kuantitas }}
+                                </div>
+
+                                <div class="col-span-2 text-right text-sm font-semibold text-slate-800">
+                                    Rp {{ number_format($detail->subtotal_item, 0, ',', '.') }}
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                @endforeach
+                </div>
+
+                <div class="grid grid-cols-12 gap-6">
+                    <div class="col-span-8">
+                        <div class="border border-slate-100 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm font-medium">Metode Pembayaran</div>
+                                <div class="text-sm text-teal-600">COD</div>
+                            </div>
+
+                            <div class="mt-3">
+                                <p class="text-sm text-slate-500">Pilih metode pembayaran untuk melanjutkan. (Contoh: COD /
+                                    Transfer)</p>
+                            </div>
+
+                            <div class="mt-4 text-right">
+                                <a href="#"
+                                    class="text-sm border border-rose-400 text-rose-500 px-3 py-1 rounded">Ubah</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-4">
+                        <div class="bg-white border border-slate-100 rounded-lg p-4">
+                            <div class="text-sm flex justify-between"><span>Subtotal Pesanan</span><span>Rp.
+                                    {{ number_format($pesanan->subtotal_produk, 0, ',', '.') }}</span></div>
+                            <div class="text-sm flex justify-between mt-2"><span>Subtotal Pengiriman</span><span>Rp.
+                                    {{ number_format($pesanan->ongkir->total_ongkir ?? 0, 0, ',', '.') }}</span></div>
+                            <hr class="my-3">
+                            <div class="text-base font-semibold flex justify-between text-teal-500"> <span>Total
+                                    Pembayaran</span><span>Rp.
+                                    {{ number_format($pesanan->grand_total, 0, ',', '.') }}</span></div>
+
+                            <div class="mt-4">
+                                @if (
+                                    $pesanan->status_pesanan->value ??
+                                        null == 'MENUNGGU_PEMBAYARAN' || $pesanan->status_pesanan == 'MENUNGGU_PEMBAYARAN')
+                                    <form action="{{ route('customer.pesanan.index') }}" method="GET">
+                                        <button type="button"
+                                            onclick="location.href='{{ route('customer.pesanan.index') }}'"
+                                            class="w-full bg-rose-500 hover:bg-rose-600 text-white py-3 rounded">Buat
+                                            Pesanan</button>
+                                    </form>
+                                @else
+                                    <button disabled class="w-full bg-slate-200 text-slate-500 py-3 rounded">Status:
+                                        {{ $pesanan->status_pesanan }}</button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-
-        @if ($pesanan->bukti_pembayaran)
-            <div class="bg-white shadow rounded-lg p-6 mb-6">
-                <h2 class="text-lg font-semibold mb-4">Bukti Pembayaran</h2>
-
-                <img src="{{ asset('storage/' . $pesanan->bukti_pembayaran) }}" alt="Bukti Pembayaran"
-                    class="w-64 rounded shadow">
-            </div>
-        @endif
-
-        <a href="{{ route('customer.pesanan.index') }}" class="inline-block px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
-            Kembali
-        </a>
     </div>
-@endsection
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const timerEl = document.getElementById('countdown-timer');
-
-        if (timerEl) {
-            const deadlineTime = parseInt(timerEl.getAttribute('data-deadline'));
-
-            const updateTimer = setInterval(function() {
-                const now = new Date().getTime();
-                const distance = deadlineTime - now;
-
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                const formattedTime =
-                    (hours < 10 ? "0" + hours : hours) + " : " +
-                    (minutes < 10 ? "0" + minutes : minutes) + " : " +
-                    (seconds < 10 ? "0" + seconds : seconds);
-
-                timerEl.innerHTML = formattedTime;
-
-                if (distance < 0) {
-                    clearInterval(updateTimer);
-                    timerEl.innerHTML = "WAKTU HABIS";
-                    timerEl.classList.add('text-red-600');
-
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const timerEl = document.getElementById('countdown-timer');
+                if (timerEl) {
+                    const deadlineTime = parseInt(timerEl.getAttribute('data-deadline'));
+                    const updateTimer = setInterval(function() {
+                        const now = new Date().getTime();
+                        const distance = deadlineTime - now;
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                        const formattedTime =
+                            (hours < 10 ? "0" + hours : hours) + " : " +
+                            (minutes < 10 ? "0" + minutes : minutes) + " : " +
+                            (seconds < 10 ? "0" + seconds : seconds);
+                        timerEl.innerHTML = formattedTime;
+                        if (distance < 0) {
+                            clearInterval(updateTimer);
+                            timerEl.innerHTML = "WAKTU HABIS";
+                            timerEl.classList.add('text-red-600');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        }
+                    }, 1000);
                 }
-            }, 1000);
-        }
-    });
-</script>
-@endpush
+            });
+        </script>
+    @endpush
+
+@endsection

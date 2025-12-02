@@ -19,7 +19,7 @@ class AuthController extends Controller
     // Menampilkan halaman login customer.
     public function index_login(): View
     {
-        return view('auth.login'); 
+        return view('auth.login');
     }
 
     // Menampilkan halaman register customer.
