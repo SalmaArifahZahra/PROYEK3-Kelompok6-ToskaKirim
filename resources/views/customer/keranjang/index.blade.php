@@ -94,8 +94,8 @@
                 @endforeach
 
             </div>
-            <div class="mt-6 bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-between">
 
+            <div class="mt-6 bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="selectAll" class="w-4 h-4">
                     <label for="selectAll" class="text-gray-700">Pilih Semua ({{ $keranjang->count() }})</label>
@@ -110,17 +110,18 @@
                         <p class="text-gray-600 text-sm">Total (<span id="selectedCount">0</span> produk):</p>
                         <p class="text-red-600 font-bold text-xl">Rp <span id="grandTotal">0</span></p>
                     </div>
-                    {{-- <a href="{{ route('customer.produk.checkout') }}"
+
+                    @php
+                        $pesananId = isset($pesanan) ? $pesanan->id_user : (auth()->user()->id_user ?? auth()->id());
+                    @endphp
+
+                    <a href="{{ route('customer.pesanan.show', $pesananId) }}"
                         class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600">
                         Checkout
-                    </a> --}}
-
+                    </a>
                 </div>
             </div>
-
-
         @endif
-
     </div>
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\AlamatUser;
 use App\Models\User;
 use App\Http\Requests\StoreAlamatUserRequest;
@@ -12,6 +13,7 @@ use Illuminate\View\View;
 
 class AlamatUserController extends Controller
 {
+
     // Menampilkan daftar alamat user
     public function index(): View
     {
@@ -19,7 +21,7 @@ class AlamatUserController extends Controller
                         ->orderBy('is_utama', 'desc')
                         ->get();
 
-        return view('customer.alamat.index', [
+        return view('customer.profile.complete_profile', [
             'alamatList' => $alamatList
         ]);
     }
@@ -61,7 +63,7 @@ class AlamatUserController extends Controller
         }
 
         $userHasAddress = $user->alamatUser()->count() > 0;
-        
+
         // Jika user belum punya alamat, set alamat pertama ini sebagai utama
         if (!$userHasAddress) {
             $data['is_utama'] = true;
@@ -69,7 +71,7 @@ class AlamatUserController extends Controller
             // Atau jika user explicitly set alamat ini sebagai utama
             $data['is_utama'] = true;
         }
-        
+
         $alamat = AlamatUser::create($data);
 
         // Jika ini alamat utama, unset alamat utama lainnya
@@ -90,9 +92,9 @@ class AlamatUserController extends Controller
     // Menampilkan form untuk mengedit alamat
     public function edit(AlamatUser $alamat): View
     {
-        $this->authorize('update', $alamat); 
+        $this->authorize('update', $alamat);
 
-        return view('customer.alamat.edit', [
+        return view('customer.profile.complete_profile', [
             'alamat' => $alamat
         ]);
     }
