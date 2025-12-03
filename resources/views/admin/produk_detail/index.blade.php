@@ -54,10 +54,34 @@
                             <input type="checkbox" id="select-all" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Foto</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Varian</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Harga Modal</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Harga Jual</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Stok</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.produk_detail.index', array_merge(['produk' => $produk->id_produk], $kategori ? ['kategori' => $kategori->id_kategori] : [], request()->except(['sort_by', 'sort_order']), ['sort_by' => 'nama_varian', 'sort_order' => $sortBy === 'nama_varian' && $sortOrder === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Nama Varian
+                                <i class="fas fa-{{ $sortBy === 'nama_varian' ? ($sortOrder === 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} text-xs"></i>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.produk_detail.index', array_merge(['produk' => $produk->id_produk], $kategori ? ['kategori' => $kategori->id_kategori] : [], request()->except(['sort_by', 'sort_order']), ['sort_by' => 'harga_modal', 'sort_order' => $sortBy === 'harga_modal' && $sortOrder === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Harga Modal
+                                <i class="fas fa-{{ $sortBy === 'harga_modal' ? ($sortOrder === 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} text-xs"></i>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.produk_detail.index', array_merge(['produk' => $produk->id_produk], $kategori ? ['kategori' => $kategori->id_kategori] : [], request()->except(['sort_by', 'sort_order']), ['sort_by' => 'harga_jual', 'sort_order' => $sortBy === 'harga_jual' && $sortOrder === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Harga Jual
+                                <i class="fas fa-{{ $sortBy === 'harga_jual' ? ($sortOrder === 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} text-xs"></i>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.produk_detail.index', array_merge(['produk' => $produk->id_produk], $kategori ? ['kategori' => $kategori->id_kategori] : [], request()->except(['sort_by', 'sort_order']), ['sort_by' => 'stok', 'sort_order' => $sortBy === 'stok' && $sortOrder === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Stok
+                                <i class="fas fa-{{ $sortBy === 'stok' ? ($sortOrder === 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} text-xs"></i>
+                            </a>
+                        </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
                 </thead>

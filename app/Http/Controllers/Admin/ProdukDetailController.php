@@ -33,12 +33,25 @@ class ProdukDetailController extends Controller
             $query->where('nama_varian', 'ILIKE', "%{$search}%");
         }
         
-        $detailList = $query->orderBy('nama_varian', 'asc')->paginate(15);
+        // Sorting
+        $sortBy = $request->get('sort_by', 'nama_varian');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        $allowedSorts = ['nama_varian', 'harga_modal', 'harga_jual', 'stok', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'nama_varian';
+        }
+        
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
+        
+        $detailList = $query->orderBy($sortBy, $sortOrder)->paginate(15);
         
         return view('admin.produk_detail.index', [
             'produk' => $produk,
             'detailList' => $detailList,
-            'kategori' => $kategori
+            'kategori' => $kategori,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder
         ]);
     }
     

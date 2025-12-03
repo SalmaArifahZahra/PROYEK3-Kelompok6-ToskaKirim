@@ -27,10 +27,23 @@ class KategoriController extends Controller
             $query->where('nama_kategori', 'ILIKE', "%{$search}%");
         }
         
-        $kategoriList = $query->orderBy('nama_kategori', 'asc')->paginate(15);
+        // Sorting
+        $sortBy = $request->get('sort_by', 'nama_kategori');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        $allowedSorts = ['nama_kategori', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'nama_kategori';
+        }
+        
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
+        
+        $kategoriList = $query->orderBy($sortBy, $sortOrder)->paginate(15);
 
         return view('admin.kategori.index', [
-            'kategoriList' => $kategoriList
+            'kategoriList' => $kategoriList,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder
         ]);
     }
 

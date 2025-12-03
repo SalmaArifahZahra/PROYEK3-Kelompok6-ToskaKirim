@@ -43,8 +43,7 @@ class ProdukController extends Controller
             return redirect()->route('admin.produk.selectKategori');
         }
 
-        $query = Produk::with('kategori', 'detail')
-                       ->withCount('detail');
+        $query = Produk::with('kategori', 'detail');
         
         // Filter by kategori (parent atau child)
         if ($kategori->parent_id === null) {
@@ -66,11 +65,24 @@ class ProdukController extends Controller
             });
         }
         
-        $produkList = $query->orderBy('nama', 'asc')->paginate(15);
+        // Sorting
+        $sortBy = $request->get('sort_by', 'nama');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        $allowedSorts = ['nama', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'nama';
+        }
+        
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
+        
+        $produkList = $query->orderBy($sortBy, $sortOrder)->paginate(15);
 
         return view('admin.produk.index', [
             'produkList' => $produkList,
-            'kategori' => $kategori
+            'kategori' => $kategori,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder
         ]);
     }
 

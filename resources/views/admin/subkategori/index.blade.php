@@ -46,7 +46,13 @@
                         <th class="px-6 py-4 text-left">
                             <input type="checkbox" id="select-all" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Sub-Kategori</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.kategori.subkategori.index', array_merge(['kategori' => $kategori->id_kategori], request()->except(['sort_by', 'sort_order']), ['sort_by' => 'nama_kategori', 'sort_order' => $sortBy === 'nama_kategori' && $sortOrder === 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Nama Sub-Kategori
+                                <i class="fas fa-{{ $sortBy === 'nama_kategori' ? ($sortOrder === 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} text-xs"></i>
+                            </a>
+                        </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
                 </thead>
