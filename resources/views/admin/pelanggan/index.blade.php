@@ -16,24 +16,13 @@
         ]
     ])
 
-    <div class="flex items-center justify-between">
-        @include('component.admin.search_bar', ['placeholder' => 'Cari nama atau email pelanggan'])
-
-        <div class="flex items-center gap-3">
-            <button class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                <i class="fas fa-trash text-xl"></i>
-            </button>
-        </div>
-    </div>
+    @include('component.admin.search_bar', ['placeholder' => 'Cari nama atau email pelanggan'])
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-4 text-left">
-                            <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
-                        </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                             <a href="{{ route('admin.pelanggan.index', array_merge(request()->except(['sort_by', 'sort_order']), ['sort_by' => 'nama', 'sort_order' => $sortBy === 'nama' && $sortOrder === 'asc' ? 'desc' : 'asc'])) }}" 
                                class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
@@ -69,9 +58,6 @@
                     @forelse($pelangganList as $pelanggan)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
-                        </td>
-                        <td class="px-6 py-4">
                             <span class="text-sm font-medium text-gray-800">{{ $pelanggan->nama }}</span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
@@ -95,7 +81,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <i class="fas fa-users text-4xl mb-3 text-gray-300"></i>
                                 <p>Belum ada data pelanggan</p>
