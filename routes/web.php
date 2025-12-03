@@ -98,6 +98,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute Kategori (Full CRUD)
         Route::resource('kategori', AdminKategoriController::class);
+        Route::post('kategori/batch-delete', [AdminKategoriController::class, 'batchDelete'])->name('kategori.batchDelete');
 
         // Rute Sub-Kategori Index
         Route::get('kategori/{kategori}/subkategori', [AdminSubKategoriController::class, 'index'])->name('kategori.subkategori.index');
@@ -109,6 +110,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{subkategori}/edit', [AdminSubKategoriController::class, 'edit'])->name('edit');
             Route::put('/{subkategori}', [AdminSubKategoriController::class, 'update'])->name('update');
             Route::delete('/{subkategori}', [AdminSubKategoriController::class, 'destroy'])->name('destroy');
+            Route::post('/batch-delete', [AdminSubKategoriController::class, 'batchDelete'])->name('batchDelete');
         });
 
         // Rute Produk - Pilih Kategori
@@ -116,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);
+        Route::post('produk/batch-delete', [AdminProdukController::class, 'batchDelete'])->name('produk.batchDelete');
 
         // Rute Produk Detail Index
         Route::get('produk/{produk}/detail', [AdminProdukDetailController::class, 'index'])->name('produk_detail.index');
@@ -127,6 +130,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
             Route::put('/{detail}', [AdminProdukDetailController::class, 'update'])->name('update');
             Route::delete('/{detail}', [AdminProdukDetailController::class, 'destroy'])->name('destroy');
+            Route::post('/batch-delete', [AdminProdukDetailController::class, 'batchDelete'])->name('batchDelete');
         });
 
         // Rute Pesanan

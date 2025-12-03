@@ -100,9 +100,9 @@
                     @foreach($pesanan->detail as $item)
                     <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
                         <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                            @if($item->produkDetail->foto)
+                            @if($item->produkDetail && $item->produkDetail->foto)
                                 <img src="{{ asset($item->produkDetail->foto) }}" 
-                                     alt="{{ $item->produkDetail->produk->nama }}" 
+                                     alt="{{ $item->produkDetail->produk ? $item->produkDetail->produk->nama : 'Produk Tidak Tersedia' }}" 
                                      class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
@@ -112,8 +112,12 @@
                         </div>
                         
                         <div class="flex-1">
-                            <h3 class="font-semibold text-gray-900">{{ $item->produkDetail->produk->nama }}</h3>
-                            <p class="text-sm text-gray-600">Varian: {{ $item->produkDetail->nama_varian }}</p>
+                            <h3 class="font-semibold text-gray-900">
+                                {{ $item->produkDetail && $item->produkDetail->produk ? $item->produkDetail->produk->nama : 'Produk Tidak Tersedia' }}
+                            </h3>
+                            <p class="text-sm text-gray-600">
+                                Varian: {{ $item->produkDetail ? $item->produkDetail->nama_varian : 'Varian Tidak Tersedia' }}
+                            </p>
                             <p class="text-sm text-gray-600">
                                 Rp {{ number_format($item->harga_saat_beli, 0, ',', '.') }} × {{ $item->kuantitas }}
                             </p>

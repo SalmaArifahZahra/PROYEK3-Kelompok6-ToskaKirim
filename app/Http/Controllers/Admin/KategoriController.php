@@ -27,7 +27,7 @@ class KategoriController extends Controller
             $query->where('nama_kategori', 'ILIKE', "%{$search}%");
         }
         
-        $kategoriList = $query->orderBy('nama_kategori', 'asc')->get();
+        $kategoriList = $query->orderBy('nama_kategori', 'asc')->paginate(15);
 
         return view('admin.kategori.index', [
             'kategoriList' => $kategoriList
@@ -148,6 +148,59 @@ class KategoriController extends Controller
             }
             
             return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
+    }
+
+    // Menghapus banyak kategori sekaligus
+    public function batchDelete(Request $request): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada kategori yang dipilih.');
+        }
+
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($ids as $id) {
+            $kategori = Kategori::find($id);
+            
+            if (!$kategori) {
+                continue;
+            }
+
+            try {
+                if ($kategori->children()->count() > 0) {
+                    $errors[] = "Kategori {$kategori->nama_kategori} masih memiliki sub-kategori";
+                    continue;
+                }
+
+                if ($kategori->produk()->count() > 0) {
+                    $errors[] = "Kategori {$kategori->nama_kategori} masih digunakan oleh produk";
+                    continue;
+                }
+
+                if ($kategori->foto) {
+                    Storage::disk('public')->delete($kategori->foto);
+                }
+                
+                $kategori->delete();
+                $deletedCount++;
+                
+            } catch (QueryException $e) {
+                $errors[] = "Gagal menghapus kategori {$kategori->nama_kategori}";
+            }
+        }
+
+        if ($deletedCount > 0 && empty($errors)) {
+            return redirect()->route('admin.kategori.index')
+                           ->with('success', "{$deletedCount} kategori berhasil dihapus");
+        } elseif ($deletedCount > 0 && !empty($errors)) {
+            return redirect()->route('admin.kategori.index')
+                           ->with('warning', "{$deletedCount} kategori berhasil dihapus, namun beberapa gagal: " . implode(', ', $errors));
+        } else {
+            return back()->with('error', 'Gagal menghapus kategori: ' . implode(', ', $errors));
         }
     }
 }

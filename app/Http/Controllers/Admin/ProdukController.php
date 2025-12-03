@@ -66,7 +66,7 @@ class ProdukController extends Controller
             });
         }
         
-        $produkList = $query->orderBy('nama', 'asc')->paginate(10);
+        $produkList = $query->orderBy('nama', 'asc')->paginate(15);
 
         return view('admin.produk.index', [
             'produkList' => $produkList,
@@ -189,7 +189,19 @@ class ProdukController extends Controller
         $kategori = Kategori::find($produk->id_kategori);
         $kategoriParam = $kategori ? ($kategori->parent_id ?? $kategori->id_kategori) : null;
         
+        // Cek apakah ada varian yang masih ada di pesanan
         $produk->load('detail');
+        foreach ($produk->detail as $detail) {
+            if ($detail->pesananDetail()->count() > 0) {
+                if ($kategoriParam) {
+                    return redirect()->route('admin.produk.index', ['kategori' => $kategoriParam])
+                                   ->with('error', 'Produk ini tidak dapat dihapus karena ada varian yang masih ada di pesanan');
+                }
+                return redirect()->route('admin.produk.selectKategori')
+                               ->with('error', 'Produk ini tidak dapat dihapus karena ada varian yang masih ada di pesanan');
+            }
+        }
+        
         foreach ($produk->detail as $detail) {
             if ($detail->foto) {
                 Storage::disk('public')->delete($detail->foto);
@@ -205,5 +217,68 @@ class ProdukController extends Controller
         
         return redirect()->route('admin.produk.selectKategori')
                          ->with('success', 'Produk dan semua variannya berhasil dihapus.');
+    }
+
+    // Menghapus banyak produk sekaligus
+    public function batchDelete(Request $request): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        $kategoriId = $request->input('kategori');
+        
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada produk yang dipilih.');
+        }
+
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($ids as $id) {
+            $produk = Produk::find($id);
+            
+            if ($produk) {
+                // Cek apakah ada varian yang masih ada di pesanan
+                $produk->load('detail');
+                $hasOrderedVariant = false;
+                
+                foreach ($produk->detail as $detail) {
+                    if ($detail->pesananDetail()->count() > 0) {
+                        $hasOrderedVariant = true;
+                        break;
+                    }
+                }
+                
+                if ($hasOrderedVariant) {
+                    $errors[] = "Produk {$produk->nama} masih ada di pesanan";
+                    continue;
+                }
+                
+                // Hapus foto semua varian
+                foreach ($produk->detail as $detail) {
+                    if ($detail->foto) {
+                        Storage::disk('public')->delete($detail->foto);
+                    }
+                }
+                $produk->delete();
+                $deletedCount++;
+            }
+        }
+
+        if ($deletedCount > 0 && empty($errors)) {
+            if ($kategoriId) {
+                return redirect()->route('admin.produk.index', ['kategori' => $kategoriId])
+                               ->with('success', "{$deletedCount} produk berhasil dihapus");
+            }
+            return redirect()->route('admin.produk.selectKategori')
+                           ->with('success', "{$deletedCount} produk berhasil dihapus");
+        } elseif ($deletedCount > 0 && !empty($errors)) {
+            if ($kategoriId) {
+                return redirect()->route('admin.produk.index', ['kategori' => $kategoriId])
+                               ->with('warning', "{$deletedCount} produk berhasil dihapus, namun beberapa gagal: " . implode(', ', $errors));
+            }
+            return redirect()->route('admin.produk.selectKategori')
+                           ->with('warning', "{$deletedCount} produk berhasil dihapus, namun beberapa gagal: " . implode(', ', $errors));
+        } else {
+            return back()->with('error', 'Gagal menghapus produk: ' . implode(', ', $errors));
+        }
     }
 }

@@ -24,7 +24,7 @@
         @include('component.admin.search_bar', ['placeholder' => 'Search for Varian Produk'])
 
         <div class="flex items-center gap-3">
-            <button class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+            <button id="batch-delete-btn" disabled class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fas fa-trash text-xl"></i>
             </button>
 
@@ -36,6 +36,14 @@
         </div>
     </div>
 
+    <!-- Hidden form for batch delete -->
+    <form id="batch-delete-form" action="{{ route('admin.produk.detail.batchDelete', $produk->id_produk) }}" method="POST" style="display: none;">
+        @csrf
+        @if($kategori)
+        <input type="hidden" name="kategori" value="{{ $kategori->id_kategori }}">
+        @endif
+    </form>
+
     <!-- Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
@@ -43,7 +51,7 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-4 text-left">
-                            <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
+                            <input type="checkbox" id="select-all" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Foto</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Varian</th>
@@ -57,7 +65,7 @@
                     @forelse($detailList as $detail)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
+                            <input type="checkbox" class="item-checkbox rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]" value="{{ $detail->id_produk_detail }}">
                         </td>
                         <td class="px-6 py-4">
                             @if($detail->foto)
@@ -103,6 +111,12 @@
         </div>
     </div>
 
+    @if(method_exists($detailList, 'hasPages') && $detailList->hasPages())
+        <div class="mt-6">
+            {{ $detailList->appends(request()->except('page'))->links() }}
+        </div>
+    @endif
+
 </div>
 
 @endsection
@@ -111,6 +125,77 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const selectAll = document.getElementById('select-all');
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        const batchDeleteBtn = document.getElementById('batch-delete-btn');
+        const batchDeleteForm = document.getElementById('batch-delete-form');
+
+        // Select all functionality
+        selectAll.addEventListener('change', function() {
+            itemCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBatchDeleteButton();
+        });
+
+        // Individual checkbox change
+        itemCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectAllState();
+                updateBatchDeleteButton();
+            });
+        });
+
+        // Update select-all checkbox state
+        function updateSelectAllState() {
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+            selectAll.checked = checkedCount === itemCheckboxes.length && checkedCount > 0;
+            selectAll.indeterminate = checkedCount > 0 && checkedCount < itemCheckboxes.length;
+        }
+
+        // Enable/disable batch delete button
+        function updateBatchDeleteButton() {
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+            batchDeleteBtn.disabled = checkedCount === 0;
+        }
+
+        // Batch delete confirmation
+        batchDeleteBtn.addEventListener('click', function() {
+            const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
+            const ids = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if (ids.length === 0) return;
+
+            Swal.fire({
+                title: 'Hapus Varian Terpilih?',
+                text: `${ids.length} varian produk akan dihapus. Tindakan ini tidak dapat dibatalkan!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Clear existing inputs
+                    const existingInputs = batchDeleteForm.querySelectorAll('input[name="ids[]"]');
+                    existingInputs.forEach(input => input.remove());
+
+                    // Add selected IDs to form
+                    ids.forEach(id => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'ids[]';
+                        input.value = id;
+                        batchDeleteForm.appendChild(input);
+                    });
+
+                    // Submit form
+                    batchDeleteForm.submit();
+                }
+            });
+        });
+
         document.querySelectorAll('form.swal-delete').forEach(function(form) {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
@@ -141,6 +226,22 @@
                 text: "{{ addslashes(session('success')) }}",
                 timer: 2500,
                 showConfirmButton: false
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ addslashes(session('error')) }}",
+            });
+        @endif
+
+        @if(session('warning'))
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian!',
+                text: "{{ addslashes(session('warning')) }}",
             });
         @endif
 

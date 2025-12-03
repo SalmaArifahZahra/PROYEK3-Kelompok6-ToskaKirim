@@ -23,7 +23,7 @@ class SubKategoriController extends Controller
             $query->where('nama_kategori', 'ILIKE', "%{$search}%");
         }
         
-        $subKategoriList = $query->orderBy('nama_kategori', 'asc')->get();
+        $subKategoriList = $query->orderBy('nama_kategori', 'asc')->paginate(15);
 
         return view('admin.subkategori.index', [
             'kategori' => $kategori,
@@ -124,5 +124,36 @@ class SubKategoriController extends Controller
 
         return redirect()->route('admin.kategori.subkategori.index', $kategori->id_kategori)
                          ->with('success', 'Sub-kategori berhasil dihapus.');
+    }
+
+    // Menghapus banyak sub-kategori sekaligus  
+    public function batchDelete(Request $request, Kategori $kategori): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada sub-kategori yang dipilih.');
+        }
+
+        $deletedCount = 0;
+
+        foreach ($ids as $id) {
+            $subkategori = Kategori::find($id);
+            
+            if ($subkategori && $subkategori->parent_id == $kategori->id_kategori) {
+                if ($subkategori->foto && file_exists(public_path($subkategori->foto))) {
+                    unlink(public_path($subkategori->foto));
+                }
+                $subkategori->delete();
+                $deletedCount++;
+            }
+        }
+
+        if ($deletedCount > 0) {
+            return redirect()->route('admin.kategori.subkategori.index', $kategori->id_kategori)
+                           ->with('success', "{$deletedCount} sub-kategori berhasil dihapus");
+        }
+        
+        return back()->with('error', 'Tidak ada sub-kategori yang berhasil dihapus');
     }
 }

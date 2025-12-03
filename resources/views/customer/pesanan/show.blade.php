@@ -47,23 +47,26 @@
                         @foreach ($pesanan->detail as $detail)
                             @php
                                 $prodDetail = $detail->produkDetail;
-                                $produk = $prodDetail->produk;
+                                $produk = $prodDetail ? $prodDetail->produk : null;
                             @endphp
 
                             <div class="grid grid-cols-12 items-center bg-teal-50 border-b border-slate-200 py-4 px-4">
                                 <div class="col-span-6 flex items-center gap-3">
-                                    <img src="{{ $produk->foto_url ?? ($prodDetail->foto ? asset('produk/' . $prodDetail->foto) : asset('images/icon_toska.png')) }}"
+                                    <img src="{{ $produk && $produk->foto_url ? $produk->foto_url : ($prodDetail && $prodDetail->foto ? asset('produk/' . $prodDetail->foto) : asset('images/icon_toska.png')) }}"
                                         class="w-16 h-16 rounded object-cover" alt="">
 
                                     <div>
-                                        <div class="font-medium text-slate-800 text-sm">{{ $produk->nama }}</div>
-                                        <div class="text-xs text-slate-500">variasi: {{ $prodDetail->nama_varian ?? '-' }}
+                                        <div class="font-medium text-slate-800 text-sm">
+                                            {{ $produk ? $produk->nama : 'Produk Tidak Tersedia' }}
+                                        </div>
+                                        <div class="text-xs text-slate-500">
+                                            variasi: {{ $prodDetail ? ($prodDetail->nama_varian ?? '-') : 'Varian Tidak Tersedia' }}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-span-2 text-right text-sm font-medium text-slate-700">
-                                    Rp {{ number_format($detail->harga_saat_beli ?? $prodDetail->harga_jual, 0, ',', '.') }}
+                                    Rp {{ number_format($detail->harga_saat_beli ?? ($prodDetail ? $prodDetail->harga_jual : 0), 0, ',', '.') }}
                                 </div>
 
                                 <div class="col-span-2 text-center text-sm font-medium text-slate-700">

@@ -33,7 +33,7 @@ class ProdukDetailController extends Controller
             $query->where('nama_varian', 'ILIKE', "%{$search}%");
         }
         
-        $detailList = $query->orderBy('nama_varian', 'asc')->get();
+        $detailList = $query->orderBy('nama_varian', 'asc')->paginate(15);
         
         return view('admin.produk_detail.index', [
             'produk' => $produk,
@@ -157,6 +157,26 @@ class ProdukDetailController extends Controller
     // Menghapus varian/detail.
     public function destroy(Request $request, Produk $produk, ProdukDetail $detail): RedirectResponse
     {
+        // Cek apakah varian ini masih ada di pesanan
+        if ($detail->pesananDetail()->count() > 0) {
+            $kategoriParam = $request->get('kategori');
+            $routeParams = ['produk' => $produk->id_produk];
+            if ($kategoriParam) {
+                $routeParams['kategori'] = $kategoriParam;
+            }
+            
+            return redirect()->route('admin.produk_detail.index', $routeParams)
+                           ->with('error', 'Varian produk ini tidak dapat dihapus karena masih ada di pesanan');
+        }
+        
+        // Hapus foto jika ada
+        if ($detail->foto) {
+            $fotoPath = public_path($detail->foto);
+            if (file_exists($fotoPath)) {
+                unlink($fotoPath);
+            }
+        }
+        
         $detail->delete();
         
         // Ambil kategori untuk redirect
@@ -168,5 +188,55 @@ class ProdukDetailController extends Controller
 
         return redirect()->route('admin.produk_detail.index', $routeParams)
                          ->with('success', 'Varian produk berhasil dihapus.');
+    }
+
+    // Menghapus banyak varian produk sekaligus
+    public function batchDelete(Request $request, Produk $produk): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        $kategoriId = $request->input('kategori');
+        
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada varian produk yang dipilih.');
+        }
+
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($ids as $id) {
+            $detail = ProdukDetail::where('id_produk_detail', $id)
+                                  ->where('id_produk', $produk->id_produk)
+                                  ->first();
+            
+            if ($detail) {
+                // Cek apakah varian ini masih ada di pesanan
+                if ($detail->pesananDetail()->count() > 0) {
+                    $errors[] = "Varian {$detail->nama_varian} masih ada di pesanan";
+                    continue;
+                }
+                
+                if ($detail->foto && file_exists(public_path($detail->foto))) {
+                    unlink(public_path($detail->foto));
+                }
+                $detail->delete();
+                $deletedCount++;
+            }
+        }
+
+        $routeParams = ['produk' => $produk->id_produk];
+        if ($kategoriId) {
+            $routeParams['kategori'] = $kategoriId;
+        }
+
+        if ($deletedCount > 0 && empty($errors)) {
+            return redirect()->route('admin.produk_detail.index', $routeParams)
+                           ->with('success', "{$deletedCount} varian produk berhasil dihapus");
+        } elseif ($deletedCount > 0 && !empty($errors)) {
+            return redirect()->route('admin.produk_detail.index', $routeParams)
+                           ->with('warning', "{$deletedCount} varian berhasil dihapus, namun beberapa gagal: " . implode(', ', $errors));
+        } else {
+            return redirect()->route('admin.produk_detail.index', $routeParams)
+                           ->with('error', 'Gagal menghapus varian: ' . implode(', ', $errors));
+        }
     }
 }
