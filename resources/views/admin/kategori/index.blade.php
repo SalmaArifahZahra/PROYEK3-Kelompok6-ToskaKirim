@@ -67,7 +67,6 @@
                         <td class="px-6 py-4">
                             @include('component.admin.table_actions', [
                                 'showEllipsis' => route('admin.kategori.subkategori.index', $kategori->id_kategori),
-                                'detailUrl' => route('admin.kategori.subkategori.index', $kategori->id_kategori),
                                 'ellipsisTitle' => 'Sub-Kategori',
                                 'editUrl' => route('admin.kategori.edit', $kategori->id_kategori),
                                 'deleteUrl' => route('admin.kategori.destroy', $kategori->id_kategori),

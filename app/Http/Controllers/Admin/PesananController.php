@@ -20,6 +20,23 @@ class PesananController extends Controller
         if ($request->has('status') && $request->status != '') {
             $query->where('status_pesanan', $request->status);
         }
+        
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                // Hilangkan # dan leading zeros untuk search ID
+                $searchId = ltrim(str_replace('#', '', $search), '0');
+                
+                if (is_numeric($searchId) && $searchId != '') {
+                    // Jika input adalah angka, search berdasarkan ID
+                    $q->where('id_pesanan', '=', (int)$searchId);
+                } else {
+                    // Jika bukan angka, search berdasarkan nama penerima saja
+                    $q->where('penerima_nama', 'ILIKE', "%{$search}%");
+                }
+            });
+        }
 
         // Sorting
         $sortBy = $request->get('sort_by', 'waktu_pesanan');

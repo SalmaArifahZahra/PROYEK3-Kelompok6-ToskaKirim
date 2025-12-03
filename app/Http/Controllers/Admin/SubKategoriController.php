@@ -13,11 +13,17 @@ use Illuminate\Validation\Rule;
 class SubKategoriController extends Controller
 {
     // Menampilkan daftar sub-kategori dari kategori tertentu.
-    public function index(Kategori $kategori): View
+    public function index(Request $request, Kategori $kategori): View
     {
-        $subKategoriList = Kategori::where('parent_id', $kategori->id_kategori)
-                                    ->orderBy('nama_kategori', 'asc')
-                                    ->get();
+        $query = Kategori::where('parent_id', $kategori->id_kategori);
+        
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('nama_kategori', 'ILIKE', "%{$search}%");
+        }
+        
+        $subKategoriList = $query->orderBy('nama_kategori', 'asc')->get();
 
         return view('admin.subkategori.index', [
             'kategori' => $kategori,

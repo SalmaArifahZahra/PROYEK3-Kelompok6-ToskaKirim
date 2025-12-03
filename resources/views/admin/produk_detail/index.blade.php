@@ -54,7 +54,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @forelse($produk->detail as $detail)
+                    @forelse($detailList as $detail)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
                             <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">

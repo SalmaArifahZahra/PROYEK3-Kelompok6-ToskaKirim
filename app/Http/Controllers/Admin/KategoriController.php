@@ -16,12 +16,18 @@ use Illuminate\Database\QueryException;
 class KategoriController extends Controller
 {
     // Menampilkan daftar kategori.
-    public function index(): View
+    public function index(Request $request): View
     {
         // Only list top-level categories (no parent)
-        $kategoriList = Kategori::whereNull('parent_id')
-                        ->orderBy('nama_kategori', 'asc')
-                        ->get();
+        $query = Kategori::whereNull('parent_id');
+        
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('nama_kategori', 'ILIKE', "%{$search}%");
+        }
+        
+        $kategoriList = $query->orderBy('nama_kategori', 'asc')->get();
 
         return view('admin.kategori.index', [
             'kategoriList' => $kategoriList

@@ -57,6 +57,15 @@ class ProdukController extends Controller
             $query->where('id_kategori', $kategori->id_kategori);
         }
         
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'ILIKE', "%{$search}%")
+                  ->orWhere('deskripsi', 'ILIKE', "%{$search}%");
+            });
+        }
+        
         $produkList = $query->orderBy('nama', 'asc')->paginate(10);
 
         return view('admin.produk.index', [

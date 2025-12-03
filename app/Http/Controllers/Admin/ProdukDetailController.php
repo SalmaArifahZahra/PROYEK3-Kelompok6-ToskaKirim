@@ -25,7 +25,16 @@ class ProdukDetailController extends Controller
             $kategori = Kategori::find($kategoriId);
         }
         
-        $detailList = $produk->detail()->orderBy('nama_varian', 'asc')->get();
+        $query = $produk->detail();
+        
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('nama_varian', 'ILIKE', "%{$search}%");
+        }
+        
+        $detailList = $query->orderBy('nama_varian', 'asc')->get();
+        
         return view('admin.produk_detail.index', [
             'produk' => $produk,
             'detailList' => $detailList,

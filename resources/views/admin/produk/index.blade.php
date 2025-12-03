@@ -105,7 +105,7 @@
 
     @if(method_exists($produkList, 'hasPages') && $produkList->hasPages())
         <div class="mt-6">
-            {{ $produkList->links() }}
+            {{ $produkList->appends(request()->except('page'))->links() }}
         </div>
     @endif
 

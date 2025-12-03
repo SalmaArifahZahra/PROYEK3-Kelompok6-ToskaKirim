@@ -96,7 +96,7 @@
 
     @if(method_exists($pelangganList, 'hasPages') && $pelangganList->hasPages())
         <div class="mt-6">
-            {{ $pelangganList->links() }}
+            {{ $pelangganList->appends(request()->except('page'))->links() }}
         </div>
     @endif
 
