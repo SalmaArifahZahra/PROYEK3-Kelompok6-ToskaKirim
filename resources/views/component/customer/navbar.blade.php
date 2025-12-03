@@ -16,6 +16,7 @@
                     </button>
                 </div>
             </div>
+
             <a href="{{ route('customer.keranjang.index') }}"
                 class="relative text-white text-xl hover:text-gray-100 transition">
                 <i class="fas fa-shopping-cart"></i>
@@ -31,42 +32,50 @@
                 @endif
             </a>
 
-
             <a href="/" class="text-white font-medium hover:text-[#174552] transition">Home</a>
-
-            <span class="text-white font-medium">
-                Halo, {{ Auth::user()->nama }}
-            </span>
-            <form id="logoutForm" action="/logout" method="POST">
-                @csrf
-                <button type="button" id="logoutBtn"
-                    class=" hover:bg-[#dc2626] text-white font-medium px-6 py-3 rounded-lg transition-colors">
-                    Logout
+            <div class="relative group">
+                <button class="flex items-center space-x-2 text-white font-medium focus:outline-none">
+                    <span>Halo, {{ Auth::user()->nama }}</span>
+                    <i class="fas fa-chevron-down text-sm"></i>
                 </button>
-            </form>
 
-            <script>
-                document.getElementById('logoutBtn').addEventListener('click', function() {
-                    Swal.fire({
-                        title: 'Apakah kamu yakin keluar?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#ef4444',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Ya, logout!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('logoutForm').submit();
-                        }
-                    });
-                });
-            </script>
+                <div
+                    class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-3
+               opacity-0 invisible group-hover:opacity-100 group-hover:visible
+               transition-all duration-200 z-50">
 
+                    <a href="{{ route('customer.pesanan.index') }}"
+                        class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
 
+                        <i class="fas fa-box text-gray-500 text-lg w-6"></i>
+                        <span class="ml-2">Pesanan Saya</span>
+                    </a>
+                    <button id="logoutDropdownBtn"
+                        class="w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
 
-
+                        <i class="fas fa-sign-out-alt text-gray-500 text-lg w-6"></i>
+                        <span class="ml-2">Logout</span>
+                    </button>
+                </div>
+            </div>
         </div>
-
     </div>
 </nav>
+
+<script>
+    document.getElementById('logoutDropdownBtn').addEventListener('click', function() {
+        Swal.fire({
+            title: 'Apakah kamu yakin keluar?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, logout!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logoutForm').submit();
+            }
+        });
+    });
+</script>
