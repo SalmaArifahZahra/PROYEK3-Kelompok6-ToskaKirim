@@ -14,6 +14,16 @@ use Illuminate\View\View;
 
 class ProdukDetailController extends Controller
 {
+    // Menampilkan tampilan daftar varian/detail untuk suatu produk.
+    public function index(Produk $produk): View
+    {
+        $detailList = $produk->detail()->orderBy('nama_varian', 'asc')->get();
+        return view('admin.produk_detail.index', [
+            'produk' => $produk,
+            'detailList' => $detailList
+        ]);
+    }
+    
     // Menampilkan form untuk membuat varian/detail baru.
     public function create(Produk $produk): View
     {
@@ -40,15 +50,17 @@ class ProdukDetailController extends Controller
         $data = $validator->validated();
 
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('produk_detail', 'public');
-            $data['foto'] = $path;
+            $file = $request->file('foto');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('produk'), $filename);
+            $data['foto'] = 'produk/' . $filename;
         }
 
         $data['id_produk'] = $produk->id_produk;
 
         ProdukDetail::create($data);
 
-        return redirect()->route('admin.produk.edit', $produk->id_produk)
+        return redirect()->route('admin.produk_detail.index', $produk->id_produk)
                          ->with('success', 'Varian produk baru berhasil ditambahkan.');
     }
 
@@ -79,29 +91,25 @@ class ProdukDetailController extends Controller
         $data = $validator->validated();
 
         if ($request->hasFile('foto')) {
-            if ($detail->foto) {
-                Storage::disk('public')->delete($detail->foto);
+            if ($detail->foto && file_exists(public_path($detail->foto))) {
+                unlink(public_path($detail->foto));
             }
-            $path = $request->file('foto')->store('produk_detail', 'public');
-            $data['foto'] = $path;
+            $file = $request->file('foto');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('produk'), $filename);
+            $data['foto'] = 'produk/' . $filename;
         }
 
         $detail->update($data);
 
-        return redirect()->route('admin.produk.edit', $produk->id_produk)
-                         ->with('success', 'Varian produk berhasil diperbarui.');
+        return redirect()->route('admin.produk_detail.index', $produk->id_produk)->with('success', 'Varian produk berhasil diperbarui.');
     }
 
     // Menghapus varian/detail.
     public function destroy(Produk $produk, ProdukDetail $detail): RedirectResponse
     {
-        if ($detail->foto) {
-            Storage::disk('public')->delete($detail->foto);
-        }
-
         $detail->delete();
 
-        return redirect()->route('admin.produk.edit', $produk->id_produk)
-                         ->with('success', 'Varian produk berhasil dihapus.');
+        return redirect()->route('admin.produk_detail.index', $produk->id_produk)->with('success', 'Varian produk berhasil dihapus.');
     }
 }

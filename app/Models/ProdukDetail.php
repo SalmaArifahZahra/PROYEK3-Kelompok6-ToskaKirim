@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProdukDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'produk_detail';
     protected $primaryKey = 'id_produk_detail';
@@ -28,8 +29,8 @@ class ProdukDetail extends Model
         'stok' => 'integer',
     ];
 
-    public function produk(): BelongsTo
+    public function produk()
     {
-        return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
+        return $this->belongsTo(Produk::class, 'id_produk');
     }
 }

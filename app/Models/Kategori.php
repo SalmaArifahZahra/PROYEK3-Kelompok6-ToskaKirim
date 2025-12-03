@@ -14,6 +14,7 @@ class Kategori extends Model
     protected $primaryKey = 'id_kategori';
 
     protected $fillable = [
+        'parent_id',
         'nama_kategori',
         'foto',
     ];
@@ -21,5 +22,14 @@ class Kategori extends Model
     public function produk(): HasMany
     {
         return $this->hasMany(Produk::class, 'id_kategori', 'id_kategori');
+    }
+    public function parent()
+    {
+        return $this->belongsTo(Kategori::class, 'parent_id', 'id_kategori');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Kategori::class, 'parent_id', 'id_kategori');
     }
 }

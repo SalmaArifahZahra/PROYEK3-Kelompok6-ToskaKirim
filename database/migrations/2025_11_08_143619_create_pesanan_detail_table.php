@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('pesanan_detail', function (Blueprint $table) {
             $table->unsignedBigInteger('id_pesanan');
-            $table->unsignedBigInteger('id_varian');
+            $table->unsignedBigInteger('id_produk_detail');
             $table->integer('kuantitas');
             $table->decimal('harga_saat_beli', 10, 2);
             $table->decimal('subtotal_item', 10, 2);
             $table->timestampsTz();
 
             // Composite Primary Key
-            $table->primary(['id_pesanan', 'id_varian']);
+            $table->primary(['id_pesanan', 'id_produk_detail']);
 
             // Foreign Key Constraints
             $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
-            $table->foreign('id_varian')->references('id_varian')->on('produk_detail')->onDelete('restrict');
+            $table->foreign('id_produk_detail')->references('id_produk_detail')->on('produk_detail')->onDelete('restrict');
         });
     }
 

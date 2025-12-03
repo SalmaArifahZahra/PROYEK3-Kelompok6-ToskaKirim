@@ -20,13 +20,13 @@ class PesananDetail extends Model
         'id_pesanan',
         'id_produk_detail',
         'kuantitas',
-        'harga_beli',
+        'harga_saat_beli',
         'subtotal_item',
     ];
 
     protected $casts = [
         'kuantitas' => 'integer',
-        'harga_beli' => 'float',
+        'harga_saat_beli' => 'float',
         'subtotal_item' => 'float',
     ];
 
