@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 use App\Http\Controllers\Admin\PesananController as AdminPesananController;
 use App\Http\Controllers\Admin\PesananDetailController as AdminPesananDetailController;
+use App\Http\Controllers\Admin\PelangganController as AdminPelangganController;
 // Import Controller Superadmin
 use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
 use App\Http\Controllers\Superadmin\MetodePembayaranController;
@@ -139,6 +140,9 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/complete', [AdminPesananDetailController::class, 'complete'])->name('complete');
             Route::post('/cancel', [AdminPesananDetailController::class, 'cancel'])->name('cancel');
         });
+
+        // Rute Pelanggan
+        Route::get('pelanggan', [AdminPelangganController::class, 'index'])->name('pelanggan.index');
     });
 
     Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
