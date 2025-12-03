@@ -98,5 +98,24 @@ Route::middleware(['auth'])->group(function () {
         // Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
 
+    Route::get('/cek-login-manual', function () {
+        // 1. Cek apakah user ditemukan
+        $user = User::where('email', 'superadmin@toskakirim.com')->first();
+
+        if (!$user) {
+            return "❌ User tidak ditemukan di database! Cek emailnya.";
+        }
+
+        echo "✅ User ditemukan: " . $user->name . "<br>";
+        echo "🔑 Role di Database: " . ($user->role ?? $user->peran ?? 'Kolom role/peran tidak ketemu') . "<br>";
+
+        // 2. Cek Password
+        // Masukkan password yang kamu tulis di seeder tadi ('password123')
+        if (Hash::check('password123', $user->password)) {
+            return "✅ PASSWORD COCOK! Masalahnya ada di AuthController, bukan di data.";
+        } else {
+            return "❌ PASSWORD SALAH! Hash di database tidak cocok dengan 'password123'.";
+        }
+    });
 });
     
