@@ -74,7 +74,7 @@
                 <span class="font-medium">Pelanggan</span>
             </a>
 
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+            <a href="{{ route('admin.rekap.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                   {{ request()->is('admin/rekap*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                 <i class="fas fa-chart-bar text-lg"></i>
                 <span class="font-medium">Rekap</span>

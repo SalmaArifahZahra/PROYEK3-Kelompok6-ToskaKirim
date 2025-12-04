@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
 use App\Http\Controllers\Admin\PesananController as AdminPesananController;
 use App\Http\Controllers\Admin\PesananDetailController as AdminPesananDetailController;
+use App\Http\Controllers\Admin\RekapController as AdminRekapController;
 // Import Controller Superadmin
 use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
 use App\Http\Controllers\Superadmin\MetodePembayaranController;
@@ -85,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
         // Checkout & Pesanan
         Route::prefix('pesanan')->name('pesanan.')->group(function () {
             Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
-            Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show'); // <- ini yang hilang
+            Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show');
         });
     });
 
@@ -139,15 +140,18 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/complete', [AdminPesananDetailController::class, 'complete'])->name('complete');
             Route::post('/cancel', [AdminPesananDetailController::class, 'cancel'])->name('cancel');
         });
+
+        // Rute Rekap Laporan
+        Route::get('/rekap', [AdminRekapController::class, 'index'])->name('rekap.index');
+        Route::get('/rekap/export/pdf', [AdminRekapController::class, 'exportPDF'])->name('rekap.export.pdf');
+        Route::get('/rekap/export/excel', [AdminRekapController::class, 'exportExcel'])->name('rekap.export.excel');
     });
 
     Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
 
         // Dashboard (Halaman Awal setelah Login)
         Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
-
         Route::resource('users', SuperAdminUserController::class);
-
         Route::resource('payments', MetodePembayaranController::class);
 
         // Rute CRUD User
