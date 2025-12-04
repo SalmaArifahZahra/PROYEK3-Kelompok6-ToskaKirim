@@ -16,15 +16,34 @@ use Illuminate\Database\QueryException;
 class KategoriController extends Controller
 {
     // Menampilkan daftar kategori.
-    public function index(): View
+    public function index(Request $request): View
     {
         // Only list top-level categories (no parent)
-        $kategoriList = Kategori::whereNull('parent_id')
-                        ->orderBy('nama_kategori', 'asc')
-                        ->get();
+        $query = Kategori::whereNull('parent_id');
+        
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('nama_kategori', 'ILIKE', "%{$search}%");
+        }
+        
+        // Sorting
+        $sortBy = $request->get('sort_by', 'nama_kategori');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        $allowedSorts = ['nama_kategori', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'nama_kategori';
+        }
+        
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
+        
+        $kategoriList = $query->orderBy($sortBy, $sortOrder)->paginate(15);
 
         return view('admin.kategori.index', [
-            'kategoriList' => $kategoriList
+            'kategoriList' => $kategoriList,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder
         ]);
     }
 
@@ -142,6 +161,59 @@ class KategoriController extends Controller
             }
             
             return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
+    }
+
+    // Menghapus banyak kategori sekaligus
+    public function batchDelete(Request $request): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada kategori yang dipilih.');
+        }
+
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($ids as $id) {
+            $kategori = Kategori::find($id);
+            
+            if (!$kategori) {
+                continue;
+            }
+
+            try {
+                if ($kategori->children()->count() > 0) {
+                    $errors[] = "Kategori {$kategori->nama_kategori} masih memiliki sub-kategori";
+                    continue;
+                }
+
+                if ($kategori->produk()->count() > 0) {
+                    $errors[] = "Kategori {$kategori->nama_kategori} masih digunakan oleh produk";
+                    continue;
+                }
+
+                if ($kategori->foto) {
+                    Storage::disk('public')->delete($kategori->foto);
+                }
+                
+                $kategori->delete();
+                $deletedCount++;
+                
+            } catch (QueryException $e) {
+                $errors[] = "Gagal menghapus kategori {$kategori->nama_kategori}";
+            }
+        }
+
+        if ($deletedCount > 0 && empty($errors)) {
+            return redirect()->route('admin.kategori.index')
+                           ->with('success', "{$deletedCount} kategori berhasil dihapus");
+        } elseif ($deletedCount > 0 && !empty($errors)) {
+            return redirect()->route('admin.kategori.index')
+                           ->with('warning', "{$deletedCount} kategori berhasil dihapus, namun beberapa gagal: " . implode(', ', $errors));
+        } else {
+            return back()->with('error', 'Gagal menghapus kategori: ' . implode(', ', $errors));
         }
     }
 }

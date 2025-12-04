@@ -150,7 +150,7 @@
 
     @if(isset($pesananList) && method_exists($pesananList, 'hasPages') && $pesananList->hasPages())
         <div class="mt-6">
-            {{ $pesananList->links() }}
+            {{ $pesananList->appends(request()->except('page'))->links() }}
         </div>
     @endif
 
