@@ -16,6 +16,10 @@ use App\Http\Controllers\Admin\RekapController as AdminRekapController;
 // Import Controller Superadmin
 use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
 use App\Http\Controllers\Superadmin\MetodePembayaranController;
+use App\Http\Controllers\Superadmin\LayananPengirimanController; 
+use App\Http\Controllers\Superadmin\PromoOngkirController;       
+use App\Http\Controllers\Superadmin\WilayahPengirimanController;
+use App\Http\Controllers\Superadmin\KontrolTokoController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
@@ -153,6 +157,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
         Route::resource('users', SuperAdminUserController::class);
         Route::resource('payments', MetodePembayaranController::class);
+
+        Route::get('/kontrol-toko', [KontrolTokoController::class, 'index'])->name('kontrol_toko.index');
+        Route::post('/kontrol-toko', [KontrolTokoController::class, 'update'])->name('kontrol_toko.update');
+
+        // --- MANAJEMEN LOGISTIK & TARIF ---
+    
+        // 1. Layanan Pengiriman
+        Route::resource('layanan', LayananPengirimanController::class)->except(['create', 'show', 'edit']);
+        
+        // 2. Promo Ongkir
+        Route::resource('promo', PromoOngkirController::class)->except(['create', 'show', 'edit']);
+        
+        // 3. Wilayah & Jarak
+        Route::get('wilayah', [WilayahPengirimanController::class, 'index'])->name('wilayah.index');
+        Route::put('wilayah/{id}', [WilayahPengirimanController::class, 'update'])->name('wilayah.update');
+        Route::post('wilayah/auto-calculate', [WilayahPengirimanController::class, 'hitungJarakOtomatis'])->name('wilayah.auto');
 
         // Rute CRUD User
         // Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
