@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function () {
 
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+
         Route::prefix('produk')->group(function () {
             Route::get('/search', [CustomerProdukController::class, 'search'])->name('produk.search');
             Route::get('/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
