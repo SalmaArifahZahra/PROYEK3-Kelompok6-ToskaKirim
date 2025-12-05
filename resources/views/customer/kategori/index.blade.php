@@ -43,7 +43,7 @@
         <div class="flex-1">
             <h2 class="text-xl mb-4 font-poppins">
                 <span class="font-semibold">Home ></span>
-                <span class="font-extrabold">{{ $kategoriUtama->nama_kategori }}</span>
+                <span class="font-semibold text-blue-600 ">{{ $kategoriUtama->nama_kategori }}</span>
             </h2>
 
 

@@ -33,14 +33,20 @@ class KategoriController extends Controller
     }
 
     // Halaman SHOW: Menampilkan sub-kategori tertentu dan produk di dalamnya
-    public function show(Kategori $subKategori): View
+    public function show(Kategori $subKategori)
     {
+        if ($subKategori->parent_id === null) {
+            // Kategori utama → redirect ke index
+            return redirect()->route('customer.kategori.index', $subKategori->id_kategori);
+        }
+
         $kategoriUtama = $subKategori->parent;
-        $subKategoris = $kategoriUtama ? $kategoriUtama->children : collect([]);
+        $subKategoris = $kategoriUtama->children;
 
         $produkList = Produk::where('id_kategori', $subKategori->id_kategori)
             ->with('detail')
             ->get();
+
         return view('customer.kategori.show', [
             'kategoriUtama' => $kategoriUtama,
             'activeSubKategori' => $subKategori,
