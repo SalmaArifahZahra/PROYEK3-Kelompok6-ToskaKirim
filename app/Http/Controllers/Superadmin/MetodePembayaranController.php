@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Superadmin; // <--- Namespace harus Superadmin
+namespace App\Http\Controllers\Superadmin; 
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\MetodePembayaran; // Pastikan kamu sudah buat Model PaymentMethod
+use App\Models\MetodePembayaran; 
 use Illuminate\Support\Facades\Storage;
 
 class MetodePembayaranController extends Controller

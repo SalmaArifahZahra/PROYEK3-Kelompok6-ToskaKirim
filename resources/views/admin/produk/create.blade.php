@@ -10,12 +10,17 @@
 
 <div class="space-y-6">
 
-    @include('component.admin.breadcrumb', [
-        'items' => [
-            ['label' => 'Produk', 'url' => route('admin.produk.index')],
-            ['label' => 'Tambah Produk']
-        ]
-    ])
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Produk', 'url' => route('admin.produk.selectKategori')]
+        ];
+        if($kategori) {
+            $breadcrumbItems[] = ['label' => $kategori->nama_kategori, 'url' => route('admin.produk.index', ['kategori' => $kategori->id_kategori])];
+        }
+        $breadcrumbItems[] = ['label' => 'Tambah Produk'];
+    @endphp
+    
+    @include('component.admin.breadcrumb', ['items' => $breadcrumbItems])
 
     <div class="bg-white rounded-lg shadow-md p-8">
         <h2 class="text-2xl font-semibold text-[#5BC6BC] mb-8">Produk Baru</h2>
@@ -112,7 +117,7 @@
             </div>
 
             <div class="flex justify-end gap-4 mt-10">
-                <a href="{{ route('admin.produk.index') }}"
+                <a href="{{ $kategori ? route('admin.produk.index', ['kategori' => $kategori->id_kategori]) : route('admin.produk.selectKategori') }}"
                    class="px-8 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Batal
                 </a>
@@ -191,14 +196,32 @@
             populateSubCategories(selectedOption);
         });
 
-        if (parentSelect.value) {
-            const selectedOption = parentSelect.options[parentSelect.selectedIndex];
-            populateSubCategories(selectedOption);
+        // Auto-select kategori jika ada dari URL parameter
+        @if($kategori)
+            @if($kategori->parent_id)
+                // Jika kategori adalah sub-kategori, pilih parent dan sub-kategori
+                parentSelect.value = '{{ $kategori->parent_id }}';
+                const selectedOption = parentSelect.options[parentSelect.selectedIndex];
+                populateSubCategories(selectedOption);
+                subCategorySelect.value = '{{ $kategori->id_kategori }}';
+            @else
+                // Jika kategori adalah parent, pilih parent saja
+                parentSelect.value = '{{ $kategori->id_kategori }}';
+                const selectedOption = parentSelect.options[parentSelect.selectedIndex];
+                populateSubCategories(selectedOption);
+            @endif
+        @else
+            // Handle old values from validation errors
+            const oldParentId = '{{ old("parent_id") }}';
+            if (oldParentId && parentSelect.value) {
+                const selectedOption = parentSelect.options[parentSelect.selectedIndex];
+                populateSubCategories(selectedOption);
 
-            const oldSubCategoryId = '{{ old("id_kategori") }}';
-            if (oldSubCategoryId) {
-                subCategorySelect.value = oldSubCategoryId;
+                const oldSubCategoryId = '{{ old("id_kategori") }}';
+                if (oldSubCategoryId) {
+                    subCategorySelect.value = oldSubCategoryId;
+                }
             }
-        }
+        @endif
     });
 </script>
