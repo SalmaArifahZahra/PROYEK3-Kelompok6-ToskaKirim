@@ -17,8 +17,8 @@ use App\Http\Controllers\Admin\PelangganController as AdminPelangganController;
 // Import Controller Superadmin
 use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
 use App\Http\Controllers\Superadmin\MetodePembayaranController;
-use App\Http\Controllers\Superadmin\LayananPengirimanController; 
-use App\Http\Controllers\Superadmin\PromoOngkirController;       
+use App\Http\Controllers\Superadmin\LayananPengirimanController;
+use App\Http\Controllers\Superadmin\PromoOngkirController;
 use App\Http\Controllers\Superadmin\WilayahPengirimanController;
 use App\Http\Controllers\Superadmin\KontrolTokoController;
 // Import Controller Customer
@@ -60,8 +60,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function () {
 
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-
         Route::prefix('produk')->group(function () {
+            Route::get('/search', [CustomerProdukController::class, 'search'])->name('produk.search');
             Route::get('/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
         });
 
@@ -154,7 +154,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/rekap', [AdminRekapController::class, 'index'])->name('rekap.index');
         Route::get('/rekap/export/pdf', [AdminRekapController::class, 'exportPDF'])->name('rekap.export.pdf');
         Route::get('/rekap/export/excel', [AdminRekapController::class, 'exportExcel'])->name('rekap.export.excel');
-        
+
         // Rute Pelanggan
         Route::get('pelanggan', [AdminPelangganController::class, 'index'])->name('pelanggan.index');
     });
@@ -170,13 +170,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/kontrol-toko', [KontrolTokoController::class, 'update'])->name('kontrol_toko.update');
 
         // --- MANAJEMEN LOGISTIK & TARIF ---
-    
+
         // 1. Layanan Pengiriman
         Route::resource('layanan', LayananPengirimanController::class)->except(['create', 'show', 'edit']);
-        
+
         // 2. Promo Ongkir
         Route::resource('promo', PromoOngkirController::class)->except(['create', 'show', 'edit']);
-        
+
         // 3. Wilayah & Jarak
         Route::get('wilayah', [WilayahPengirimanController::class, 'index'])->name('wilayah.index');
         Route::put('wilayah/{id}', [WilayahPengirimanController::class, 'update'])->name('wilayah.update');

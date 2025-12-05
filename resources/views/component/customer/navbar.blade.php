@@ -8,13 +8,16 @@
         <div class="flex items-center space-x-6">
 
             <div class="flex justify-center mx-10">
-                <div class="relative w-[350px]">
-                    <input type="text" placeholder="Search"
-                        class="w-full bg-white text-gray-700 rounded-full px-5 py-2 border border-gray-300 focus:outline-none">
-                    <button class="absolute top-1/2 -translate-y-1/2 right-4">
-                        <i class="fas fa-search text-[#5BC6BC] text-lg"></i>
-                    </button>
-                </div>
+                <form id="searchForm" class="w-[350px]" method="GET" action="{{ route('customer.produk.search') }}">
+                    <div class="relative">
+                        <input id="searchInput" type="text" name="q" placeholder="Search"
+                            class="w-full bg-white text-gray-700 rounded-full px-5 py-2 border border-gray-300 focus:outline-none"
+                            value="{{ request('q') }}">
+                        <button type="submit" class="absolute top-1/2 -translate-y-1/2 right-4">
+                            <i class="fas fa-search text-[#5BC6BC] text-lg"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <a href="{{ route('customer.keranjang.index') }}"
@@ -52,10 +55,14 @@
                     </a>
                     <button id="logoutDropdownBtn"
                         class="w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
-
                         <i class="fas fa-sign-out-alt text-gray-500 text-lg w-6"></i>
                         <span class="ml-2">Logout</span>
                     </button>
+
+                    <form id="logoutForm" method="POST" action="{{ route('logout') }}" class="hidden">
+                        @csrf
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -78,4 +85,6 @@
             }
         });
     });
+
+
 </script>
