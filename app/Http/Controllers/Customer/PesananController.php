@@ -111,12 +111,14 @@ class PesananController extends Controller
 
 
         $pengaturan = Pengaturan::first();
+        $alamatUtama = Auth::user()->alamatUser()->where('is_utama', true)->first();
+
 
         // Hitung Deadline (Waktu Pesanan + 24 Jam)
         $deadline = Carbon::parse($pesanan->waktu_pesanan)->addHours(24);
         $deadlineTimestamp = $deadline->timestamp * 1000;
 
-        return view('customer.pesanan.show', compact('pesanan', 'pengaturan', 'deadline', 'deadlineTimestamp'));
+        return view('customer.pesanan.show', compact('pesanan', 'pengaturan', 'deadline', 'deadlineTimestamp', 'alamatUtama'));
     }
 
     // Upload Bukti Pembayaran

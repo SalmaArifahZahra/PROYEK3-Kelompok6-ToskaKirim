@@ -94,6 +94,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
             Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show');
         });
+
+        Route::prefix('alamat')->name('alamat.')->group(function () {
+            Route::get('/', [AlamatUserController::class, 'index'])->name('index');
+            Route::get('/create', [AlamatUserController::class, 'create'])->name('create');
+            Route::post('/store', [AlamatUserController::class, 'store'])->name('store');
+            Route::get('/{alamat}/edit', [AlamatUserController::class, 'edit'])->name('edit');
+            Route::put('/{alamat}/update', [AlamatUserController::class, 'update'])->name('update');
+        });
     });
 
     // --- Rute Admin & Superadmin ---

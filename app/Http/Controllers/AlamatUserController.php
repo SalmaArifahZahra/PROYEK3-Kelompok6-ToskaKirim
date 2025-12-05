@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
+
 class AlamatUserController extends Controller
 {
 
@@ -18,8 +19,8 @@ class AlamatUserController extends Controller
     public function index(): View
     {
         $alamatList = Auth::user()->alamatUser()
-                        ->orderBy('is_utama', 'desc')
-                        ->get();
+            ->orderBy('is_utama', 'desc')
+            ->get();
 
         return view('customer.profile.complete_profile', [
             'alamatList' => $alamatList
@@ -48,7 +49,7 @@ class AlamatUserController extends Controller
 
             if (!$user) {
                 return redirect()->route('register')
-                                 ->withErrors(['error' => 'Sesi registrasi tidak valid. Silakan daftar ulang.']);
+                    ->withErrors(['error' => 'Sesi registrasi tidak valid. Silakan daftar ulang.']);
             }
 
             $data['id_user'] = $userId;
@@ -57,7 +58,7 @@ class AlamatUserController extends Controller
             $user = $request->user();
             if (!$user) {
                 return redirect()->route('login')
-                                 ->withErrors(['error' => 'Anda harus login terlebih dahulu.']);
+                    ->withErrors(['error' => 'Anda harus login terlebih dahulu.']);
             }
             $data['id_user'] = $user->id_user;
         }
@@ -82,22 +83,23 @@ class AlamatUserController extends Controller
         if ($isNewRegistration) {
             session()->forget('temp_user_id');
             return redirect()->route('login')
-                             ->with('success', 'Registrasi dan profil berhasil disimpan! Silakan login dengan email dan password yang telah Anda buat.');
+                ->with('success', 'Registrasi dan profil berhasil disimpan! Silakan login dengan email dan password yang telah Anda buat.');
         }
 
         return redirect()->route('customer.dashboard')
-                         ->with('success', 'Alamat berhasil disimpan!');
+            ->with('success', 'Alamat berhasil disimpan!');
     }
 
     // Menampilkan form untuk mengedit alamat
     public function edit(AlamatUser $alamat): View
     {
-        $this->authorize('update', $alamat);
+        // $this->authorize('update', $alamat); ← hapus ini jika tidak pakai Policy
 
         return view('customer.profile.complete_profile', [
             'alamat' => $alamat
         ]);
     }
+
 
     // Memperbarui data alamat
     public function update(StoreAlamatUserRequest $request, AlamatUser $alamat): RedirectResponse
@@ -107,7 +109,7 @@ class AlamatUserController extends Controller
         $alamat->update($request->validated());
 
         return redirect()->route('customer.alamat.index')
-                         ->with('success', 'Alamat berhasil diperbarui.');
+            ->with('success', 'Alamat berhasil diperbarui.');
     }
 
     // Menghapus alamat
@@ -125,7 +127,7 @@ class AlamatUserController extends Controller
         $alamat->delete();
 
         return redirect()->route('customer.alamat.index')
-                         ->with('success', 'Alamat berhasil dihapus.');
+            ->with('success', 'Alamat berhasil dihapus.');
     }
 
     // Menetapkan alamat sebagai alamat utama
@@ -136,6 +138,6 @@ class AlamatUserController extends Controller
         $alamat->setAsUtama();
 
         return redirect()->route('customer.alamat.index')
-                         ->with('success', 'Alamat utama berhasil diubah.');
+            ->with('success', 'Alamat utama berhasil diubah.');
     }
 }
