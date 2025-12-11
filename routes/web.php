@@ -91,6 +91,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Checkout & Pesanan
         Route::prefix('pesanan')->name('pesanan.')->group(function () {
+            Route::get('/create', [CustomerPesananController::class, 'create'])->name('create');
+            Route::post('/store', [CustomerPesananController::class, 'store'])->name('store');
             Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
             Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show');
         });
