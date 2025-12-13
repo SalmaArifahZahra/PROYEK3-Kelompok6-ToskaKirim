@@ -1,140 +1,142 @@
 @extends('layouts.layout_customer')
 
-@section('title', 'Daftar Pesanan')
+@section('title', 'Pesanan Saya')
 
 @section('content')
+<div class="max-w-5xl mx-auto my-8 px-4">
 
-    <div class="max-w-5xl mx-auto my-8 px-4">
+    <h1 class="text-2xl font-bold text-slate-800 mb-6">Pesanan Saya</h1>
 
-        @php
-            $statusList = [
-                '' => 'Semua',
-                'menunggu_pembayaran' => 'Menunggu Pembayaran',
-                'menunggu_verifikasi' => 'Menunggu Verifikasi',
-                'diproses' => 'Sedang Diproses',
-                'dikirim' => 'Dikirim',
-                'selesai' => 'Selesai',
-                'dibatalkan' => 'Dibatalkan',
-            ];
-        @endphp
+    {{-- 1. TAB NAVIGASI STATUS --}}
+    <div class="flex overflow-x-auto gap-2 mb-6 pb-2 border-b border-slate-200 no-scrollbar">
+        <a href="{{ route('customer.pesanan.index') }}" 
+           class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
+           {{ !$status ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+           Semua
+        </a>
+        
+        <a href="{{ route('customer.pesanan.index', ['status' => 'menunggu_pembayaran']) }}" 
+           class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
+           {{ $status == 'menunggu_pembayaran' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+           Menunggu Pembayaran
+        </a>
 
-        <div class="bg-white shadow-sm rounded-xl p-3 mb-6">
-            <div class="flex gap-4 overflow-x-auto pb-1">
+        <a href="{{ route('customer.pesanan.index', ['status' => 'menunggu_verifikasi']) }}" 
+           class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
+           {{ $status == 'menunggu_verifikasi' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+           Menunggu Verifikasi
+        </a>
 
-                @foreach ($statusList as $key => $label)
-                    <a href="{{ route('customer.pesanan.index', ['status' => $key]) }}"
-                        class="px-3 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition
-                {{ $status == $key ? 'text-white bg-teal-600 shadow-sm' : 'text-slate-600 bg-slate-100 hover:bg-slate-200' }}">
-                        {{ $label }}
-                    </a>
-                @endforeach
+        <a href="{{ route('customer.pesanan.index', ['status' => 'diproses']) }}" 
+           class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
+           {{ $status == 'diproses' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+           Diproses
+        </a>
 
-            </div>
-        </div>
+        <a href="{{ route('customer.pesanan.index', ['status' => 'dikirim']) }}" 
+           class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
+           {{ $status == 'dikirim' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+           Dikirim
+        </a>
 
+        <a href="{{ route('customer.pesanan.index', ['status' => 'selesai']) }}" 
+           class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
+           {{ $status == 'selesai' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+           Selesai
+        </a>
+    </div>
 
-
+    {{-- 2. LIST PESANAN --}}
+    <div class="space-y-4">
         @forelse ($pesananList as $pesanan)
-
-            @php
-                $statusText = match ($pesanan->status_pesanan) {
-                    'menunggu_pembayaran' => 'Menunggu Pembayaran',
-                    'menunggu_verifikasi' => 'Menunggu Verifikasi',
-                    'diproses' => 'Sedang Diproses',
-                    'dikirim' => 'Dikirim',
-                    'selesai' => 'Selesai',
-                    'dibatalkan' => 'Dibatalkan',
-                    default => 'Status Tidak Diketahui',
-                };
-
-                $statusColor = match ($pesanan->status_pesanan) {
-                    'menunggu_pembayaran' => 'text-orange-500',
-                    'menunggu_verifikasi' => 'text-yellow-500',
-                    'diproses' => 'text-blue-600',
-                    'dikirim' => 'text-red-500',
-                    'selesai' => 'text-green-600',
-                    'dibatalkan' => 'text-rose-600',
-                    default => 'text-slate-600',
-                };
-            @endphp
-
-            <div class="bg-white px-4 py-3 rounded-xl shadow-sm mb-3 flex justify-between items-center">
-
-                <div class="text-slate-800 font-semibold">
-                    {{ $pesanan->toko->nama_toko ?? 'Toska Kirim' }}
+            
+            {{-- Kartu Pesanan --}}
+            <div class="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                
+                {{-- Header Kartu --}}
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-3 mb-3 gap-2">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="font-bold text-slate-700">INV-{{ $pesanan->id_pesanan }}</span>
+                        <span class="text-slate-400">•</span>
+                        <span class="text-slate-500">{{ $pesanan->waktu_pesanan->format('d M Y, H:i') }}</span>
+                    </div>
+                    
+                    {{-- Badge Status --}}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold
+                        @if($pesanan->status_pesanan == 'menunggu_pembayaran') bg-orange-100 text-orange-600
+                        @elseif($pesanan->status_pesanan == 'menunggu_verifikasi') bg-blue-100 text-blue-600
+                        @elseif($pesanan->status_pesanan == 'diproses') bg-indigo-100 text-indigo-600
+                        @elseif($pesanan->status_pesanan == 'dikirim') bg-teal-100 text-teal-600
+                        @elseif($pesanan->status_pesanan == 'selesai') bg-green-100 text-green-600
+                        @elseif($pesanan->status_pesanan == 'dibatalkan') bg-red-100 text-red-600
+                        @endif">
+                        {{ strtoupper(str_replace('_', ' ', $pesanan->status_pesanan->value)) }}
+                    </span>
                 </div>
 
-                <div class="text-sm font-semibold {{ $statusColor }}">
-                    {{ $statusText }}
-                </div>
-            </div>
-
-            @foreach ($pesanan->detail as $detail)
-                @php
-                    $varian = $detail->produkDetail;
-                    $produk = $varian?->produk;
-                @endphp
-
-                <div class="bg-white p-4 rounded-xl shadow-sm mb-3">
-
-                    <div class="flex gap-4">
-
-                        <img src="{{ $produk?->foto_url ?? asset('images/icon_toska.png') }}"
-                            class="w-20 h-20 rounded-lg object-cover">
-
-                        <div class="flex-1">
-                            <div class="text-sm font-semibold text-slate-800">
-                                {{ $produk->nama ?? 'Produk Tidak Tersedia' }}
-                            </div>
-
-                            <div class="text-xs text-slate-500 mt-1">
-                                Variasi: {{ $varian?->nama_varian ?? '-' }}
-                            </div>
-
-                            <div class="text-xs text-slate-500 mt-1">
-                                x{{ $detail->kuantitas }}
-                            </div>
-                        </div>
-
-                        <div class="text-sm font-semibold text-slate-700">
-                            Rp {{ number_format($detail->harga_beli, 0, ',', '.') }}
-                        </div>
+                {{-- Body Kartu (Produk Pertama) --}}
+                <div class="flex gap-4 items-center">
+                    {{-- Ambil gambar produk pertama sebagai preview --}}
+                    @php
+                        $firstDetail = $pesanan->detail->first();
+                        $firstProduct = $firstDetail ? $firstDetail->produkDetail->produk : null;
+                    @endphp
+                    
+                    <img src="{{ $firstProduct->foto_url ?? asset('images/icon_toska.png') }}" 
+                         class="w-16 h-16 rounded object-cover border border-slate-100">
+                    
+                    <div class="flex-1">
+                        <h4 class="font-bold text-slate-700 text-sm md:text-base">
+                            {{ $firstProduct->nama ?? 'Produk' }}
+                        </h4>
+                        <p class="text-xs text-slate-500">
+                            {{ $firstDetail->kuantitas }} barang 
+                            @if($pesanan->detail->count() > 1)
+                                <span class="text-slate-400">(+{{ $pesanan->detail->count() - 1 }} produk lainnya)</span>
+                            @endif
+                        </p>
                     </div>
 
-                </div>
-            @endforeach
-
-            <div class="bg-white p-4 rounded-xl shadow-sm mb-5">
-
-                <div class="flex justify-between items-center">
-                    <div class="text-sm text-slate-600">
-                        Total yang Perlu Dibayar:
-                    </div>
-
-                    <div class="text-lg font-extrabold text-teal-600">
-                        Rp {{ number_format($pesanan->grand_total, 0, ',', '.') }}
+                    <div class="text-right hidden md:block">
+                        <p class="text-xs text-slate-500">Total Belanja</p>
+                        <p class="font-bold text-teal-600">Rp {{ number_format($pesanan->grand_total, 0, ',', '.') }}</p>
                     </div>
                 </div>
 
-                {{-- @if ($pesanan->status_pesanan === 'dikirim')
-                    <div class="flex justify-end mt-3">
-                        <a href="{{ route('customer.pesanan.selesai', $pesanan->id_pesanan) }}"
-                            class="px-4 py-2 border border-teal-600 text-teal-600 text-sm rounded-lg hover:bg-teal-50 transition">
-                            Pesanan Selesai
-                        </a>
+                {{-- Footer Kartu (Tombol Aksi) --}}
+                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+                    <div class="block md:hidden">
+                        <p class="text-xs text-slate-500">Total Belanja</p>
+                        <p class="font-bold text-teal-600">Rp {{ number_format($pesanan->grand_total, 0, ',', '.') }}</p>
                     </div>
-                @endif --}}
+
+                    <div class="ml-auto flex gap-2">
+                        @if($pesanan->status_pesanan == 'menunggu_pembayaran')
+                             <a href="{{ route('customer.pesanan.show', $pesanan->id_pesanan) }}" 
+                                class="px-4 py-2 bg-orange-500 text-white text-sm font-bold rounded hover:bg-orange-600 transition">
+                                Bayar Sekarang
+                             </a>
+                        @else
+                             <a href="{{ route('customer.pesanan.show', $pesanan->id_pesanan) }}" 
+                                class="px-4 py-2 border border-teal-600 text-teal-600 text-sm font-bold rounded hover:bg-teal-50 transition">
+                                Lihat Detail
+                             </a>
+                        @endif
+                    </div>
+                </div>
 
             </div>
 
         @empty
-
-            <div class="text-center py-10 text-slate-600">
-                <img src="{{ asset('images/empty.png') }}" class="w-40 mx-auto mb-4 opacity-70">
-                <p class="text-slate-500">Belum ada pesanan.</p>
+            <div class="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                <i class="fas fa-shopping-bag text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-500 font-medium">Belum ada pesanan</p>
+                <a href="{{ route('customer.dashboard') }}" class="text-teal-600 hover:underline text-sm mt-2 block">
+                    Mulai Belanja
+                </a>
             </div>
         @endforelse
-
     </div>
 
+</div>
 @endsection

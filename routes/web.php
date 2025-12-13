@@ -97,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/store', [CustomerPesananController::class, 'storeFromConfirm'])->name('store');
             Route::get('/store', function() {
             return redirect()->route('customer.keranjang.index')->with('error', 'Terjadi kesalahan validasi data. Silakan coba checkout ulang.');
+            Route::post('/{id}/upload', [CustomerPesananController::class, 'uploadBukti'])->name('upload');
+            Route::post('/{id}/cancel', [CustomerPesananController::class, 'cancel'])->name('cancel');
         });
             Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
         });
