@@ -111,14 +111,15 @@
                         <p class="text-red-600 font-bold text-xl">Rp <span id="grandTotal">0</span></p>
                     </div>
 
-                    @php
-                        $pesananId = isset($pesanan) ? $pesanan->id_user : (auth()->user()->id_user ?? auth()->id());
-                    @endphp
-
-                    <a href="{{ route('customer.pesanan.show', $pesananId) }}"
-                        class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600">
-                        Checkout
-                    </a>
+                    <!-- Hidden form to submit selected items to checkout -->
+                    <form id="formCheckoutReal" action="{{ route('customer.keranjang.checkout') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="items" id="itemsInputHidden">
+                        
+                        <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 font-bold shadow-md transition-transform transform hover:scale-105">
+                            Checkout Sekarang
+                        </button>
+                    </form>
                 </div>
             </div>
         @endif
@@ -235,6 +236,40 @@
 
                     updateSelectedInfo();
                 });
+            });
+
+            // Checkout form submission: collect selected items
+            document.getElementById('formCheckoutReal').addEventListener('submit', function(e) {
+                // Ambil semua checkbox yang dicentang
+                const selected = [];
+                document.querySelectorAll('.itemCheckbox:checked').forEach(chk => {
+                    const id = chk.dataset.id;
+                    const qtyInput = document.querySelector('.qtyInput[data-id="' + id + '"]');
+                    
+                    if(qtyInput) {
+                        const qty = parseInt(qtyInput.value);
+                        selected.push({ id_produk_detail: id, quantity: qty });
+                    }
+                });
+
+                // Validasi: Jika kosong, stop submit
+                if (selected.length === 0) {
+                    e.preventDefault(); // Batalkan submit
+                    Swal.fire({ 
+                        icon: 'warning', 
+                        title: 'Belum ada produk', 
+                        text: 'Silakan centang minimal 1 produk untuk checkout.' 
+                    });
+                    return false;
+                }
+
+                // Masukkan data JSON ke input hidden
+                const jsonString = JSON.stringify(selected);
+                document.getElementById('itemsInputHidden').value = jsonString;
+
+                console.log("Mengirim data:", jsonString);
+                // Biarkan form melakukan submit secara alami (POST)
+                return true; 
             });
         });
     </script>
