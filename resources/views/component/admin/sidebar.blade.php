@@ -18,7 +18,10 @@
                 <span class="font-medium">Dashboard</span>
             </a>
 
+            {{-- MENU KHUSUS SUPERADMIN --}}
             @if($isSuperadmin)
+                
+                {{-- GROUP: MASTER DATA --}}
                 <div class="pt-4 pb-2">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                         Master Data & Kontrol
@@ -72,14 +75,52 @@
                     <i class="fas fa-map-marked-alt text-lg w-6 text-center"></i>
                     <span class="font-medium">Database Wilayah</span>
                 </a>
+
+                <a href="{{ route('superadmin.kontrol_toko.index') }}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                          {{ request()->routeIs('superadmin.kontrol_toko.*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="fas fa-store text-lg w-6 text-center"></i>
+                    <span class="font-medium">Kontrol Toko</span>
+                </a>
+
+                {{-- GROUP: LOGISTIK --}}
+                <div class="pt-4 pb-2">
+                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Logistik & Tarif
+                    </p>
+                </div>
+
+                <a href="{{ route('superadmin.layanan.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                          {{ request()->routeIs('superadmin.layanan.*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="fas fa-truck text-lg w-6 text-center"></i>
+                    <span class="font-medium">Layanan Kirim</span>
+                </a>
+
+                <a href="{{ route('superadmin.promo.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                          {{ request()->routeIs('superadmin.promo.*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="fas fa-tags text-lg w-6 text-center"></i>
+                    <span class="font-medium">Promo Ongkir</span>
+                </a>
+
+                <a href="{{ route('superadmin.wilayah.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                          {{ request()->routeIs('superadmin.wilayah.*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="fas fa-map-marked-alt text-lg w-6 text-center"></i>
+                    <span class="font-medium">Database Wilayah</span>
+                </a>
                 
                 <div class="pt-4 pb-2">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                         Operasional Toko
                     </p>
                 </div>
+
             @endif
 
+            {{-- MENU UMUM (ADMIN & SUPERADMIN) --}}
+            
             <a href="{{ route('admin.produk.index') }}"
                class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                      {{ request()->routeIs('admin.produk.*') ? 'bg-[#5BC6BC] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
@@ -135,7 +176,7 @@
             </form>
 
         </div>
-
+        
     </nav>
 
 </aside>
