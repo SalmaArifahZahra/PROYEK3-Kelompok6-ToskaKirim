@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class KeranjangSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         DB::table('keranjang')->insert([

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Kategori;
 use App\Models\Produk;
+use App\Models\keranjang;
 
 class DashboardController extends Controller
 {
@@ -15,12 +17,15 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
-        // kategori card sesuai dengan sort nama kategori  -salma
-        return view('customer.dashboard', [
-            'kategori' => Kategori::orderBy('id_kategori', 'asc')->whereNull('parent_id')->get(),
-            'produk'   => Produk::with('detail')
-                ->take(12)
-                ->get(),
-        ]);
+        $cartCount = Keranjang::where('id_user', Auth::id())->sum('quantity');
+        $kategori = Kategori::orderBy('id_kategori', 'asc')
+            ->whereNull('parent_id')
+            ->get();
+
+        $produk = Produk::with('detail')
+            ->take(12)
+            ->get();
+
+        return view('customer.dashboard', compact('kategori', 'produk', 'cartCount'));
     }
 }

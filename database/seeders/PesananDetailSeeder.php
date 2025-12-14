@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class PesananDetailSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         DB::table('pesanan_detail')->insert([
@@ -41,7 +38,7 @@ class PesananDetailSeeder extends Seeder
                 'created_at' => now()->subDays(5),
                 'updated_at' => now()->subDays(5),
             ],
-            
+
             // Pesanan 2 - Siti Nurhaliza
             [
                 'id_pesanan' => 2,
@@ -70,7 +67,7 @@ class PesananDetailSeeder extends Seeder
                 'created_at' => now()->subDays(3),
                 'updated_at' => now()->subDays(3),
             ],
-            
+
             // Pesanan 3 - Ahmad Rizky
             [
                 'id_pesanan' => 3,
@@ -90,7 +87,7 @@ class PesananDetailSeeder extends Seeder
                 'created_at' => now()->subDays(2),
                 'updated_at' => now()->subDays(2),
             ],
-            
+
             // Pesanan 4 - Dewi Lestari
             [
                 'id_pesanan' => 4,

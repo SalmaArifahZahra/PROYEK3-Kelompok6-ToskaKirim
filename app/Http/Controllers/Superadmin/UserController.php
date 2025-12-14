@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Superadmin;
 
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
@@ -16,51 +16,47 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    // Menampilkan halaman dashboard superadmin.
-    public function dashboard(): View
+    // Menampilkan Dashboard Superadmin (Sesuai Figma)
+    public function dashboard()
     {
-        return view('superadmin.dashboard');
+        // Hitung data untuk ringkasan (opsional, biar dashboard gak kosong)
+        $totalAdmin = User::where('peran', 'admin')->count();
+        $totalPayment = 0;
+        return view('superadmin.dashboard', compact('totalAdmin', 'totalPayment'));
     }
 
-    // Menampilkan daftar user.
-    public function index(): View
+    // Menampilkan Daftar Admin (Sesuai Figma "Daftar Admin")
+    public function index()
     {
-        $users = User::orderBy('nama')->get();
-        
-        return view('superadmin.users.dashboard', [
-            'users' => $users
-        ]);
+        // Hanya ambil user yang role-nya 'admin'
+        $admins = User::where('peran', 'admin')->orderBy('nama')->get(); 
+        return view('superadmin.users.index', compact('admins'));
     }
 
-    // Menampilkan form untuk membuat user baru.
-    public function create(): View
+    public function create()
     {
         return view('superadmin.users.create');
     }
 
-    // Menyimpan user baru.
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        // Validasi
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => ['required', Password::min(8)],
-            'peran' => ['required', Rule::in(RoleEnum::ADMIN, RoleEnum::CUSTOMER)],
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
+            'peran' => 'required|in:admin', // Superadmin cuma bikin Admin
         ]);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
+        User::create([
+            'nama' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'peran' => $request->peran,
+        ]);
 
-        $data = $validator->validated();
-        $data['password'] = Hash::make($data['password']);
-
-        User::create($data);
-
-        return redirect()->route('superadmin.users.dashboard')
-                         ->with('success', 'User baru berhasil dibuat.');
+        return redirect()->route('superadmin.users.index')->with('success', 'Admin berhasil ditambahkan');
     }
+
 
     // Menampilkan form untuk mengedit user.
     public function edit(User $user): View

@@ -2,18 +2,27 @@
 
 @section('title', 'Tambah Varian Produk')
 
+@section('styles')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endsection
+
 @section('content')
 
 <div class="space-y-6">
 
     <!-- Breadcrumb -->
-    @include('component.admin.breadcrumb', [
-        'items' => [
-            ['label' => 'Produk', 'url' => route('admin.produk.index')],
-            ['label' => $produk->nama, 'url' => route('admin.produk_detail.index', $produk->id_produk)],
-            ['label' => 'Tambah Varian Produk']
-        ]
-    ])
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Produk', 'url' => route('admin.produk.selectKategori')]
+        ];
+        if($kategori) {
+            $breadcrumbItems[] = ['label' => $kategori->nama_kategori, 'url' => route('admin.produk.index', ['kategori' => $kategori->id_kategori])];
+        }
+        $breadcrumbItems[] = ['label' => $produk->nama, 'url' => route('admin.produk_detail.index', ['produk' => $produk->id_produk, 'kategori' => $kategori ? $kategori->id_kategori : null])];
+        $breadcrumbItems[] = ['label' => 'Tambah Varian Produk'];
+    @endphp
+    
+    @include('component.admin.breadcrumb', ['items' => $breadcrumbItems])
 
     <!-- Form Card -->
     <div class="flex justify-center">
@@ -118,7 +127,7 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-end gap-4 mt-10">
-                <a href="{{ route('admin.produk_detail.index', $produk->id_produk) }}"
+                <a href="{{ route('admin.produk_detail.index', ['produk' => $produk->id_produk, 'kategori' => $kategori ? $kategori->id_kategori : null]) }}"
                    class="px-8 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Batal
                 </a>
@@ -132,3 +141,16 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi kesalahan',
+            html: '@foreach($errors->all() as $error)<div>- {{ $error }}</div>@endforeach',
+            confirmButtonColor: '#5BC6BC'
+        });
+    @endif
+</script>
+@endpush

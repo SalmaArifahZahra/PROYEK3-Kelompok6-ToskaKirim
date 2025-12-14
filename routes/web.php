@@ -3,19 +3,31 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AlamatUserController;
-use App\Http\Controllers\DashboardController; 
+use App\Http\Controllers\DashboardController;
 // Import Controller Admin
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\KategoriController as AdminKategoriController;
 use App\Http\Controllers\Admin\SubKategoriController as AdminSubKategoriController;
 use App\Http\Controllers\Admin\ProdukController as AdminProdukController;
 use App\Http\Controllers\Admin\ProdukDetailController as AdminProdukDetailController;
+use App\Http\Controllers\Admin\PesananController as AdminPesananController;
+use App\Http\Controllers\Admin\PesananDetailController as AdminPesananDetailController;
+use App\Http\Controllers\Admin\RekapController as AdminRekapController;
+use App\Http\Controllers\Admin\PelangganController as AdminPelangganController;
+// Import Controller Superadmin
+use App\Http\Controllers\Superadmin\UserController as SuperAdminUserController;
+use App\Http\Controllers\Superadmin\MetodePembayaranController;
+use App\Http\Controllers\Superadmin\LayananPengirimanController;
+use App\Http\Controllers\Superadmin\PromoOngkirController;
+use App\Http\Controllers\Superadmin\WilayahPengirimanController;
+use App\Http\Controllers\Superadmin\KontrolTokoController;
 // Import Controller Customer
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\KategoriController as CustomerKategoriController;
 use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
 use App\Http\Controllers\Customer\KeranjangController as CustomerKeranjangController;
+use App\Http\Controllers\Customer\PesananController  as CustomerPesananController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -46,17 +58,18 @@ Route::middleware(['auth'])->group(function () {
 
     // --- Rute Customer ---
     Route::middleware('role:customer')->prefix('customer')->name('customer.')->group(function () {
-        
+
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
         Route::prefix('produk')->group(function () {
+            Route::get('/search', [CustomerProdukController::class, 'search'])->name('produk.search');
             Route::get('/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
         });
 
         // Alur 'Lengkapi Profil' setelah register
         Route::get('/profile/complete', [AlamatUserController::class, 'create'])
-             ->name('profile.complete');
-        
+            ->name('profile.complete');
+
         // CRUD Alamat Lengkap
         Route::resource('alamat', AlamatUserController::class);
         Route::post('/alamat/{alamat}/set-utama', [AlamatUserController::class, 'setUtama'])
@@ -68,59 +81,129 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sub-kategori/{subKategori}', [CustomerKategoriController::class, 'show'])
             ->name('kategori.show');
 
-        
+        // Keranjang Belanja Customer
+        Route::prefix('keranjang')->name('keranjang.')->group(function () {
+            Route::get('/', [CustomerKeranjangController::class, 'index'])->name('index');
+            Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
+            Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
+            Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
+            Route::post('/checkout', [CustomerPesananController::class, 'checkoutFromCart'])->name('checkout');
+        });
+
+        // Checkout & Pesanan
+        Route::prefix('pesanan')->name('pesanan.')->group(function () {
+            Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
+            Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show');
+            Route::post('/store', [CustomerPesananController::class, 'storeFromConfirm'])->name('store');
+            Route::get('/store', function() {
+            return redirect()->route('customer.keranjang.index')->with('error', 'Terjadi kesalahan validasi data. Silakan coba checkout ulang.');
+            Route::post('/{id}/upload', [CustomerPesananController::class, 'uploadBukti'])->name('upload');
+            Route::post('/{id}/cancel', [CustomerPesananController::class, 'cancel'])->name('cancel');
+        });
+            Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
+        });
+
+        Route::prefix('alamat')->name('alamat.')->group(function () {
+            Route::get('/', [AlamatUserController::class, 'index'])->name('index');
+            Route::get('/create', [AlamatUserController::class, 'create'])->name('create');
+            Route::post('/store', [AlamatUserController::class, 'store'])->name('store');
+            Route::get('/{alamat}/edit', [AlamatUserController::class, 'edit'])->name('edit');
+            Route::put('/{alamat}/update', [AlamatUserController::class, 'update'])->name('update');
+        });
     });
 
     // --- Rute Admin & Superadmin ---
     Route::middleware('role:admin,superadmin')->prefix('admin')->name('admin.')->group(function () {
-        
+
         // Rute landing page Admin
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Rute Kategori (Full CRUD)
         Route::resource('kategori', AdminKategoriController::class);
-        
+        Route::post('kategori/batch-delete', [AdminKategoriController::class, 'batchDelete'])->name('kategori.batchDelete');
+
         // Rute Sub-Kategori Index
         Route::get('kategori/{kategori}/subkategori', [AdminSubKategoriController::class, 'index'])->name('kategori.subkategori.index');
-        
+
         // Rute Sub-Kategori (Nested)
-        Route::prefix('kategori/{kategori:id_kategori}/subkategori')->name('kategori.subkategori.')->group(function() {
+        Route::prefix('kategori/{kategori:id_kategori}/subkategori')->name('kategori.subkategori.')->group(function () {
             Route::get('/create', [AdminSubKategoriController::class, 'create'])->name('create');
             Route::post('/', [AdminSubKategoriController::class, 'store'])->name('store');
             Route::get('/{subkategori}/edit', [AdminSubKategoriController::class, 'edit'])->name('edit');
             Route::put('/{subkategori}', [AdminSubKategoriController::class, 'update'])->name('update');
             Route::delete('/{subkategori}', [AdminSubKategoriController::class, 'destroy'])->name('destroy');
+            Route::post('/batch-delete', [AdminSubKategoriController::class, 'batchDelete'])->name('batchDelete');
         });
+
+        // Rute Produk - Pilih Kategori
+        Route::get('produk/select-kategori', [AdminProdukController::class, 'selectKategori'])->name('produk.selectKategori');
 
         // Rute Produk Induk (Full CRUD)
         Route::resource('produk', AdminProdukController::class);
-        
+        Route::post('produk/batch-delete', [AdminProdukController::class, 'batchDelete'])->name('produk.batchDelete');
+
         // Rute Produk Detail Index
         Route::get('produk/{produk}/detail', [AdminProdukDetailController::class, 'index'])->name('produk_detail.index');
-        
+
         // Rute Varian/Detail Produk (Nested)
-        Route::prefix('produk/{produk:id_produk}/detail')->name('produk.detail.')->group(function() {
+        Route::prefix('produk/{produk:id_produk}/detail')->name('produk.detail.')->group(function () {
             Route::get('/create', [AdminProdukDetailController::class, 'create'])->name('create');
             Route::post('/', action: [AdminProdukDetailController::class, 'store'])->name('store');
             Route::get('/{detail}/edit', [AdminProdukDetailController::class, 'edit'])->name('edit');
             Route::put('/{detail}', [AdminProdukDetailController::class, 'update'])->name('update');
             Route::delete('/{detail}', [AdminProdukDetailController::class, 'destroy'])->name('destroy');
-            
+            Route::post('/batch-delete', [AdminProdukDetailController::class, 'batchDelete'])->name('batchDelete');
         });
+
+        // Rute Pesanan
+        Route::get('pesanan', [AdminPesananController::class, 'index'])->name('pesanan.index');
+
+        // Rute Pesanan Detail (nested)
+        Route::prefix('pesanan/{pesanan:id_pesanan}')->name('pesanan_detail.')->group(function () {
+            Route::get('/', [AdminPesananDetailController::class, 'index'])->name('index');
+            Route::post('/verify', [AdminPesananDetailController::class, 'verify'])->name('verify');
+            Route::post('/process', [AdminPesananDetailController::class, 'process'])->name('process');
+            Route::post('/complete', [AdminPesananDetailController::class, 'complete'])->name('complete');
+            Route::post('/cancel', [AdminPesananDetailController::class, 'cancel'])->name('cancel');
+        });
+
+        // Rute Rekap Laporan
+        Route::get('/rekap', [AdminRekapController::class, 'index'])->name('rekap.index');
+        Route::get('/rekap/export/pdf', [AdminRekapController::class, 'exportPDF'])->name('rekap.export.pdf');
+        Route::get('/rekap/export/excel', [AdminRekapController::class, 'exportExcel'])->name('rekap.export.excel');
+
+        // Rute Pelanggan
+        Route::get('pelanggan', [AdminPelangganController::class, 'index'])->name('pelanggan.index');
     });
 
-    // --- Rute Superadmin ---
-    Route::middleware('role:superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
-        // Rute landing page Superadmin
-        Route::get('/dashboard', [AdminUserController::class, 'dashboard'])->name('users.dashboard');
-        
+    Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+
+        // Dashboard (Halaman Awal setelah Login)
+        Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
+        Route::resource('users', SuperAdminUserController::class);
+        Route::resource('payments', MetodePembayaranController::class);
+
+        Route::get('/kontrol-toko', [KontrolTokoController::class, 'index'])->name('kontrol_toko.index');
+        Route::post('/kontrol-toko', [KontrolTokoController::class, 'update'])->name('kontrol_toko.update');
+
+        // --- MANAJEMEN LOGISTIK & TARIF ---
+
+        // 1. Layanan Pengiriman
+        Route::resource('layanan', LayananPengirimanController::class)->except(['create', 'show', 'edit']);
+
+        // 2. Promo Ongkir
+        Route::resource('promo', PromoOngkirController::class)->except(['create', 'show', 'edit']);
+
+        // 3. Wilayah & Jarak
+        Route::get('wilayah', [WilayahPengirimanController::class, 'index'])->name('wilayah.index');
+        Route::put('wilayah/{id}', [WilayahPengirimanController::class, 'update'])->name('wilayah.update');
+        Route::post('wilayah/auto-calculate', [WilayahPengirimanController::class, 'hitungJarakOtomatis'])->name('wilayah.auto');
+
         // Rute CRUD User
-        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
-        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
-        Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+        // Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+        // Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        // Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+        // Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        // Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
-
 });

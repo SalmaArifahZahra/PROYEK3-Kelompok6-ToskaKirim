@@ -22,4 +22,18 @@ class ProdukController extends Controller
 
         return view('customer.produk.detail', compact('produk', 'produkLainnya'));
     }
+    public function search(Request $request)
+    {
+        $keyword = strtolower($request->input('q', ''));
+
+        $produk = Produk::with('detail')
+            ->where(function ($q) use ($keyword) {
+                $q->whereRaw('LOWER(nama) LIKE ?', ['%' . $keyword . '%'])
+                    ->orWhereRaw('LOWER(deskripsi) LIKE ?', ['%' . $keyword . '%']);
+            })
+            ->paginate(12)
+            ->appends(['q' => $keyword]);
+
+        return view('customer.produk.search', compact('produk', 'keyword'));
+    }
 }

@@ -14,29 +14,96 @@ use Illuminate\View\View;
 
 class ProdukController extends Controller
 {
-    // Menampilkan daftar produk (induk) beserta jumlah variannya.
-    public function index(): View
+    // Menampilkan halaman pilih kategori produk.
+    public function selectKategori(): View
     {
-        $produkList = Produk::with('kategori', 'detail')
-                            ->withCount('detail')
-                            ->orderBy('nama', 'asc')
-                            ->paginate(10);
+        $kategoriList = Kategori::whereNull('parent_id')
+                                ->withCount('produk')
+                                ->orderBy('nama_kategori', 'asc')
+                                ->get();
+
+        return view('admin.produk.select_kategori', [
+            'kategoriList' => $kategoriList
+        ]);
+    }
+
+    // Menampilkan daftar produk (induk) beserta jumlah variannya.
+    public function index(Request $request)
+    {
+        $kategoriId = $request->get('kategori');
+        
+        // Validasi kategori exists
+        if ($kategoriId) {
+            $kategori = Kategori::find($kategoriId);
+            if (!$kategori) {
+                return redirect()->route('admin.produk.selectKategori')
+                                 ->with('error', 'Kategori tidak ditemukan.');
+            }
+        } else {
+            return redirect()->route('admin.produk.selectKategori');
+        }
+
+        $query = Produk::with('kategori', 'detail');
+        
+        // Filter by kategori (parent atau child)
+        if ($kategori->parent_id === null) {
+            // Jika kategori parent, ambil semua produk dari parent dan child-nya
+            $childIds = $kategori->children->pluck('id_kategori')->toArray();
+            $allKategoriIds = array_merge([$kategori->id_kategori], $childIds);
+            $query->whereIn('id_kategori', $allKategoriIds);
+        } else {
+            // Jika sub-kategori, ambil produk dari sub-kategori tersebut
+            $query->where('id_kategori', $kategori->id_kategori);
+        }
+        
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'ILIKE', "%{$search}%")
+                  ->orWhere('deskripsi', 'ILIKE', "%{$search}%");
+            });
+        }
+        
+        // Sorting
+        $sortBy = $request->get('sort_by', 'nama');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        $allowedSorts = ['nama', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'nama';
+        }
+        
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
+        
+        $produkList = $query->orderBy($sortBy, $sortOrder)->paginate(15);
 
         return view('admin.produk.index', [
-            'produkList' => $produkList
+            'produkList' => $produkList,
+            'kategori' => $kategori,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder
         ]);
     }
 
     // Menampilkan form untuk membuat produk (induk) baru.
-    public function create(): View
+    public function create(Request $request): View
     {
+        $kategoriId = $request->get('kategori');
+        $kategori = null;
+        
+        if ($kategoriId) {
+            $kategori = Kategori::find($kategoriId);
+        }
+        
         $parentCategories = Kategori::whereNull('parent_id')
                             ->with('children') 
                             ->orderBy('nama_kategori', 'asc')
                             ->get();
         
         return view('admin.produk.create', [
-            'parentCategories' => $parentCategories
+            'parentCategories' => $parentCategories,
+            'kategori' => $kategori
         ]);
     }
 
@@ -55,14 +122,25 @@ class ProdukController extends Controller
         }
 
         $produk = Produk::create($validator->validated());
+        
+        // Ambil kategori untuk redirect ke konteks yang sama
+        $kategori = Kategori::find($produk->id_kategori);
+        $kategoriParam = $kategori->parent_id ?? $kategori->id_kategori;
 
-        return redirect()->route('admin.produk.edit', $produk->id_produk)
+        return redirect()->route('admin.produk.edit', ['produk' => $produk->id_produk, 'kategori' => $kategoriParam])
                          ->with('success', 'Produk berhasil dibuat. Sekarang, tambahkan varian untuk produk ini.');
     }
 
     // Menampilkan form untuk mengedit produk (induk).
-    public function edit(Produk $produk): View
+    public function edit(Request $request, Produk $produk): View
     {
+        $kategoriId = $request->get('kategori');
+        $kategori = null;
+        
+        if ($kategoriId) {
+            $kategori = Kategori::find($kategoriId);
+        }
+        
         $produk->load('kategori');
         $parentCategories = Kategori::whereNull('parent_id')
                             ->with('children') 
@@ -85,6 +163,7 @@ class ProdukController extends Controller
             'parentCategories' => $parentCategories,
             'currentParentId' => $currentParentId,
             'currentSubId' => $currentSubId,
+            'kategori' => $kategori,
         ]);
     }
 
@@ -106,15 +185,35 @@ class ProdukController extends Controller
         }
 
         $produk->update($validator->validated());
+        
+        // Ambil kategori untuk redirect ke konteks yang sama
+        $kategori = Kategori::find($produk->id_kategori);
+        $kategoriParam = $kategori->parent_id ?? $kategori->id_kategori;
 
-        return redirect()->route('admin.produk.index')
+        return redirect()->route('admin.produk.index', ['kategori' => $kategoriParam])
                          ->with('success', 'Data produk berhasil diperbarui.');
     }
 
     // Menghapus produk (induk) beserta semua variannya.
     public function destroy(Produk $produk): RedirectResponse
     {
+        // Simpan kategori sebelum delete untuk redirect
+        $kategori = Kategori::find($produk->id_kategori);
+        $kategoriParam = $kategori ? ($kategori->parent_id ?? $kategori->id_kategori) : null;
+        
+        // Cek apakah ada varian yang masih ada di pesanan
         $produk->load('detail');
+        foreach ($produk->detail as $detail) {
+            if ($detail->pesananDetail()->count() > 0) {
+                if ($kategoriParam) {
+                    return redirect()->route('admin.produk.index', ['kategori' => $kategoriParam])
+                                   ->with('error', 'Produk ini tidak dapat dihapus karena ada varian yang masih ada di pesanan');
+                }
+                return redirect()->route('admin.produk.selectKategori')
+                               ->with('error', 'Produk ini tidak dapat dihapus karena ada varian yang masih ada di pesanan');
+            }
+        }
+        
         foreach ($produk->detail as $detail) {
             if ($detail->foto) {
                 Storage::disk('public')->delete($detail->foto);
@@ -123,7 +222,75 @@ class ProdukController extends Controller
 
         $produk->delete();
 
-        return redirect()->route('admin.produk.index')
+        if ($kategoriParam) {
+            return redirect()->route('admin.produk.index', ['kategori' => $kategoriParam])
+                             ->with('success', 'Produk dan semua variannya berhasil dihapus.');
+        }
+        
+        return redirect()->route('admin.produk.selectKategori')
                          ->with('success', 'Produk dan semua variannya berhasil dihapus.');
+    }
+
+    // Menghapus banyak produk sekaligus
+    public function batchDelete(Request $request): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        $kategoriId = $request->input('kategori');
+        
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada produk yang dipilih.');
+        }
+
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($ids as $id) {
+            $produk = Produk::find($id);
+            
+            if ($produk) {
+                // Cek apakah ada varian yang masih ada di pesanan
+                $produk->load('detail');
+                $hasOrderedVariant = false;
+                
+                foreach ($produk->detail as $detail) {
+                    if ($detail->pesananDetail()->count() > 0) {
+                        $hasOrderedVariant = true;
+                        break;
+                    }
+                }
+                
+                if ($hasOrderedVariant) {
+                    $errors[] = "Produk {$produk->nama} masih ada di pesanan";
+                    continue;
+                }
+                
+                // Hapus foto semua varian
+                foreach ($produk->detail as $detail) {
+                    if ($detail->foto) {
+                        Storage::disk('public')->delete($detail->foto);
+                    }
+                }
+                $produk->delete();
+                $deletedCount++;
+            }
+        }
+
+        if ($deletedCount > 0 && empty($errors)) {
+            if ($kategoriId) {
+                return redirect()->route('admin.produk.index', ['kategori' => $kategoriId])
+                               ->with('success', "{$deletedCount} produk berhasil dihapus");
+            }
+            return redirect()->route('admin.produk.selectKategori')
+                           ->with('success', "{$deletedCount} produk berhasil dihapus");
+        } elseif ($deletedCount > 0 && !empty($errors)) {
+            if ($kategoriId) {
+                return redirect()->route('admin.produk.index', ['kategori' => $kategoriId])
+                               ->with('warning', "{$deletedCount} produk berhasil dihapus, namun beberapa gagal: " . implode(', ', $errors));
+            }
+            return redirect()->route('admin.produk.selectKategori')
+                           ->with('warning', "{$deletedCount} produk berhasil dihapus, namun beberapa gagal: " . implode(', ', $errors));
+        } else {
+            return back()->with('error', 'Gagal menghapus produk: ' . implode(', ', $errors));
+        }
     }
 }

@@ -16,10 +16,12 @@ class Pesanan extends Model
 
     protected $table = 'pesanan';
     protected $primaryKey = 'id_pesanan';
+    protected $guarded = ['id_pesanan'];
 
     protected $fillable = [
         'id_user',
         'id_ongkir',
+        'id_layanan_pengiriman',
         'waktu_pesanan',
         'subtotal_produk',
         'grand_total',
@@ -44,6 +46,11 @@ class Pesanan extends Model
     public function ongkir(): BelongsTo
     {
         return $this->belongsTo(Ongkir::class, 'id_ongkir', 'id_ongkir');
+    }
+
+    public function layananPengiriman(): BelongsTo
+    {
+        return $this->belongsTo(LayananPengiriman::class, 'id_layanan_pengiriman', 'id');
     }
 
     public function pembayaran(): HasOne

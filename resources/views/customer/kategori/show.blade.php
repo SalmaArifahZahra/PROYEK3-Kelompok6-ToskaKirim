@@ -6,8 +6,7 @@
     <div class="max-w-6xl mx-auto flex gap-6">
 
         <aside class="w-1/4 bg-white p-5 rounded-lg shadow">
-            <h3 class="font-bold mb-3">{{ $kategoriUtama->nama_kategori }}</h3>
-
+            <h3 class="font-bold mb-3">{{ $kategoriUtama->nama_kategori ?? 'Kategori' }}</h3>
             <ul>
                 @foreach ($subKategoris as $sub)
                     <li class="mb-2">
@@ -23,8 +22,18 @@
         <div class="flex-1">
 
             <h2 class="text-xl font-semibold mb-4">
-                Home > {{ $kategoriUtama->nama_kategori }} > {{ $activeSubKategori->nama_kategori }}
+                <a href="{{ route('customer.dashboard') }}" class="text-gray-800 hover:underline">Home</a>
+                >
+                <a href="{{ route('customer.kategori.show', $kategoriUtama->id_kategori) }}"
+                    class="text-gray-800 hover:underline">
+                    {{ $kategoriUtama->nama_kategori }}
+                </a>
+                >
+                <span class="font-semibold text-blue-600">
+                    {{ $activeSubKategori->nama_kategori }}
+                </span>
             </h2>
+
 
             @include('component.customer.card_produk', [
                 'produk' => $produkList,

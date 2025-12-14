@@ -13,15 +13,34 @@ use Illuminate\Validation\Rule;
 class SubKategoriController extends Controller
 {
     // Menampilkan daftar sub-kategori dari kategori tertentu.
-    public function index(Kategori $kategori): View
+    public function index(Request $request, Kategori $kategori): View
     {
-        $subKategoriList = Kategori::where('parent_id', $kategori->id_kategori)
-                                    ->orderBy('nama_kategori', 'asc')
-                                    ->get();
+        $query = Kategori::where('parent_id', $kategori->id_kategori);
+        
+        // Filter pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('nama_kategori', 'ILIKE', "%{$search}%");
+        }
+        
+        // Sorting
+        $sortBy = $request->get('sort_by', 'nama_kategori');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        $allowedSorts = ['nama_kategori', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'nama_kategori';
+        }
+        
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
+        
+        $subKategoriList = $query->orderBy($sortBy, $sortOrder)->paginate(15);
 
         return view('admin.subkategori.index', [
             'kategori' => $kategori,
-            'subKategoriList' => $subKategoriList
+            'subKategoriList' => $subKategoriList,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder
         ]);
     }
 
@@ -58,7 +77,8 @@ class SubKategoriController extends Controller
         Kategori::create($data);
 
         return redirect()->route('admin.kategori.subkategori.index', $kategori->id_kategori)
-                         ->with('success', 'Sub-kategori berhasil ditambahkan.');
+
+        ->with('success', 'Sub-kategori berhasil ditambahkan.');
     }
 
     // Menampilkan form untuk mengedit sub-kategori.
@@ -117,5 +137,36 @@ class SubKategoriController extends Controller
 
         return redirect()->route('admin.kategori.subkategori.index', $kategori->id_kategori)
                          ->with('success', 'Sub-kategori berhasil dihapus.');
+    }
+
+    // Menghapus banyak sub-kategori sekaligus  
+    public function batchDelete(Request $request, Kategori $kategori): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada sub-kategori yang dipilih.');
+        }
+
+        $deletedCount = 0;
+
+        foreach ($ids as $id) {
+            $subkategori = Kategori::find($id);
+            
+            if ($subkategori && $subkategori->parent_id == $kategori->id_kategori) {
+                if ($subkategori->foto && file_exists(public_path($subkategori->foto))) {
+                    unlink(public_path($subkategori->foto));
+                }
+                $subkategori->delete();
+                $deletedCount++;
+            }
+        }
+
+        if ($deletedCount > 0) {
+            return redirect()->route('admin.kategori.subkategori.index', $kategori->id_kategori)
+                           ->with('success', "{$deletedCount} sub-kategori berhasil dihapus");
+        }
+        
+        return back()->with('error', 'Tidak ada sub-kategori yang berhasil dihapus');
     }
 }

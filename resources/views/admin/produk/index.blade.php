@@ -2,7 +2,6 @@
 
 @section('title', 'Produk')
 
-{{-- Tambahkan CDN SweetAlert2 jika belum ada di layout_admin --}}
 @section('styles')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
@@ -11,24 +10,43 @@
 
 <div class="space-y-6">
 
+    @include('component.admin.breadcrumb', [
+        'items' => [
+            ['label' => 'Produk', 'url' => route('admin.produk.selectKategori')],
+            ['label' => $kategori->nama_kategori ?? 'Semua Produk']
+        ]
+    ])
+
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800">Produk</h1>
+        <div>
+            <p class="text-sm text-gray-600">
+                <a href="{{ route('admin.produk.selectKategori') }}" class="text-[#5BC6BC] hover:underline">
+                    <i class="fas fa-arrow-left mr-1"></i> Kembali ke Pilih Kategori
+                </a>
+            </p>
+        </div>
     </div>
 
     <div class="flex items-center justify-between">
         @include('component.admin.search_bar', ['placeholder' => 'Search for Produk'])
 
         <div class="flex items-center gap-3">
-            <button class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+            <button id="batch-delete-btn" disabled class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fas fa-trash text-xl"></i>
             </button>
 
-            <a href="{{ route('admin.produk.create') }}" class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
+            <a href="{{ route('admin.produk.create', ['kategori' => $kategori->id_kategori]) }}" class="flex items-center gap-2 px-4 py-2 bg-[#5BC6BC] text-white rounded-lg hover:bg-[#4aa89e] transition-colors">
                 <i class="fas fa-plus"></i>
                 <span class="font-medium">Tambah Produk</span>
             </a>
         </div>
     </div>
+
+    <!-- Hidden form for batch delete -->
+    <form id="batch-delete-form" action="{{ route('admin.produk.batchDelete') }}" method="POST" style="display: none;">
+        @csrf
+        <input type="hidden" name="kategori" value="{{ $kategori->id_kategori }}">
+    </form>
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
@@ -36,10 +54,16 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-4 text-left">
-                            <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
+                            <input type="checkbox" id="select-all" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
                         </th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Produk</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kategori</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                            <a href="{{ route('admin.produk.index', array_merge(['kategori' => $kategori->id_kategori], request()->except(['sort_by', 'sort_order']), ['sort_by' => 'nama', 'sort_order' => $sortBy === 'nama' && $sortOrder === 'asc' ? 'desc' : 'asc'])) }}"
+                               class="flex items-center gap-2 hover:text-[#5BC6BC] transition-colors">
+                                Nama Produk
+                                <i class="fas fa-{{ $sortBy === 'nama' ? ($sortOrder === 'asc' ? 'sort-up' : 'sort-down') : 'sort' }} text-xs"></i>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Sub-Kategori</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Deskripsi</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                     </tr>
@@ -48,24 +72,31 @@
                     @forelse($produkList as $produk)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]">
+                            <input type="checkbox" class="item-checkbox rounded border-gray-300 text-[#5BC6BC] focus:ring-[#5BC6BC]" value="{{ $produk->id_produk }}">
                         </td>
                         <td class="px-6 py-4 text-sm font-medium text-gray-800">
                             {{ $produk->nama }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $produk->kategori->nama_kategori ?? '-' }}
+                            @if($produk->kategori)
+                                @if($produk->kategori->parent_id)
+                                    {{ $produk->kategori->nama_kategori }}
+                                @else
+                                    <span class="text-gray-400 italic">-</span>
+                                @endif
+                            @else
+                                <span class="text-gray-400 italic">-</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
                             {{ Str::limit($produk->deskripsi, 50) }}
                         </td>
                         <td class="px-6 py-4">
-                            {{-- Kita kirim parameter data-nama untuk SweetAlert --}}
                             @include('component.admin.table_actions', [
-                                // 'showEllipsis' => route('admin.produk_detail.index', $produk->id_produk), // Jika ingin ke detail
-                                'editUrl' => route('admin.produk.edit', $produk->id_produk),
+                                'detailUrl' => route('admin.produk_detail.index', ['produk' => $produk->id_produk, 'kategori' => $kategori->id_kategori]),
+                                'editUrl' => route('admin.produk.edit', ['produk' => $produk->id_produk, 'kategori' => $kategori->id_kategori]),
                                 'deleteUrl' => route('admin.produk.destroy', $produk->id_produk),
-                                'dataNama' => $produk->nama // Variabel tambahan untuk custom component (lihat di bawah)
+                                'dataNama' => $produk->nama
                             ])
                         </td>
                     </tr>
@@ -86,18 +117,85 @@
 
     @if(method_exists($produkList, 'hasPages') && $produkList->hasPages())
         <div class="mt-6">
-            {{ $produkList->links() }} 
-            {{-- Atau gunakan kode manual pagination Anda yang sebelumnya --}}
+            {{ $produkList->appends(request()->except('page'))->links() }}
         </div>
     @endif
 
 </div>
 
-{{-- SCRIPT SWEETALERT --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('select-all');
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        const batchDeleteBtn = document.getElementById('batch-delete-btn');
+        const batchDeleteForm = document.getElementById('batch-delete-form');
+
+        // Select all functionality
+        selectAll.addEventListener('change', function() {
+            itemCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBatchDeleteButton();
+        });
+
+        // Individual checkbox change
+        itemCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectAllState();
+                updateBatchDeleteButton();
+            });
+        });
+
+        // Update select-all checkbox state
+        function updateSelectAllState() {
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+            selectAll.checked = checkedCount === itemCheckboxes.length && checkedCount > 0;
+            selectAll.indeterminate = checkedCount > 0 && checkedCount < itemCheckboxes.length;
+        }
+
+        // Enable/disable batch delete button
+        function updateBatchDeleteButton() {
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+            batchDeleteBtn.disabled = checkedCount === 0;
+        }
+
+        // Batch delete confirmation
+        batchDeleteBtn.addEventListener('click', function() {
+            const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
+            const ids = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if (ids.length === 0) return;
+
+            Swal.fire({
+                title: 'Hapus Produk Terpilih?',
+                text: `${ids.length} produk beserta semua variannya akan dihapus. Tindakan ini tidak dapat dibatalkan!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Clear existing inputs
+                    const existingInputs = batchDeleteForm.querySelectorAll('input[name="ids[]"]');
+                    existingInputs.forEach(input => input.remove());
+
+                    // Add selected IDs to form
+                    ids.forEach(id => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'ids[]';
+                        input.value = id;
+                        batchDeleteForm.appendChild(input);
+                    });
+
+                    // Submit form
+                    batchDeleteForm.submit();
+                }
+            });
+        });
         
-        // 1. Cek Flash Message Success (Dari Controller)
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -108,7 +206,6 @@
             });
         @endif
 
-        // 2. Cek Flash Message Error
         @if(session('error'))
             Swal.fire({
                 icon: 'error',
@@ -118,8 +215,15 @@
             });
         @endif
 
-        // 3. Handle Tombol Delete dengan Class 'swal-delete'
-        // Kita gunakan Event Delegation agar aman untuk element dinamis
+        @if(session('warning'))
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian!',
+                text: "{{ session('warning') }}",
+                confirmButtonColor: '#5BC6BC'
+            });
+        @endif
+
         const deleteForms = document.querySelectorAll('.swal-delete');
         
         deleteForms.forEach(form => {
