@@ -27,66 +27,103 @@ class WilayahPengirimanController extends Controller
     }
 
     // --- FITUR BARU: HITUNG OTOMATIS (GRATIS) ---
-    public function hitungJarakOtomatis(Request $request)
+   public function hitungJarakOtomatis(Request $request)
     {
-        // 1. Ambil 5 wilayah yang jaraknya masih 0
-        // (Kita batasi 5 agar server OpenStreetMap tidak memblokir kita karena spam)
-        $wilayah = WilayahPengiriman::where('jarak_km', 0)->take(5)->get();
+        // 1. SETTING SUPER
+        set_time_limit(300); // 5 Menit maks
+        ini_set('memory_limit', '512M');
+
+        // 2. AMBIL 20 DATA (Batch)
+        $wilayah = WilayahPengiriman::where('jarak_km', '<', 0.1)->take(20)->get();
+        $sisaAntrian = WilayahPengiriman::where('jarak_km', '<', 0.1)->count();
 
         if ($wilayah->isEmpty()) {
-            return back()->with('success', 'Semua wilayah sudah memiliki data jarak!');
+            return back()->with('success', 'Semua data jarak sudah terisi!');
         }
 
-        // 2. Setting Koordinat Toko 
+        // Koordinat Toko (Pastikan Akurat)
         $tokoLat = -6.9205437;
         $tokoLon = 107.6720667;
 
         $updated = 0;
-        $client = new \GuzzleHttp\Client(); // Library request bawaan Laravel
+        $logs = []; // Simpan log apa yang terjadi
+        
+        // Client HTTP
+        $client = new \GuzzleHttp\Client(['verify' => false, 'timeout' => 10]); 
 
         foreach ($wilayah as $w) {
-            // Format pencarian: "Kelurahan, Kecamatan, Kota"
-            $query = "{$w->kelurahan}, {$w->kecamatan}, {$w->kota_kabupaten}";
+            
+            // Bersihkan teks dari spasi berlebih
+            $kel = trim($w->kelurahan);
+            $kec = trim($w->kecamatan);
+            $kot = trim($w->kota_kabupaten);
 
-            try {
-                // Request ke API Nominatim (Gratis)
-                $response = $client->get('https://nominatim.openstreetmap.org/search', [
-                    'headers' => [
-                        'User-Agent' => 'ToskaKirimApp/1.0 (admin@toskakirim.com)' // Wajib isi User-Agent
-                    ],
-                    'query' => [
-                        'q' => $query,
-                        'format' => 'json',
-                        'limit' => 1
-                    ]
-                ]);
+            // --- STRATEGI BERLAPIS (PRIORITAS PENCARIAN) ---
+            $queries = [
+                // 1. Paling Akurat
+                "$kel, $kec, $kot",
+                // 2. Coba tanpa Kecamatan (Sering berhasil di sini)
+                "$kel, $kot",
+                // 3. Coba Kecamatan saja (Fallback biar gak 0)
+                "$kec, $kot",
+                // 4. Coba Kota saja (Darurat terakhir)
+                "$kot"
+            ];
 
-                $data = json_decode($response->getBody(), true);
+            $found = false;
 
-                if (!empty($data)) {
-                    $destLat = $data[0]['lat'];
-                    $destLon = $data[0]['lon'];
-
-                    // Hitung Jarak Garis Lurus (Rumus Haversine)
-                    $jarakKm = $this->hitungJarakHaversine($tokoLat, $tokoLon, $destLat, $destLon);
+            foreach ($queries as $q) {
+                try {
+                    $response = $client->get('https://nominatim.openstreetmap.org/search', [
+                        'headers' => ['User-Agent' => 'ToskaKirimApp/1.0'],
+                        'query' => [
+                            'q' => $q,
+                            'format' => 'json',
+                            'limit' => 1
+                        ]
+                    ]);
                     
-                    // Faktor Koreksi: Jalan raya biasanya 1.3x lebih jauh dari garis lurus
-                    $jarakRuteEstimasi = $jarakKm * 1.3; 
+                    $data = json_decode($response->getBody(), true);
 
-                    // Simpan ke database (3 angka belakang koma)
-                    $w->update(['jarak_km' => round($jarakRuteEstimasi, 3)]);
-                    $updated++;
-                    
-                    // Jeda 1 detik (sopan santun ke server gratisan)
-                    sleep(1); 
+                    if (!empty($data)) {
+                        // KETEMU!
+                        $destLat = $data[0]['lat'];
+                        $destLon = $data[0]['lon'];
+
+                        // Hitung
+                        $jarakKm = $this->hitungJarakHaversine($tokoLat, $tokoLon, $destLat, $destLon);
+                        $jarakRute = $jarakKm * 1.3; 
+
+                        // Update & Break (Keluar dari loop pencarian)
+                        $w->update(['jarak_km' => round($jarakRute, 3)]);
+                        $updated++;
+                        $found = true;
+                        
+                        // Jeda 1 detik (Wajib, aturan OpenStreetMap)
+                        sleep(1);
+                        break; 
+                    }
+
+                } catch (\Exception $e) {
+                    // Lanjut ke query berikutnya
+                    continue;
                 }
-            } catch (\Exception $e) {
-                // Jika gagal, lanjut ke wilayah berikutnya
-                continue; 
+            }
+
+            if (!$found) {
+                // Catat nama wilayah yang bandel banget gak ketemu
+                $logs[] = "$kel ($kec)";
             }
         }
 
-        return back()->with('success', "Berhasil menghitung jarak untuk $updated wilayah secara otomatis!");
+        // Susun Pesan
+        $msg = "Batch Selesai! Sukses Update: $updated data. Sisa Antrian: " . ($sisaAntrian - 20);
+        
+        if (!empty($logs)) {
+            $msg .= ". Gagal menemukan: " . implode(', ', array_slice($logs, 0, 3));
+        }
+
+        return back()->with('success', $msg);
     }
 
     // --- RUMUS MATEMATIKA (Private) ---

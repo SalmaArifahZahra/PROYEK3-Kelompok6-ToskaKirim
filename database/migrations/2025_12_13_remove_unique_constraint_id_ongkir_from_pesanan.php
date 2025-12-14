@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,11 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pengaturan', function (Blueprint $table) {
-            $table->bigIncrements('id_pengaturan'); // diisi 1 baris saja
-            $table->decimal('tarif_per_km', 10, 2);
-            $table->string('foto_qris', 255);
-        });
+        // Use raw SQL to safely drop the constraint if it exists
+        DB::statement("ALTER TABLE pesanan DROP CONSTRAINT IF EXISTS pesanan_id_ongkir_unique CASCADE");
     }
 
     /**
@@ -23,6 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pengaturan');
+        // Rollback not needed
     }
 };

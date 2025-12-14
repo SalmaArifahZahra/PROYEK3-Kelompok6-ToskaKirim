@@ -1,4 +1,4 @@
-@extends('layouts.layout_superadmin')
+@extends('layouts.layout_admin')
 
 @section('title', 'Database Wilayah')
 
@@ -16,10 +16,36 @@
                 @csrf
                 <button type="submit" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm text-sm font-medium">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Hitung Jarak (API Google)
+                    Hitung Jarak Otomatis
                 </button>
             </form>
         </div>
+    </div>
+
+    <div class="mb-4">
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Berhasil!</strong>
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Gagal!</strong>
+                <span class="block sm:inline">{{ session('error') }}</span>
+            </div>
+        @endif
+        
+        @if($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -41,6 +67,7 @@
                 <tbody class="divide-y divide-gray-100 text-sm" id="tableContent">
                     @foreach($wilayah as $w)
                     <tr class="hover:bg-gray-50 transition">
+                        
                         <td class="px-6 py-4">
                             <div class="font-medium text-gray-800">{{ $w->kecamatan }}</div>
                             <div class="text-xs text-gray-500">{{ $w->kota_kabupaten }}</div>
@@ -49,25 +76,25 @@
                             {{ $w->kelurahan }}
                         </td>
                         
-                        <form action="{{ route('superadmin.wilayah.update', $w->id) }}" method="POST">
-                            @csrf @method('PUT')
-                            <td class="px-6 py-4 text-center">
-                                <div class="relative inline-block w-24">
-                                    <input type="number" step="0.001" name="jarak_km" value="{{ $w->jarak_km }}" 
-                                           class="w-full px-2 py-1 text-center border rounded border-gray-300 focus:border-[#2A9D8F] focus:ring-1 focus:ring-[#2A9D8F] font-mono text-gray-700 font-bold"
-                                           {{ $w->jarak_km > 0 ? 'readonly' : '' }}> <span class="absolute right-[-25px] top-1 text-gray-400 text-xs">km</span>
+                        <td class="px-6 py-4 text-center" colspan="2">
+                            <form action="{{ route('superadmin.wilayah.update', $w->id) }}" method="POST" class="flex items-center justify-center gap-2">
+                                @csrf 
+                                @method('PUT')
+                                
+                                <div class="relative w-24">
+                                    <input type="number" 
+                                        step="0.001" 
+                                        name="jarak_km" 
+                                        value="{{ $w->jarak_km }}" 
+                                        class="w-full px-2 py-1 text-center border rounded border-gray-300 focus:border-[#2A9D8F] focus:ring-1 focus:ring-[#2A9D8F] font-mono text-gray-700 font-bold">
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($w->jarak_km == 0)
-                                    <button type="submit" class="text-[#2A9D8F] hover:text-[#21867a] font-medium text-xs border border-[#2A9D8F] px-3 py-1 rounded">
-                                        Simpan
-                                    </button>
-                                @else
-                                    <span class="text-green-600 text-xs font-bold bg-green-100 px-2 py-1 rounded-full">✓ Terisi</span>
-                                @endif
-                            </td>
-                        </form>
+                                <span class="text-xs text-gray-400">km</span>
+
+                                <button type="submit" class="ml-2 text-white bg-[#2A9D8F] hover:bg-[#21867a] focus:ring-2 focus:ring-teal-300 font-medium rounded text-xs px-3 py-1.5 transition">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
