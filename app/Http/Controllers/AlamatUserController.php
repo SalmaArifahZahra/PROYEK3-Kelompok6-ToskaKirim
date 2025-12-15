@@ -57,7 +57,7 @@ class AlamatUserController extends Controller
     }
 
     // Ambil detail alamat tertentu (JSON)
-    public function showApi($alamat) 
+    public function showApi($alamat)
     {
         $alamat = AlamatUser::where('id_alamat', $alamat)->first();
 
