@@ -42,34 +42,23 @@ class PesananController extends Controller
     // Menampilkan halaman konfirmasi pesanan dari keranjang
     public function checkoutFromCart(Request $request)
     {
-        // 1. Parsing & Validasi Item dari Keranjang
         $itemsData = $this->parseItems($request->input('items'));
         if (!$itemsData) {
             return redirect()->route('customer.keranjang.index')
                 ->with('error', 'Tidak ada produk yang dipilih.');
         }
 
-        // 2. Cek Alamat Utama
         $user = Auth::user();
         $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
 
-        if (!$alamatUtama) {
-            return redirect()->route('customer.alamat.create')
-                ->with('error', 'Silahkan atur alamat utama sebelum memesan.');
-        }
-
         try {
-            // 3. Hitung Subtotal & Cek Stok (Tanpa mengurangi stok)
             $summary = $this->calculateOrderSummary($itemsData, false);
         } catch (\Exception $e) {
             return redirect()->route('customer.keranjang.index')->with('error', $e->getMessage());
         }
 
-        // 4. Load Data Pendukung
         $paymentMethods = MetodePembayaran::where('is_active', 1)->get();
         $layananPengiriman = LayananPengiriman::where('is_active', 1)->get();
-
-        // 5. Hitung Estimasi Ongkir (Default layanan pertama)
         $selectedLayanan = $layananPengiriman->first();
         $ongkir = 0;
 
@@ -98,60 +87,63 @@ class PesananController extends Controller
             'items' => 'required|json',
             'metode_pembayaran' => 'required',
             'id_layanan_pengiriman' => 'nullable|exists:layanan_pengiriman,id',
+            'id_alamat' => 'nullable|exists:alamat_user,id_alamat',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $user = Auth::user();
-        $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
 
-        // Parsing Item
+        // Jika ada id_alamat dari modal, gunakan itu. Jika tidak, gunakan alamat utama
+        $alamat = null;
+        if ($request->id_alamat) {
+            $alamat = $user->alamatUser()->where('id_alamat', $request->id_alamat)->first();
+        } else {
+            $alamat = $user->alamatUser()->where('is_utama', true)->first();
+        }
+
+        if (!$alamat) {
+            return redirect()->route('customer.keranjang.index')
+                ->with('error', 'Alamat tidak ditemukan. Silakan atur alamat terlebih dahulu.');
+        }
+
         $itemsData = $this->parseItems($request->input('items'));
         if (!$itemsData) {
             return redirect()->route('customer.keranjang.index')->with('error', 'Data keranjang tidak valid.');
         }
 
-        // Fallback Layanan Pengiriman
         $idLayanan = $request->id_layanan_pengiriman ?? LayananPengiriman::where('is_active', 1)->value('id');
         if (!$idLayanan) return back()->with('error', 'Layanan pengiriman tidak tersedia.');
 
         DB::beginTransaction();
         try {
-            // 1. Hitung Ongkir Real
             $ongkirService = new OngkirService();
-            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamatUtama->id_alamat);
+            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamat->id_alamat);
 
             if (!empty($ongkirData['error'])) {
                 throw new \Exception('Gagal menghitung ongkir: ' . $ongkirData['error']);
             }
-
-            // 2. Validasi Stok & Hitung Subtotal (Sekaligus kurangi stok)
             $summary = $this->calculateOrderSummary($itemsData, true);
-
-            // 3. Simpan Data Ongkir
             $ongkirRecord = Ongkir::create([
                 'jarak' => $ongkirData['jarak'],
                 'tarif_per_km' => $ongkirData['tarif_per_km'],
                 'total_ongkir' => $ongkirData['total_ongkir']
             ]);
 
-            // 4. Tentukan Status Pesanan
             $statusPesanan = $this->determineOrderStatus($request);
 
-            // 5. Buat Header Pesanan
             $pesanan = Pesanan::create([
                 'id_user' => $user->id_user,
                 'id_ongkir' => $ongkirRecord->id_ongkir,
                 'id_layanan_pengiriman' => $idLayanan,
                 'waktu_pesanan' => now(),
                 'status_pesanan' => $statusPesanan,
-                'penerima_nama' => $alamatUtama->nama_penerima,
-                'penerima_telepon' => $alamatUtama->telepon_penerima,
-                'alamat_lengkap' => "{$alamatUtama->jalan_patokan}, {$alamatUtama->kelurahan}, {$alamatUtama->kecamatan}, {$alamatUtama->kota_kabupaten}",
+                'penerima_nama' => $alamat->nama_penerima,
+                'penerima_telepon' => $alamat->telepon_penerima,
+                'alamat_lengkap' => "{$alamat->jalan_patokan}, {$alamat->kelurahan}, {$alamat->kecamatan}, {$alamat->kota_kabupaten}",
                 'subtotal_produk' => $summary['subtotal'],
                 'grand_total' => $summary['subtotal'] + $ongkirData['total_ongkir']
             ]);
 
-            // 6. Simpan Detail Pesanan
             foreach ($summary['items'] as $item) {
                 PesananDetail::create([
                     'id_pesanan' => $pesanan->id_pesanan,
@@ -162,12 +154,10 @@ class PesananController extends Controller
                 ]);
             }
 
-            // 7. Simpan Pembayaran (Jika ada bukti bayar langsung)
             if ($request->hasFile('bukti_bayar') && $request->metode_pembayaran !== 'COD') {
                 $this->savePaymentProof($request, $pesanan);
             }
 
-            // 8. Bersihkan Keranjang
             $productIds = array_column($itemsData, 'id_produk_detail');
             Keranjang::where('id_user', $user->id_user)
                 ->whereIn('id_produk_detail', $productIds)

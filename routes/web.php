@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [CustomerKeranjangController::class, 'index'])->name('index');
             Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
             Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
+            Route::delete('/bulk/destroy', [CustomerKeranjangController::class, 'destroyBulk'])->name('destroyBulk');
             Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
 
             // Route Checkout Utama (POST)
@@ -135,7 +136,7 @@ Route::middleware(['auth'])->group(function () {
 
             Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
         });
-        
+
         Route::prefix('alamat')->name('alamat.')->group(function () {
             Route::get('/', [AlamatUserController::class, 'index'])->name('index');
             Route::get('/create', [AlamatUserController::class, 'create'])->name('create');

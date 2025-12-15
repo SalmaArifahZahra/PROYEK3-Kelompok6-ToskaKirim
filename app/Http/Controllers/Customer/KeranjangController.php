@@ -24,7 +24,7 @@ class KeranjangController extends Controller
             ->get();
 
         $cartCount = $keranjang->sum('quantity');
-        
+
         return view('customer.keranjang.index', compact('keranjang', 'produks', 'cartCount'));
     }
 
@@ -66,6 +66,24 @@ class KeranjangController extends Controller
         }
 
         return back()->with('error', 'Produk tidak ditemukan.');
+    }
+    public function destroyBulk(Request $request)
+    {
+        $request->validate([
+            'selected_ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $request->input('selected_ids'));
+
+        $deleted = Keranjang::whereIn('id_produk_detail', $ids)
+            ->where('id_user', auth()->id())
+            ->delete();
+
+        if ($deleted) {
+            return back()->with('success', 'Produk terpilih berhasil dihapus.');
+        }
+
+        return back()->with('error', 'Gagal menghapus produk atau produk tidak ditemukan.');
     }
 
     public function updateQty(Request $request, $id)
