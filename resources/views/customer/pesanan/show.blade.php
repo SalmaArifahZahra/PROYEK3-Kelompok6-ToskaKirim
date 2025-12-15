@@ -33,7 +33,7 @@
             <ol class="flex items-center gap-2">
                 <li><a href="{{ route('customer.pesanan.index') }}" class="hover:underline">Pesanan Saya</a></li>
                 <li>/</li>
-                <li class="text-slate-700 font-medium">INV-{{ $pesanan->id_pesanan }}</li>
+                <li class="text-slate-700 font-medium">ID Pesanan-{{ $pesanan->id_pesanan }}</li>
             </ol>
             
             <span class="text-xs text-slate-400">
@@ -218,27 +218,42 @@
                     </div>
 
                 @elseif($pesanan->status_pesanan->value == 'diproses' || $pesanan->status_pesanan->value == 'dikirim')
-                     <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                         <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                             <h3 class="font-bold text-slate-700">Lacak Pengiriman</h3>
+                            <h3 class="font-bold text-slate-700">Lacak Pengiriman</h3>
                         </div>
                         <div class="p-6 text-center">
                             <div class="bg-teal-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="fas fa-shipping-fast text-2xl text-teal-500"></i>
                             </div>
+                            
                             @if($pesanan->status_pesanan->value == 'dikirim')
                                 <h4 class="font-bold text-slate-800">Paket Sedang Dikirim</h4>
                                 <p class="text-sm text-slate-500 mt-2">Kurir sedang mengantar paket ke alamat tujuan.</p>
+                                
+                                {{-- TOMBOL PESANAN SELESAI (BARU) --}}
+                                <div class="mt-6 pt-6 border-t border-slate-100">
+                                    <p class="text-sm text-slate-600 mb-3">Sudah menerima paket?</p>
+                                    
+                                    <form action="{{ route('customer.pesanan.selesai', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin paket sudah diterima dengan baik? Status akan menjadi Selesai.');">
+                                        @csrf
+                                        <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-lg font-bold shadow-lg shadow-teal-500/30 hover:bg-teal-700 transition-transform active:scale-95">
+                                            <i class="fas fa-check-circle mr-2"></i> Pesanan Diterima
+                                        </button>
+                                    </form>
+                                </div>
+
                             @else
                                 <h4 class="font-bold text-slate-800">Sedang Dikemas</h4>
                                 <p class="text-sm text-slate-500 mt-2">Penjual sedang menyiapkan barang pesanan Anda.</p>
                             @endif
 
-                            <button class="w-full mt-6 bg-slate-100 text-slate-600 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors">
+                            {{-- Tombol Lacak (Opsional, jika ada link tracking) --}}
+                            {{-- <button class="w-full mt-4 bg-slate-100 text-slate-600 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors">
                                 Lihat Detail Pelacakan
-                            </button>
+                            </button> --}}
                         </div>
-                     </div>
+                    </div>
                 @endif
 
             </div>

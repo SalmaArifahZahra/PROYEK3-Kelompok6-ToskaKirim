@@ -313,7 +313,7 @@ class PesananController extends Controller
     private function determineOrderStatus(Request $request)
     {
         if ($request->metode_pembayaran === 'COD') {
-            return StatusPesananEnum::DIPROSES;
+            return StatusPesananEnum::MENUNGGU_VERIFIKASI;
         }
         if ($request->hasFile('bukti_bayar')) {
             return StatusPesananEnum::MENUNGGU_VERIFIKASI;
@@ -350,5 +350,18 @@ class PesananController extends Controller
 
         return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
             ->with('success', 'Pesanan berhasil. Silahkan lakukan pembayaran.');
+    }
+
+    public function selesai($id)
+    {
+        $pesanan = Pesanan::where('id_user', Auth::id())->findOrFail($id);
+        if ($pesanan->status_pesanan == StatusPesananEnum::DIKIRIM) {
+            
+            $pesanan->update([
+                'status_pesanan' => StatusPesananEnum::SELESAI,
+            ]);
+            return back()->with('success', 'Terima kasih! Pesanan telah diselesaikan.');
+        }
+        return back()->with('error', 'Pesanan tidak dapat diselesaikan saat ini.');
     }
 }

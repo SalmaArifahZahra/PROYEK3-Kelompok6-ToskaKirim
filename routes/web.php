@@ -90,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
             Route::post('/{id}/upload', [CustomerPesananController::class, 'uploadBukti'])->name('upload');
             Route::post('/{id}/cancel', [CustomerPesananController::class, 'cancel'])->name('cancel');
+            Route::post('/{id}/selesai', [CustomerPesananController::class, 'selesai'])->name('selesai');
         });
 
         // Alamat APIs
