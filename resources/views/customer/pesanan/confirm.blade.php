@@ -8,15 +8,15 @@
 
 @section('content')
 
-<div class="max-w-5xl mx-auto my-8 px-4 relative z-10">
+    <div class="max-w-5xl mx-auto my-8 px-4 relative z-10">
 
-    <nav class="text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
-        <ol class="flex items-center gap-2">
-            <li><a href="{{ route('customer.keranjang.index') }}" class="hover:underline">Keranjang</a></li>
-            <li>/</li>
-            <li class="text-slate-700 font-medium">Konfirmasi & Pembayaran</li>
-        </ol>
-    </nav>
+        <nav class="text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center gap-2">
+                <li><a href="{{ route('customer.keranjang.index') }}" class="hover:underline">Keranjang</a></li>
+                <li>/</li>
+                <li class="text-slate-700 font-medium">Konfirmasi & Pembayaran</li>
+            </ol>
+        </nav>
 
         <form action="{{ route('customer.pesanan.store') }}" method="POST" enctype="multipart/form-data" id="checkoutForm">
             @csrf
@@ -45,7 +45,6 @@
                     @endif
                 </div>
             </div>
-        </div>
 
             <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                 <div class="p-6">
@@ -112,9 +111,6 @@
                                     </div>
                                 @endif
                             </div>
-                        @endforeach
-                    </div>
-                </div>
 
                             {{-- Metode Pembayaran --}}
                             <div class="border border-slate-200 rounded-lg p-5 mb-6">
@@ -208,23 +204,12 @@
                                     </a>
                                 </div>
                             </div>
-                            <div class="mt-6 space-y-3">
-                                <button type="submit" id="btn-submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors">
-                                    Buat Pesanan
-                                </button>
-                                <a href="{{ route('customer.keranjang.index') }}" class="block w-full text-center text-slate-500 hover:text-slate-700 text-sm font-medium">
-                                    Batalkan
-                                </a>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </form>
-</div>
-
-@include('customer.components.address_modal')
+        </form>
+    </div>
 
 @include('customer.components.address_modal')
 
@@ -259,7 +244,6 @@
                     calculateAndUpdateOngkir(this.value);
                 });
             });
-        });
 
             function calculateAndUpdateOngkir(layananId) {
                 // Loading state
@@ -342,10 +326,8 @@
                         }
                         updateTransferButtonText();
                     }
-                    updateTransferButtonText();
-                }
+                });
             });
-        });
 
             if(fileInput) fileInput.addEventListener('change', updateTransferButtonText);
 
