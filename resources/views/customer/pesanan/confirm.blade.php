@@ -3,7 +3,7 @@
 @section('title', 'Konfirmasi & Pembayaran')
 
 @push('styles')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
 @section('content')
@@ -21,18 +21,20 @@
         <form action="{{ route('customer.pesanan.store') }}" method="POST" enctype="multipart/form-data" id="checkoutForm">
             @csrf
             <input type="hidden" name="items" id="itemsInput">
-            <input type="hidden" name="id_layanan_pengiriman" id="selectedLayananInput" value="{{ $selectedLayananId ?? 1 }}">
-            
+            <input type="hidden" name="id_layanan_pengiriman" id="selectedLayananInput"
+                value="{{ $selectedLayananId ?? 1 }}">
+
             {{-- Card Alamat --}}
             <div class="bg-white border border-slate-200 rounded-lg p-4 mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-teal-600 font-semibold">Alamat Pengiriman</h3>
-                    <button type="button" id="btnEditAlamat" class="text-xs bg-teal-100 text-teal-700 px-3 py-1 rounded hover:bg-teal-200 transition-colors">
+                    <button type="button" id="btnEditAlamat"
+                        class="text-xs bg-teal-100 text-teal-700 px-3 py-1 rounded hover:bg-teal-200 transition-colors">
                         Ubah Alamat
                     </button>
                 </div>
                 <div class="text-sm">
-                    @if($alamatUtama)
+                    @if ($alamatUtama)
                         <p class="font-medium text-slate-800">{{ $alamatUtama->nama_penerima }}</p>
                         <p class="text-slate-600">{{ $alamatUtama->telepon_penerima }}</p>
                         <p class="text-slate-700 mt-1">
@@ -52,7 +54,8 @@
                     <div class="mb-6">
                         <h3 class="text-slate-700 font-medium mb-3">Produk Dipesan</h3>
                         <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                            <div class="grid grid-cols-12 bg-slate-50 border-b border-slate-200 py-3 px-4 text-sm font-semibold text-slate-600">
+                            <div
+                                class="grid grid-cols-12 bg-slate-50 border-b border-slate-200 py-3 px-4 text-sm font-semibold text-slate-600">
                                 <div class="col-span-6">Produk</div>
                                 <div class="col-span-2 text-right">Harga</div>
                                 <div class="col-span-2 text-center">Qty</div>
@@ -64,9 +67,11 @@
                                     $produkDetail = $item['produk_detail'];
                                     $produk = $produkDetail->produk;
                                 @endphp
-                                <div class="grid grid-cols-12 items-center bg-white border-b border-slate-200 py-4 px-4 hover:bg-slate-50">
+                                <div
+                                    class="grid grid-cols-12 items-center bg-white border-b border-slate-200 py-4 px-4 hover:bg-slate-50">
                                     <div class="col-span-6 flex items-center gap-3">
-                                        <img src="{{ $produk->foto_url ?? asset('images/icon_toska.png') }}" class="w-12 h-12 rounded object-cover">
+                                        <img src="{{ $produk->foto_url ?? asset('images/icon_toska.png') }}"
+                                            class="w-12 h-12 rounded object-cover">
                                         <div>
                                             <p class="font-medium text-slate-800 text-sm">{{ $produk->nama }}</p>
                                             <p class="text-xs text-slate-500">Varian: {{ $produkDetail->nama_varian }}</p>
@@ -92,19 +97,21 @@
                             {{-- Layanan Pengiriman --}}
                             <div class="border border-slate-200 rounded-lg p-5 mb-6">
                                 <h3 class="font-semibold text-slate-700 mb-4">Pilih Layanan Pengiriman</h3>
-                                @if($layananPengiriman->isEmpty())
+                                @if ($layananPengiriman->isEmpty())
                                     <div class="text-center py-6 text-slate-500 text-sm">Tidak ada layanan tersedia.</div>
                                 @else
                                     <div class="space-y-3">
-                                        @foreach($layananPengiriman as $layanan)
-                                            <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
-                                                <input type="radio" name="id_layanan_pengiriman_radio" value="{{ $layanan->id }}" 
+                                        @foreach ($layananPengiriman as $layanan)
+                                            <label
+                                                class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
+                                                <input type="radio" name="id_layanan_pengiriman_radio"
+                                                    value="{{ $layanan->id }}"
                                                     class="h-4 w-4 text-teal-600 focus:ring-teal-500"
-                                                    @if(isset($selectedLayananId) && $selectedLayananId == $layanan->id) checked @endif
-                                                    required>
+                                                    @if (isset($selectedLayananId) && $selectedLayananId == $layanan->id) checked @endif required>
                                                 <div class="flex-1">
                                                     <p class="font-medium text-slate-700">{{ $layanan->nama_layanan }}</p>
-                                                    <p class="text-xs text-slate-500">Tarif: Rp {{ number_format($layanan->tarif_per_km, 0, ',', '.') }} per km</p>
+                                                    <p class="text-xs text-slate-500">Tarif: Rp
+                                                        {{ number_format($layanan->tarif_per_km, 0, ',', '.') }} per km</p>
                                                 </div>
                                             </label>
                                         @endforeach
@@ -116,49 +123,70 @@
                             <div class="border border-slate-200 rounded-lg p-5 mb-6">
                                 <h3 class="font-semibold text-slate-700 mb-4">Pilih Metode Pembayaran</h3>
                                 <div class="space-y-4">
-                                    <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
-                                        <input type="radio" name="metode_pembayaran" value="COD" class="h-4 w-4 text-teal-600 focus:ring-teal-500" required>
+                                    <label
+                                        class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
+                                        <input type="radio" name="metode_pembayaran" value="COD"
+                                            class="h-4 w-4 text-teal-600 focus:ring-teal-500" required>
                                         <div class="flex items-center gap-3">
                                             <i class="fas fa-money-bill-wave text-teal-600 text-xl"></i>
                                             <span class="font-medium text-slate-700">Cash on Delivery (COD)</span>
                                         </div>
                                     </label>
 
-                                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider mt-4">Transfer Bank / E-Wallet</p>
+                                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider mt-4">Transfer Bank
+                                        / E-Wallet</p>
 
-                                    @foreach($paymentMethods as $method)
-                                    <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
-                                        <input type="radio" name="metode_pembayaran" value="{{ $method->id }}" 
-                                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 payment-radio"
-                                            data-bank="{{ $method->nama_bank }}"
-                                            data-rek="{{ $method->nomor_rekening }}"
-                                            data-name="{{ $method->atas_nama }}"
-                                            data-img="{{ $method->gambar ? asset('storage/' . $method->gambar) : '' }}">
-                                        <div class="flex items-center gap-3 w-full">
-                                            @if($method->gambar)
-                                                <img src="{{ asset('storage/' . $method->gambar) }}" class="h-8 w-auto object-contain">
-                                            @else
-                                                <i class="fas fa-university text-slate-400 text-xl"></i>
-                                            @endif
-                                            <span class="font-medium text-slate-700">{{ $method->nama_bank }}</span>
-                                        </div>
-                                    </label>
+                                    @foreach ($paymentMethods as $method)
+                                        <label
+                                            class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
+                                            <input type="radio" name="metode_pembayaran" value="{{ $method->id }}"
+                                                class="h-4 w-4 text-teal-600 focus:ring-teal-500 payment-radio"
+                                                data-bank="{{ $method->nama_bank }}"
+                                                data-rek="{{ $method->nomor_rekening }}"
+                                                data-name="{{ $method->atas_nama }}"
+                                                data-img="{{ $method->gambar ? asset('storage/' . $method->gambar) : '' }}">
+                                            <div class="flex items-center gap-3 w-full">
+                                                @if ($method->gambar)
+                                                    <img src="{{ asset('storage/' . $method->gambar) }}"
+                                                        class="h-8 w-auto object-contain">
+                                                @else
+                                                    <i class="fas fa-university text-slate-400 text-xl"></i>
+                                                @endif
+                                                <span class="font-medium text-slate-700">{{ $method->nama_bank }}</span>
+                                            </div>
+                                        </label>
                                     @endforeach
                                 </div>
 
-                                <div id="transfer-info" class="hidden mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 animate-fade-in-down">
+                                <div id="transfer-info"
+                                    class="hidden mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 animate-fade-in-down">
                                     <h4 class="text-blue-800 font-semibold mb-2 text-sm">Informasi Transfer</h4>
                                     <div class="flex items-center gap-4">
                                         <img id="bank-img" src="" class="h-12 w-auto object-contain hidden">
                                         <div>
-                                            <p class="text-sm text-slate-600">Bank: <span id="bank-name" class="font-bold"></span></p>
-                                            <p class="text-sm text-slate-600">No. Rekening: <span id="bank-rek" class="font-mono font-bold text-lg text-slate-800"></span></p>
+                                            <p class="text-sm text-slate-600">Bank: <span id="bank-name"
+                                                    class="font-bold"></span></p>
+                                            <p class="text-sm text-slate-600">No. Rekening: <span id="bank-rek"
+                                                    class="font-mono font-bold text-lg text-slate-800"></span></p>
                                             <p class="text-sm text-slate-600">A.N: <span id="bank-owner"></span></p>
                                         </div>
                                     </div>
                                     <div class="mt-4 pt-4 border-t border-blue-200">
-                                        <label class="block text-sm font-medium text-slate-700 mb-2">Upload Bukti Transfer (Sekarang)</label>
-                                        <input type="file" name="bukti_bayar" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200">
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Upload Bukti Transfer
+                                            (Sekarang)</label>
+
+                                        <div class="relative border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:bg-slate-50 transition cursor-pointer"
+                                            id="drop-area">
+                                            <!-- ✅ TAMBAHKAN disabled saat awal -->
+                                            <input type="file" name="bukti_bayar" id="bukti_bayar_input"
+                                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled>
+                                            <div id="preview-container">
+                                                <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
+                                                <p class="text-xs text-slate-500">Klik atau tarik foto ke sini</p>
+                                                <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG (Max 2MB)</p>
+                                            </div>
+                                        </div>
+
                                         <p class="text-xs text-slate-500 mt-1">* Kosongkan jika ingin membayar nanti.</p>
                                     </div>
                                 </div>
@@ -196,10 +224,12 @@
                                     </div>
                                 </div>
                                 <div class="mt-6 space-y-3">
-                                    <button type="submit" id="btn-submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors">
+                                    <button type="submit" id="btn-submit"
+                                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors">
                                         Buat Pesanan
                                     </button>
-                                    <a href="{{ route('customer.keranjang.index') }}" class="block w-full text-center text-slate-500 hover:text-slate-700 text-sm font-medium">
+                                    <a href="{{ route('customer.keranjang.index') }}"
+                                        class="block w-full text-center text-slate-500 hover:text-slate-700 text-sm font-medium">
                                         Batalkan
                                     </a>
                                 </div>
@@ -211,7 +241,7 @@
         </form>
     </div>
 
-@include('customer.components.address_modal')
+    @include('customer.components.address_modal')
 
 @endsection
 
@@ -220,74 +250,97 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log("Script Loaded - All Systems Go");
 
+            // Di bagian script form submit
+            document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                console.log('Form submitted');
+                console.log('Metode Pembayaran:', document.querySelector(
+                    'input[name="metode_pembayaran"]:checked')?.value);
+                console.log('Items:', document.getElementById('itemsInput').value);
+                // Lanjutkan submit
+            });
+
             // LOGIC ONGKIR DINAMIS
             const subtotal = {{ $subtotal ?? 0 }};
             const items = [
-                @if(isset($selectedItems))
+                @if (isset($selectedItems))
                     @foreach ($selectedItems as $item)
-                        { id_produk_detail: "{{ $item['produk_detail']->id_produk_detail }}", quantity: {{ $item['quantity'] }} },
+                        {
+                            id_produk_detail: "{{ $item['produk_detail']->id_produk_detail }}",
+                            quantity: {{ $item['quantity'] }}
+                        },
                     @endforeach
                 @endif
             ];
-            
+
             const itemsInput = document.getElementById('itemsInput');
-            if(itemsInput) itemsInput.value = JSON.stringify(items);
+            if (itemsInput) itemsInput.value = JSON.stringify(items);
 
             // Ongkir Logic
-            const selectedLayananRadio = document.querySelector('input[name="id_layanan_pengiriman_radio"]:checked');
+            const selectedLayananRadio = document.querySelector(
+                'input[name="id_layanan_pengiriman_radio"]:checked');
             if (selectedLayananRadio) calculateAndUpdateOngkir(selectedLayananRadio.value);
 
             document.querySelectorAll('input[name="id_layanan_pengiriman_radio"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     const hiddenInput = document.getElementById('selectedLayananInput');
-                    if(hiddenInput) hiddenInput.value = this.value;
+                    if (hiddenInput) hiddenInput.value = this.value;
                     calculateAndUpdateOngkir(this.value);
                 });
             });
 
             function calculateAndUpdateOngkir(layananId) {
                 // Loading state
-                if(document.getElementById('distanceDisplay')) document.getElementById('distanceDisplay').textContent = '...';
-                if(document.getElementById('tarifDisplay')) document.getElementById('tarifDisplay').textContent = '...';
-                if(document.getElementById('ongkirDisplay')) document.getElementById('ongkirDisplay').textContent = '...';
+                if (document.getElementById('distanceDisplay')) document.getElementById('distanceDisplay')
+                    .textContent = '...';
+                if (document.getElementById('tarifDisplay')) document.getElementById('tarifDisplay').textContent =
+                    '...';
+                if (document.getElementById('ongkirDisplay')) document.getElementById('ongkirDisplay').textContent =
+                    '...';
 
-                fetch('{{ route("customer.pesanan.calculateOngkir") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ id_layanan_pengiriman: layananId })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        // Gunakan fallback '|| 0' untuk mencegah error 'undefined'
-                        const ongkir = data.data.total_ongkir || 0;
-                        const jarak = data.data.jarak || 0;
-                        const tarif = data.data.tarif_per_km || 0;
-                        const grandTotal = subtotal + ongkir;
-                        
-                        const elDistance = document.getElementById('distanceDisplay');
-                        const elTarif = document.getElementById('tarifDisplay');
-                        const elOngkir = document.getElementById('ongkirDisplay');
-                        const elTotal = document.getElementById('totalDisplay');
+                fetch('{{ route('customer.pesanan.calculateOngkir') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            id_layanan_pengiriman: layananId
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Gunakan fallback '|| 0' untuk mencegah error 'undefined'
+                            const ongkir = data.data.total_ongkir || 0;
+                            const jarak = data.data.jarak || 0;
+                            const tarif = data.data.tarif_per_km || 0;
+                            const grandTotal = subtotal + ongkir;
 
-                        if(elDistance) elDistance.textContent = jarak.toFixed(2) + ' km';
-                        // toLocaleString aman karena tarif sudah pasti angka (atau 0)
-                        if(elTarif) elTarif.textContent = 'Rp ' + tarif.toLocaleString('id-ID') + '/km';
-                        if(elOngkir) elOngkir.textContent = 'Rp ' + ongkir.toLocaleString('id-ID');
-                        if(elTotal) elTotal.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Gagal', text: data.error });
-                        // Reset ke 0 jika gagal
-                        if(document.getElementById('ongkirDisplay')) document.getElementById('ongkirDisplay').textContent = 'Rp 0';
-                    }
-                })
-                .catch(error => {
-                    console.error('Ongkir Error:', error);
-                    // Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal koneksi ke server.' });
-                });
+                            const elDistance = document.getElementById('distanceDisplay');
+                            const elTarif = document.getElementById('tarifDisplay');
+                            const elOngkir = document.getElementById('ongkirDisplay');
+                            const elTotal = document.getElementById('totalDisplay');
+
+                            if (elDistance) elDistance.textContent = jarak.toFixed(2) + ' km';
+                            // toLocaleString aman karena tarif sudah pasti angka (atau 0)
+                            if (elTarif) elTarif.textContent = 'Rp ' + tarif.toLocaleString('id-ID') + '/km';
+                            if (elOngkir) elOngkir.textContent = 'Rp ' + ongkir.toLocaleString('id-ID');
+                            if (elTotal) elTotal.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: data.error
+                            });
+                            // Reset ke 0 jika gagal
+                            if (document.getElementById('ongkirDisplay')) document.getElementById(
+                                'ongkirDisplay').textContent = 'Rp 0';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ongkir Error:', error);
+                        // Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal koneksi ke server.' });
+                    });
             }
 
             // LOGIC METODE PEMBAYARAN & TOMBOL
@@ -298,30 +351,31 @@
             document.querySelectorAll('input[name="metode_pembayaran"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     if (this.value === 'COD') {
-                        if(transferInfo) transferInfo.classList.add('hidden');
-                        if(btnSubmit) {
+                        if (transferInfo) transferInfo.classList.add('hidden');
+                        if (btnSubmit) {
                             btnSubmit.textContent = 'Buat Pesanan (COD)';
-                            btnSubmit.className = 'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                            btnSubmit.className =
+                                'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
                         }
-                        if(fileInput) fileInput.value = '';
+                        if (fileInput) fileInput.value = '';
                     } else {
-                        if(transferInfo) transferInfo.classList.remove('hidden');
-                        
+                        if (transferInfo) transferInfo.classList.remove('hidden');
+
                         const bankName = document.getElementById('bank-name');
                         const bankRek = document.getElementById('bank-rek');
                         const bankOwner = document.getElementById('bank-owner');
                         const imgEl = document.getElementById('bank-img');
 
-                        if(bankName) bankName.textContent = this.dataset.bank;
-                        if(bankRek) bankRek.textContent = this.dataset.rek;
-                        if(bankOwner) bankOwner.textContent = this.dataset.name;
-                        
-                        if(imgEl) {
-                            if(this.dataset.img) { 
-                                imgEl.src = this.dataset.img; 
-                                imgEl.classList.remove('hidden'); 
-                            } else { 
-                                imgEl.classList.add('hidden'); 
+                        if (bankName) bankName.textContent = this.dataset.bank;
+                        if (bankRek) bankRek.textContent = this.dataset.rek;
+                        if (bankOwner) bankOwner.textContent = this.dataset.name;
+
+                        if (imgEl) {
+                            if (this.dataset.img) {
+                                imgEl.src = this.dataset.img;
+                                imgEl.classList.remove('hidden');
+                            } else {
+                                imgEl.classList.add('hidden');
                             }
                         }
                         updateTransferButtonText();
@@ -329,17 +383,19 @@
                 });
             });
 
-            if(fileInput) fileInput.addEventListener('change', updateTransferButtonText);
+            if (fileInput) fileInput.addEventListener('change', updateTransferButtonText);
 
             function updateTransferButtonText() {
                 const selected = document.querySelector('input[name="metode_pembayaran"]:checked');
                 if (selected && selected.value !== 'COD' && btnSubmit) {
                     if (fileInput && fileInput.files.length > 0) {
                         btnSubmit.textContent = 'Bayar & Buat Pesanan';
-                        btnSubmit.className = 'w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                        btnSubmit.className =
+                            'w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow transition-colors';
                     } else {
                         btnSubmit.textContent = 'Bayar Nanti (Buat Pesanan)';
-                        btnSubmit.className = 'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                        btnSubmit.className =
+                            'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
                     }
                 }
             }
@@ -353,7 +409,7 @@
             const btnAdd = document.getElementById('btnAddAddress');
             const btnCancelForm = document.getElementById('cancelAddressForm');
             const btnSubmitModal = document.getElementById('submitModal');
-            
+
             const listContainer = document.getElementById('addressList');
             const formContainer = document.getElementById('addressFormContainer');
             const addBtnContainer = document.getElementById('addAddressButtonContainer');
@@ -404,40 +460,44 @@
                 addBtnContainer.classList.remove('hidden');
                 form.reset();
                 addressIdInput.value = ''; // Reset ID penting!
-                
+
                 // Reset Select Wilayah
-                if(kotaSelect) kotaSelect.innerHTML = '<option value="">Pilih Kota</option>';
-                if(kecamatanSelect) kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                if(kelurahanSelect) kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+                if (kotaSelect) kotaSelect.innerHTML = '<option value="">Pilih Kota</option>';
+                if (kecamatanSelect) kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                if (kelurahanSelect) kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
             }
 
             // --- LOAD LIST ALAMAT ---
             function loadAddresses() {
-                listContainer.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-teal-600 mb-2"></i><br>Memuat data...</div>';
-                
-                fetch('{{ route("customer.alamat.api.all") }}')
+                listContainer.innerHTML =
+                    '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-teal-600 mb-2"></i><br>Memuat data...</div>';
+
+                fetch('{{ route('customer.alamat.api.all') }}')
                     .then(r => r.json())
                     .then(res => {
                         if (res.success) renderList(res.data);
                     })
                     .catch(err => {
                         console.error(err);
-                        listContainer.innerHTML = '<div class="text-center text-red-500 py-4">Gagal memuat alamat.</div>';
+                        listContainer.innerHTML =
+                            '<div class="text-center text-red-500 py-4">Gagal memuat alamat.</div>';
                     });
             }
 
             function renderList(data) {
                 listContainer.innerHTML = '';
                 if (data.length === 0) {
-                    listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 bg-slate-50 rounded border border-dashed">Belum ada alamat.</div>';
+                    listContainer.innerHTML =
+                        '<div class="text-center py-8 text-gray-500 bg-slate-50 rounded border border-dashed">Belum ada alamat.</div>';
                     return;
                 }
 
                 data.forEach(addr => {
                     const isUtama = addr.is_utama == 1;
                     const el = document.createElement('div');
-                    el.className = `border rounded-lg p-4 cursor-pointer mb-3 transition-all ${isUtama ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500' : 'border-gray-300 hover:border-teal-300'}`;
-                    
+                    el.className =
+                        `border rounded-lg p-4 cursor-pointer mb-3 transition-all ${isUtama ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500' : 'border-gray-300 hover:border-teal-300'}`;
+
                     el.innerHTML = `
                         <div class="flex items-start gap-3 pointer-events-none">
                             <input type="radio" name="selectedAddressModal" value="${addr.id_alamat}" class="mt-1 w-4 h-4 text-teal-600 pointer-events-auto" ${isUtama ? 'checked' : ''}>
@@ -455,20 +515,22 @@
                             <button type="button" onclick="window.deleteAddress(${addr.id_alamat})" class="text-red-600 hover:underline px-2 pointer-events-auto">Hapus</button>
                         </div>
                     `;
-                    
+
                     // Klik card = klik radio
                     el.addEventListener('click', (e) => {
-                        if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
                             const radio = el.querySelector('input[type="radio"]');
-                            if(radio) {
+                            if (radio) {
                                 radio.checked = true;
                                 // Visual update
                                 Array.from(listContainer.children).forEach(c => {
-                                    c.classList.remove('border-teal-500', 'bg-teal-50', 'ring-1', 'ring-teal-500');
+                                    c.classList.remove('border-teal-500', 'bg-teal-50',
+                                        'ring-1', 'ring-teal-500');
                                     c.classList.add('border-gray-300');
                                 });
                                 el.classList.remove('border-gray-300');
-                                el.classList.add('border-teal-500', 'bg-teal-50', 'ring-1', 'ring-teal-500');
+                                el.classList.add('border-teal-500', 'bg-teal-50', 'ring-1',
+                                    'ring-teal-500');
                             }
                         }
                     });
@@ -479,7 +541,10 @@
             // --- GLOBAL: EDIT ALAMAT (FIXED POPULATE) ---
             window.editAddress = function(id) {
                 // Tampilkan loading swal
-                Swal.fire({ title: 'Memuat...', didOpen: () => Swal.showLoading() });
+                Swal.fire({
+                    title: 'Memuat...',
+                    didOpen: () => Swal.showLoading()
+                });
 
                 fetch(`{{ url('customer/alamat/api') }}/${id}`)
                     .then(r => r.json())
@@ -487,7 +552,7 @@
                         Swal.close();
                         if (res.success) {
                             const d = res.data;
-                            
+
                             // 1. Isi Input Text Standard
                             document.getElementById('addressId').value = d.id_alamat;
                             document.getElementById('label_alamat').value = d.label_alamat;
@@ -499,16 +564,19 @@
                             document.getElementById('rw').value = d.rw || '';
 
                             // 2. Isi Hidden Values Wilayah
-                            if(kotaHidden) kotaHidden.value = d.kota_kabupaten;
-                            if(kecamatanHidden) kecamatanHidden.value = d.kecamatan;
-                            if(kelurahanHidden) kelurahanHidden.value = d.kelurahan;
+                            if (kotaHidden) kotaHidden.value = d.kota_kabupaten;
+                            if (kecamatanHidden) kecamatanHidden.value = d.kecamatan;
+                            if (kelurahanHidden) kelurahanHidden.value = d.kelurahan;
 
                             // 3. VISUAL HACK: Tampilkan Nama Wilayah di Dropdown (Dummy Option)
                             // Agar user melihat "Bandung" dan bukan "Pilih Kota" saat edit
-                            kotaSelect.innerHTML = `<option value="${d.kota_kabupaten}" selected>${d.kota_kabupaten}</option>`;
-                            kecamatanSelect.innerHTML = `<option value="${d.kecamatan}" selected>${d.kecamatan}</option>`;
-                            kelurahanSelect.innerHTML = `<option value="${d.kelurahan}" selected>${d.kelurahan}</option>`;
-                            
+                            kotaSelect.innerHTML =
+                                `<option value="${d.kota_kabupaten}" selected>${d.kota_kabupaten}</option>`;
+                            kecamatanSelect.innerHTML =
+                                `<option value="${d.kecamatan}" selected>${d.kecamatan}</option>`;
+                            kelurahanSelect.innerHTML =
+                                `<option value="${d.kelurahan}" selected>${d.kelurahan}</option>`;
+
                             // Provinsi biarkan pilih ulang jika ingin ganti, atau set dummy juga
                             // provinsiSelect.value = ... (Susah tanpa ID)
 
@@ -516,7 +584,10 @@
                             document.getElementById('formTitle').textContent = 'Edit Alamat';
                             formContainer.classList.remove('hidden');
                             addBtnContainer.classList.add('hidden');
-                            formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            formContainer.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
                         } else {
                             Swal.fire('Error', 'Gagal mengambil data alamat', 'error');
                         }
@@ -537,62 +608,84 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         fetch(`{{ url('customer/alamat/api') }}/${id}`, {
-                            method: 'DELETE',
-                            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-                        })
-                        .then(r => r.json())
-                        .then(res => {
-                            if(res.success) {
-                                Swal.fire('Terhapus!', 'Alamat berhasil dihapus.', 'success');
-                                loadAddresses();
-                            } else {
-                                Swal.fire('Gagal', res.message, 'error');
-                            }
-                        });
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').content
+                                }
+                            })
+                            .then(r => r.json())
+                            .then(res => {
+                                if (res.success) {
+                                    Swal.fire('Terhapus!', 'Alamat berhasil dihapus.', 'success');
+                                    loadAddresses();
+                                } else {
+                                    Swal.fire('Gagal', res.message, 'error');
+                                }
+                            });
                     }
                 });
             };
 
             // --- SUBMIT FORM TAMBAH / EDIT ---
-            if(form) {
+            if (form) {
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    
+
                     const id = addressIdInput.value;
-                    const url = id ? `{{ url('customer/alamat/api') }}/${id}` : '{{ route("customer.alamat.store") }}';
-                    
+                    const url = id ? `{{ url('customer/alamat/api') }}/${id}` :
+                        '{{ route('customer.alamat.store') }}';
+
                     const formData = new FormData(form);
                     if (id) formData.append('_method', 'PUT');
 
-                    Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
+                    Swal.fire({
+                        title: 'Menyimpan...',
+                        didOpen: () => Swal.showLoading()
+                    });
 
                     fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    })
-                    .then(r => r.json())
-                    .then(res => {
-                        if(res.success) {
-                            Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, timer: 1500, showConfirmButton: false });
-                            resetFormView();
-                            loadAddresses();
-                        } else {
-                            // Tampilkan error validasi jika ada
-                            let msg = res.message || 'Gagal menyimpan data.';
-                            if(res.errors) {
-                                msg = Object.values(res.errors).flat().join('\n');
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content,
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        })
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: res.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                                resetFormView();
+                                loadAddresses();
+                            } else {
+                                // Tampilkan error validasi jika ada
+                                let msg = res.message || 'Gagal menyimpan data.';
+                                if (res.errors) {
+                                    msg = Object.values(res.errors).flat().join('\n');
+                                }
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: msg
+                                });
                             }
-                            Swal.fire({ icon: 'error', title: 'Gagal', text: msg });
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan sistem.' });
-                    });
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Terjadi kesalahan sistem.'
+                            });
+                        });
                 });
             }
 
@@ -601,19 +694,26 @@
                 btnSubmitModal.addEventListener('click', () => {
                     const selected = document.querySelector('input[name="selectedAddressModal"]:checked');
                     if (!selected) return Swal.fire('Info', 'Pilih salah satu alamat dulu.', 'info');
-                    
+
                     btnSubmitModal.textContent = 'Menyimpan...';
-                    
+
                     fetch(`{{ url('customer/alamat/api') }}/${selected.value}/utama`, {
                         method: 'POST',
-                        headers: { 
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content,
                             'Content-Type': 'application/json'
                         }
                     }).then(r => r.json()).then(data => {
-                        if(data.success) {
-                            Swal.fire({ icon: 'success', title: 'Sukses', text: 'Alamat pengiriman diubah.', timer: 1000, showConfirmButton: false })
-                            .then(() => window.location.reload());
+                        if (data.success) {
+                            Swal.fire({
+                                    icon: 'success',
+                                    title: 'Sukses',
+                                    text: 'Alamat pengiriman diubah.',
+                                    timer: 1000,
+                                    showConfirmButton: false
+                                })
+                                .then(() => window.location.reload());
                         } else {
                             Swal.fire('Gagal', data.message, 'error');
                             btnSubmitModal.textContent = 'Pilih Alamat Ini';
@@ -632,11 +732,14 @@
                     document.getElementById('formTitle').textContent = 'Tambah Alamat Baru';
                     formContainer.classList.remove('hidden');
                     addBtnContainer.classList.add('hidden');
-                    
+
                     // Load Provinsi untuk form baru
-                    if(provinsiSelect) fetchData('provinces', provinsiSelect, 'Provinsi');
-                    
-                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (provinsiSelect) fetchData('provinces', provinsiSelect, 'Provinsi');
+
+                    formContainer.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 });
             }
 
@@ -652,7 +755,7 @@
                     const data = result.data || result || [];
 
                     selectElement.innerHTML = `<option value="">Pilih ${placeholder}</option>`;
-                    
+
                     data.forEach(item => {
                         const option = document.createElement('option');
                         option.value = item.id;
@@ -665,9 +768,9 @@
             }
 
             // Event Listeners Wilayah (Change)
-            if(provinsiSelect) {
+            if (provinsiSelect) {
                 provinsiSelect.addEventListener('change', function() {
-                    if(this.value) {
+                    if (this.value) {
                         fetchData(`regencies/${this.value}`, kotaSelect, 'Kota/Kabupaten');
                         kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
                         kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
@@ -675,29 +778,29 @@
                 });
             }
 
-            if(kotaSelect) {
+            if (kotaSelect) {
                 kotaSelect.addEventListener('change', function() {
-                    if(this.value) {
+                    if (this.value) {
                         fetchData(`districts/${this.value}`, kecamatanSelect, 'Kecamatan');
                         kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
                         // Simpan Nama ke Hidden
-                        if(kotaHidden) kotaHidden.value = this.options[this.selectedIndex].text;
+                        if (kotaHidden) kotaHidden.value = this.options[this.selectedIndex].text;
                     }
                 });
             }
 
-            if(kecamatanSelect) {
+            if (kecamatanSelect) {
                 kecamatanSelect.addEventListener('change', function() {
-                    if(this.value) {
+                    if (this.value) {
                         fetchData(`villages/${this.value}`, kelurahanSelect, 'Kelurahan');
-                        if(kecamatanHidden) kecamatanHidden.value = this.options[this.selectedIndex].text;
+                        if (kecamatanHidden) kecamatanHidden.value = this.options[this.selectedIndex].text;
                     }
                 });
             }
 
-            if(kelurahanSelect) {
+            if (kelurahanSelect) {
                 kelurahanSelect.addEventListener('change', function() {
-                    if(this.value && kelurahanHidden) {
+                    if (this.value && kelurahanHidden) {
                         kelurahanHidden.value = this.options[this.selectedIndex].text;
                     }
                 });

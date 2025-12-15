@@ -92,7 +92,7 @@ class PesananController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         // Jika ada id_alamat dari modal, gunakan itu. Jika tidak, gunakan alamat utama
         $alamat = null;
         if ($request->id_alamat) {
@@ -105,7 +105,7 @@ class PesananController extends Controller
             return redirect()->route('customer.keranjang.index')
                 ->with('error', 'Alamat tidak ditemukan. Silakan atur alamat terlebih dahulu.');
         }
-        
+
         $itemsData = $this->parseItems($request->input('items'));
         if (!$itemsData) {
             return redirect()->route('customer.keranjang.index')->with('error', 'Data keranjang tidak valid.');
@@ -137,6 +137,7 @@ class PesananController extends Controller
                 'id_layanan_pengiriman' => $idLayanan,
                 'waktu_pesanan' => now(),
                 'status_pesanan' => $statusPesanan,
+                'metode_pembayaran' => $request->metode_pembayaran,
                 'penerima_nama' => $alamat->nama_penerima,
                 'penerima_telepon' => $alamat->telepon_penerima,
                 'alamat_lengkap' => "{$alamat->jalan_patokan}, {$alamat->kelurahan}, {$alamat->kecamatan}, {$alamat->kota_kabupaten}",
@@ -149,12 +150,15 @@ class PesananController extends Controller
                     'id_pesanan' => $pesanan->id_pesanan,
                     'id_produk_detail' => $item['produk_detail']->id_produk_detail,
                     'kuantitas' => $item['quantity'],
-                    'harga_beli' => $item['produk_detail']->harga_jual,
+                    'harga_saat_beli' => $item['produk_detail']->harga_jual,
                     'subtotal_item' => $item['subtotal']
                 ]);
             }
-
-            if ($request->hasFile('bukti_bayar') && $request->metode_pembayaran !== 'COD') {
+            if (
+                $request->metode_pembayaran !== 'COD' &&
+                $request->hasFile('bukti_bayar') &&
+                $request->file('bukti_bayar')->isValid()
+            ) {
                 $this->savePaymentProof($request, $pesanan);
             }
 
@@ -166,7 +170,6 @@ class PesananController extends Controller
             DB::commit();
 
             return $this->redirectAfterOrder($request, $pesanan);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('customer.keranjang.index')
@@ -174,7 +177,6 @@ class PesananController extends Controller
         }
     }
 
-    // Menampilkan detail pesanan
     public function show($id)
     {
         $pesanan = Pesanan::where('id_pesanan', $id)
@@ -182,15 +184,18 @@ class PesananController extends Controller
             ->with(['detail.produkDetail.produk', 'ongkir', 'pembayaran', 'layananPengiriman'])
             ->findOrFail($id);
 
-        $pengaturan = Pengaturan::first();
+  
         $paymentMethods = MetodePembayaran::where('is_active', 1)->get();
-
         $deadline = Carbon::parse($pesanan->waktu_pesanan)->addHours(24);
         $deadlineTimestamp = $deadline->timestamp * 1000;
         $isExpired = now()->greaterThan($deadline);
 
         return view('customer.pesanan.show', compact(
-            'pesanan', 'pengaturan', 'deadline', 'deadlineTimestamp', 'paymentMethods', 'isExpired'
+            'pesanan',
+            'deadline',
+            'deadlineTimestamp', 
+            'paymentMethods',
+            'isExpired'
         ));
     }
 
@@ -210,7 +215,7 @@ class PesananController extends Controller
 
         DB::transaction(function () use ($pesanan, $request) {
             $this->savePaymentProof($request, $pesanan);
-            
+
             $pesanan->update([
                 'status_pesanan' => StatusPesananEnum::MENUNGGU_VERIFIKASI
             ]);
@@ -280,7 +285,7 @@ class PesananController extends Controller
             if (!isset($item['id_produk_detail'], $item['quantity'])) continue;
 
             $produkVarian = ProdukDetail::with('produk')->find($item['id_produk_detail']);
-            
+
             if (!$produkVarian) {
                 throw new \Exception("Produk ID {$item['id_produk_detail']} tidak ditemukan.");
             }
@@ -321,7 +326,7 @@ class PesananController extends Controller
     private function savePaymentProof(Request $request, Pesanan $pesanan)
     {
         $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
-        
+
         Pembayaran::updateOrCreate(
             ['id_pesanan' => $pesanan->id_pesanan],
             [
@@ -333,18 +338,35 @@ class PesananController extends Controller
         );
     }
 
+    // private function redirectAfterOrder(Request $request, Pesanan $pesanan)
+    // {
+    //     if ($request->metode_pembayaran === 'COD') {
+    //         return redirect()->route('customer.pesanan.index')
+    //             ->with('success', 'Pesanan COD berhasil dibuat!');
+    //     }
+
+    //     if ($request->hasFile('bukti_bayar')) {
+    //         return redirect()->route('customer.pesanan.index')
+    //             ->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');
+    //     }
+
+    //     return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
+    //         ->with('success', 'Pesanan berhasil. Silahkan lakukan pembayaran.');
+    // }
     private function redirectAfterOrder(Request $request, Pesanan $pesanan)
     {
         if ($request->metode_pembayaran === 'COD') {
             return redirect()->route('customer.pesanan.index')
                 ->with('success', 'Pesanan COD berhasil dibuat!');
         }
-        
-        if ($request->hasFile('bukti_bayar')) {
+
+        // ✅ PERBAIKAN: Cek file benar-benar ada DAN valid
+        if ($request->hasFile('bukti_bayar') && $request->file('bukti_bayar')->isValid()) {
             return redirect()->route('customer.pesanan.index')
                 ->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');
         }
 
+        // Jika tidak ada bukti, arahkan ke halaman detail untuk upload
         return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
             ->with('success', 'Pesanan berhasil. Silahkan lakukan pembayaran.');
     }

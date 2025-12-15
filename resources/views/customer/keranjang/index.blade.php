@@ -3,7 +3,6 @@
 @section('title', 'Keranjang Belanja')
 
 @section('content')
-
     <div class="max-w-6xl mx-auto mt-6">
 
         <h1 class="text-2xl font-semibold mb-6">Keranjang Belanja</h1>
