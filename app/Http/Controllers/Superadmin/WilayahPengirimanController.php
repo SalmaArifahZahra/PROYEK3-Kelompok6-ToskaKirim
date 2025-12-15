@@ -10,13 +10,28 @@ use Illuminate\Support\Facades\Http; // Library HTTP Client
 class WilayahPengirimanController extends Controller
 {
     // Menampilkan daftar wilayah
-    public function index() {
-        $wilayah = WilayahPengiriman::orderBy('kota_kabupaten')
+    public function index(Request $request) {
+        $query = WilayahPengiriman::orderBy('kota_kabupaten')
                     ->orderBy('kecamatan')
-                    ->orderBy('kelurahan')
-                    ->paginate(50);
-                    
-        return view('superadmin.wilayah.index', compact('wilayah'));
+                    ->orderBy('kelurahan');
+        
+        // Search parameter
+        $search = $request->get('search', '');
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('kelurahan', 'ILIKE', "%{$search}%")
+                  ->orWhere('kecamatan', 'ILIKE', "%{$search}%")
+                  ->orWhere('kota_kabupaten', 'ILIKE', "%{$search}%");
+            });
+        }
+        
+        $wilayah = $query->paginate(50);
+        $wilayah->appends($request->query());
+        
+        return view('superadmin.wilayah.index', [
+            'wilayah' => $wilayah,
+            'search' => $search
+        ]);
     }
 
     // Update manual jarak (jika diedit lewat tabel)
@@ -26,14 +41,12 @@ class WilayahPengirimanController extends Controller
         return back()->with('success', 'Jarak berhasil diupdate manual');
     }
 
-    // --- FITUR BARU: HITUNG OTOMATIS (GRATIS) ---
+    // Hitung jarak otomatis menggunakan OpenStreetMap API
    public function hitungJarakOtomatis(Request $request)
     {
-        // 1. SETTING SUPER
         set_time_limit(300); // 5 Menit maks
         ini_set('memory_limit', '512M');
 
-        // 2. AMBIL 20 DATA (Batch)
         $wilayah = WilayahPengiriman::where('jarak_km', '<', 0.1)->take(20)->get();
         $sisaAntrian = WilayahPengiriman::where('jarak_km', '<', 0.1)->count();
 
@@ -41,7 +54,7 @@ class WilayahPengirimanController extends Controller
             return back()->with('success', 'Semua data jarak sudah terisi!');
         }
 
-        // Koordinat Toko (Pastikan Akurat)
+        // Koordinat Toko
         $tokoLat = -6.9205437;
         $tokoLon = 107.6720667;
 
@@ -53,20 +66,18 @@ class WilayahPengirimanController extends Controller
 
         foreach ($wilayah as $w) {
             
-            // Bersihkan teks dari spasi berlebih
             $kel = trim($w->kelurahan);
             $kec = trim($w->kecamatan);
             $kot = trim($w->kota_kabupaten);
 
-            // --- STRATEGI BERLAPIS (PRIORITAS PENCARIAN) ---
             $queries = [
-                // 1. Paling Akurat
+                // Paling Akurat
                 "$kel, $kec, $kot",
-                // 2. Coba tanpa Kecamatan (Sering berhasil di sini)
+                // Coba tanpa Kecamatan (Sering berhasil di sini)
                 "$kel, $kot",
-                // 3. Coba Kecamatan saja (Fallback biar gak 0)
+                // Coba Kecamatan saja (Fallback biar gak 0)
                 "$kec, $kot",
-                // 4. Coba Kota saja (Darurat terakhir)
+                // Coba Kota saja (Darurat terakhir)
                 "$kot"
             ];
 
@@ -86,11 +97,9 @@ class WilayahPengirimanController extends Controller
                     $data = json_decode($response->getBody(), true);
 
                     if (!empty($data)) {
-                        // KETEMU!
                         $destLat = $data[0]['lat'];
                         $destLon = $data[0]['lon'];
 
-                        // Hitung
                         $jarakKm = $this->hitungJarakHaversine($tokoLat, $tokoLon, $destLat, $destLon);
                         $jarakRute = $jarakKm * 1.3; 
 
@@ -105,7 +114,6 @@ class WilayahPengirimanController extends Controller
                     }
 
                 } catch (\Exception $e) {
-                    // Lanjut ke query berikutnya
                     continue;
                 }
             }
@@ -126,7 +134,7 @@ class WilayahPengirimanController extends Controller
         return back()->with('success', $msg);
     }
 
-    // --- RUMUS MATEMATIKA (Private) ---
+    // Fungsi hitung jarak Haversine
     private function hitungJarakHaversine($lat1, $lon1, $lat2, $lon2) {
         $earthRadius = 6371; // Radius bumi dalam KM
 

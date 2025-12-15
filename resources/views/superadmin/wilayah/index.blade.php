@@ -49,9 +49,43 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100">
-            <input type="text" id="searchBox" placeholder="Cari Kelurahan atau Kecamatan..." 
-                   class="w-full md:w-1/3 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2A9D8F] text-sm">
+        <div class="p-4 border-b border-gray-100 bg-gray-50">
+            <form action="{{ route('superadmin.wilayah.index') }}" method="GET" class="flex gap-2">
+                <div class="flex-1 relative">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" 
+                           name="search" 
+                           value="{{ $search }}"
+                           placeholder="Cari Kelurahan, Kecamatan, atau Kota..." 
+                           class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-medium"
+                           id="searchInput">
+                    @if($search)
+                    <a href="{{ route('superadmin.wilayah.index') }}" 
+                       class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+                       title="Clear search">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
+                    @endif
+                </div>
+                <button type="submit" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-search mr-2"></i>Cari
+                </button>
+            </form>
+            
+            @if($search)
+            <div class="mt-3 flex items-center gap-2 text-sm">
+                <div class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
+                    <strong>{{ $wilayah->total() }}</strong> hasil ditemukan untuk "<strong>{{ $search }}</strong>"
+                </div>
+            </div>
+            @endif
         </div>
 
         <div class="overflow-x-auto">
@@ -65,9 +99,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-sm" id="tableContent">
-                    @foreach($wilayah as $w)
+                    @forelse($wilayah as $w)
                     <tr class="hover:bg-gray-50 transition">
-                        
                         <td class="px-6 py-4">
                             <div class="font-medium text-gray-800">{{ $w->kecamatan }}</div>
                             <div class="text-xs text-gray-500">{{ $w->kota_kabupaten }}</div>
@@ -96,7 +129,21 @@
                             </form>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center gap-3">
+                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <p class="font-medium text-gray-600">Data tidak ditemukan</p>
+                                    <p class="text-sm text-gray-500">Coba ubah pencarian Anda</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -108,14 +155,33 @@
 </div>
 
 <script>
-    // Script Search Sederhana
-    document.getElementById('searchBox').addEventListener('keyup', function() {
-        let value = this.value.toLowerCase();
-        let rows = document.querySelectorAll("#tableContent tr");
+    // Auto-submit search on page load if search parameter exists
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
         
-        rows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.indexOf(value) > -1 ? "" : "none";
+        // Focus input jika ada search sebelumnya
+        if (searchInput && searchInput.value) {
+            searchInput.focus();
+        }
+
+        // Optional: Auto-submit saat mengetik (dengan debounce)
+        let debounceTimer;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            
+            // Jika kosong, submit langsung
+            if (!this.value.trim()) {
+                this.form.submit();
+                return;
+            }
+
+            // Debounce 500ms untuk mengurangi server request
+            debounceTimer = setTimeout(() => {
+                // Hanya submit jika sudah minimal 2 karakter
+                if (this.value.trim().length >= 2) {
+                    this.form.submit();
+                }
+            }, 500);
         });
     });
 </script>
