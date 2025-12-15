@@ -12,6 +12,7 @@ class AlamatUser extends Model
 
     protected $table = 'alamat_user';
     protected $primaryKey = 'id_alamat';
+    public $incrementing = true;
 
     protected $fillable = [
         'id_user',
@@ -37,10 +38,7 @@ class AlamatUser extends Model
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
 
-    /**
-     * Set alamat ini sebagai alamat utama.
-     * Otomatis unset alamat utama lainnya milik user yang sama.
-     */
+    // Set alamat ini sebagai alamat utama
     public function setAsUtama(): void
     {
         // Unset semua alamat utama milik user ini
