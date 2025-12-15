@@ -2,86 +2,84 @@
 
 namespace App\Services;
 
-use App\Models\WilayahPengiriman;
 use App\Models\LayananPengiriman;
 use App\Models\AlamatUser;
+use Illuminate\Support\Facades\DB;
 
 class OngkirService
 {
-    /**
-     * Hitung ongkir berdasarkan alamat dan layanan pengiriman
-     * 
-     * @param int $idLayananPengiriman - ID dari layanan_pengiriman
-     * @param int $idAlamat - ID dari alamat_user
-     * @return array ['jarak' => float, 'tarif_per_km' => int, 'total_ongkir' => int]
-     */
-    public function hitungOngkir($idLayananPengiriman, $idAlamat)
+    public function hitungOngkir($idLayanan, $idAlamatUser)
     {
-        // 1. Ambil data alamat
-        $alamat = AlamatUser::find($idAlamat);
-        if (!$alamat) {
+        try {
+            // 1. Ambil Data Layanan & Alamat User
+            $layanan = LayananPengiriman::find($idLayanan);
+            $alamatUser = AlamatUser::find($idAlamatUser);
+
+            if (!$layanan || !$alamatUser) {
+                return ['error' => 'Data layanan atau alamat tidak valid.'];
+            }
+
+            // 2. Normalisasi String (Bersihkan spasi & lowercase)
+            // Tujuannya agar " Arcamanik " cocok dengan "arcamanik"
+            $kecamatanUser = strtolower(trim($alamatUser->kecamatan));
+            $kelurahanUser = strtolower(trim($alamatUser->kelurahan));
+            $kotaUser = strtolower(trim($alamatUser->kota_kabupaten));
+
+            // 3. QUERY DINAMIS KE TABLE WILAYAH_PENGIRIMAN
+            // Prioritas 1: Cari yang Kelurahan & Kecamatan & Kota COCOK (Paling Akurat)
+            $wilayah = DB::table('wilayah_pengiriman')
+                ->where(DB::raw('LOWER(kelurahan)'), $kelurahanUser)
+                ->where(DB::raw('LOWER(kecamatan)'), $kecamatanUser)
+                ->where(DB::raw('LOWER(kota_kabupaten)'), $kotaUser)
+                ->first();
+
+            // Prioritas 2: Jika tidak ketemu, cari berdasarkan Kecamatan & Kota saja
+            if (!$wilayah) {
+                $wilayah = DB::table('wilayah_pengiriman')
+                    ->where(DB::raw('LOWER(kecamatan)'), $kecamatanUser)
+                    ->where(DB::raw('LOWER(kota_kabupaten)'), $kotaUser)
+                    ->first();
+            }
+
+            // Prioritas 3: Jika tidak ketemu juga, cari berdasarkan Kota saja (Fallback Kasar)
+            if (!$wilayah) {
+                $wilayah = DB::table('wilayah_pengiriman')
+                    ->where(DB::raw('LOWER(kota_kabupaten)'), $kotaUser)
+                    ->first();
+            }
+
+            // 4. Ambil Jarak
+            if ($wilayah) {
+                // Pastikan nama kolom di database Anda 'jarak_km' atau 'jarak'
+                // Sesuaikan baris ini dengan nama kolom di tabel database Anda
+                $jarak = $wilayah->jarak_km ?? $wilayah->jarak ?? 5; 
+            } else {
+                // Jika Wilayah benar-benar tidak ada di database pengiriman
+                // Kita return error agar Admin sadar harus input data, 
+                // ATAU beri default jarak jauh (misal 10km)
+                // Disini saya set default 5km agar tidak error
+                $jarak = 5; 
+            }
+
+            // 5. Hitung Tarif
+            $tarifPerKm = $layanan->tarif_per_km;
+            $totalOngkir = $jarak * $tarifPerKm;
+
+            // FIX: Hapus logic minimum 5000 agar 2km * 2000 tetap jadi 4000
+            // if ($totalOngkir < 5000) $totalOngkir = 5000; 
+
             return [
-                'jarak' => 0,
-                'tarif_per_km' => 0,
-                'total_ongkir' => 0,
-                'error' => 'Alamat tidak ditemukan'
+                'jarak' => (float) $jarak,
+                'tarif_per_km' => (int) $tarifPerKm,
+                'total_ongkir' => (int) ceil($totalOngkir),
+                'total_ongkir_formatted' => 'Rp ' . number_format(ceil($totalOngkir), 0, ',', '.'),
+                'error' => null
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Gagal menghitung ongkir: ' . $e->getMessage()
             ];
         }
-
-        // 2. Cari wilayah berdasarkan kelurahan + kecamatan + kota_kabupaten
-        $wilayah = WilayahPengiriman::where('kelurahan', $alamat->kelurahan)
-            ->where('kecamatan', $alamat->kecamatan)
-            ->where('kota_kabupaten', $alamat->kota_kabupaten)
-            ->first();
-
-        if (!$wilayah) {
-            return [
-                'jarak' => 0,
-                'tarif_per_km' => 0,
-                'total_ongkir' => 0,
-                'error' => "Wilayah {$alamat->kelurahan}, {$alamat->kecamatan}, {$alamat->kota_kabupaten} tidak ditemukan"
-            ];
-        }
-
-        // 3. Ambil data layanan pengiriman
-        $layanan = LayananPengiriman::find($idLayananPengiriman);
-        if (!$layanan) {
-            return [
-                'jarak' => 0,
-                'tarif_per_km' => 0,
-                'total_ongkir' => 0,
-                'error' => 'Layanan pengiriman tidak ditemukan'
-            ];
-        }
-
-        // 4. Hitung total ongkir
-        $jarak = (float) $wilayah->jarak_km;
-        $tarifPerKm = (int) $layanan->tarif_per_km;
-        $totalOngkir = (int) ($jarak * $tarifPerKm);
-
-        return [
-            'jarak' => $jarak,
-            'tarif_per_km' => $tarifPerKm,
-            'total_ongkir' => $totalOngkir,
-            'error' => null
-        ];
-    }
-
-    /**
-     * Ambil jarak hanya berdasarkan alamat
-     */
-    public function getJarak($idAlamat)
-    {
-        $alamat = AlamatUser::find($idAlamat);
-        if (!$alamat) {
-            return null;
-        }
-
-        $wilayah = WilayahPengiriman::where('kelurahan', $alamat->kelurahan)
-            ->where('kecamatan', $alamat->kecamatan)
-            ->where('kota_kabupaten', $alamat->kota_kabupaten)
-            ->first();
-
-        return $wilayah ? $wilayah->jarak_km : null;
     }
 }

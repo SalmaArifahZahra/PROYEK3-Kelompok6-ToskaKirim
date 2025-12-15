@@ -117,8 +117,8 @@ class PesananController extends Controller
         DB::beginTransaction();
         try {
             $ongkirService = new OngkirService();
-            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamat->id_alamat);
-            
+            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamatUtama->id_alamat);
+
             if (!empty($ongkirData['error'])) {
                 throw new \Exception('Gagal menghitung ongkir: ' . $ongkirData['error']);
             }
@@ -253,10 +253,14 @@ class PesananController extends Controller
             return response()->json(['success' => false, 'error' => $ongkirData['error']], 400);
         }
 
+        // PERBAIKAN: Return data lengkap, bukan cuma formatted
         return response()->json([
             'success' => true,
             'data' => [
-                'total_ongkir_formatted' => 'Rp ' . number_format($ongkirData['total_ongkir'], 0, ',', '.')
+                'jarak' => $ongkirData['jarak'],
+                'tarif_per_km' => $ongkirData['tarif_per_km'],
+                'total_ongkir' => $ongkirData['total_ongkir'],
+                'total_ongkir_formatted' => $ongkirData['total_ongkir_formatted']
             ]
         ]);
     }

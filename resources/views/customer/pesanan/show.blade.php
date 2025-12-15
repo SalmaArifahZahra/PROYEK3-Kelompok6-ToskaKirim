@@ -4,6 +4,7 @@
 
 @section('content')
 
+    {{-- A. LOGIKA HITUNG MUNDUR (Hanya jika Menunggu Pembayaran & Bukan COD) --}}
     @if ($pesanan->status_pesanan == 'menunggu_pembayaran' && !$isExpired)
         <div class="sticky top-20 z-40 bg-orange-50 border-b border-orange-200 p-4 mb-6 shadow-sm">
             <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
@@ -14,7 +15,7 @@
                         <p class="text-xs">Pesanan akan otomatis dibatalkan jika melewati batas waktu.</p>
                     </div>
                 </div>
-
+                
                 <div class="text-center">
                     <div id="countdown-timer" class="text-2xl font-bold text-orange-600 tracking-wider font-mono"
                         data-deadline="{{ $deadlineTimestamp }}">
@@ -29,13 +30,15 @@
     @endif
 
     <div class="max-w-5xl mx-auto my-8 px-4">
+
+        {{-- B. BREADCRUMB --}}
         <nav class="text-sm text-slate-500 mb-6 flex justify-between items-center">
             <ol class="flex items-center gap-2">
                 <li><a href="{{ route('customer.pesanan.index') }}" class="hover:underline">Pesanan Saya</a></li>
                 <li>/</li>
                 <li class="text-slate-700 font-medium">INV-{{ $pesanan->id_pesanan }}</li>
             </ol>
-
+            
             <span class="text-xs text-slate-400">
                 Dipesan pada: {{ $pesanan->waktu_pesanan->format('d M Y, H:i') }}
             </span>
@@ -43,10 +46,10 @@
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-
+            {{-- C. KOLOM KIRI: Detail Produk & Pengiriman --}}
             <div class="md:col-span-8 space-y-6">
 
-
+                {{-- Card Produk --}}
                 <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                     <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
                         <h3 class="font-bold text-slate-700">Detail Produk</h3>
@@ -66,7 +69,7 @@
                             <div class="p-4 flex gap-4">
                                 <img src="{{ $detail->produkDetail->produk->foto_url ?? asset('images/no-image.png') }}"
                                      class="w-20 h-20 rounded-md object-cover border border-slate-100">
-
+                                
                                 <div class="flex-1">
                                     <h4 class="font-medium text-slate-800">{{ $detail->produkDetail->produk->nama }}</h4>
                                     <p class="text-xs text-slate-500 mb-1">Varian: {{ $detail->produkDetail->nama_varian }}</p>
@@ -80,7 +83,7 @@
                     </div>
                 </div>
 
-
+                {{-- Card Info Pengiriman (SNAPSHOT) --}}
                 <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                     <div class="bg-slate-50 px-6 py-3 border-b border-slate-200">
                         <h3 class="font-bold text-slate-700">Informasi Pengiriman</h3>
@@ -100,7 +103,7 @@
                             <div class="md:col-span-2 pt-4 border-t border-slate-100 mt-2">
                                 <p class="text-slate-500 text-xs mb-1">Layanan Ekspedisi</p>
                                 <p class="font-semibold text-teal-600">
-                                    {{ $pesanan->layananPengiriman->nama_layanan }} -
+                                    {{ $pesanan->layananPengiriman->nama_layanan }} - 
                                     <span class="text-slate-600 font-normal">Estimasi {{ $pesanan->layananPengiriman->estimasi_waktu }}</span>
                                 </p>
                             </div>
@@ -111,12 +114,13 @@
 
             </div>
 
-
+            {{-- D. KOLOM KANAN: Pembayaran & Aksi --}}
             <div class="md:col-span-4 space-y-6">
 
+                {{-- Card Ringkasan Biaya --}}
                 <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
                     <h3 class="font-bold text-slate-700 mb-4">Rincian Pembayaran</h3>
-
+                    
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between text-slate-600">
                             <span>Total Harga Produk</span>
@@ -134,18 +138,19 @@
                     </div>
                 </div>
 
-
+                {{-- Card Instruksi Pembayaran / Upload Bukti --}}
+                {{-- Hanya Tampil Jika Status "Menunggu Pembayaran" --}}
                 @if($pesanan->status_pesanan == 'menunggu_pembayaran')
                     <div class="bg-white border border-teal-200 rounded-lg shadow-sm overflow-hidden">
-
-
+                        
+                        {{-- Header Card --}}
                         <div class="bg-teal-50 px-6 py-4 border-b border-teal-100">
                             <h3 class="font-bold text-teal-800">Pembayaran</h3>
                             <p class="text-xs text-teal-600 mt-1">Silakan transfer ke salah satu rekening berikut:</p>
                         </div>
 
                         <div class="p-6">
-
+                            {{-- List Bank --}}
                             <div class="space-y-4 mb-6">
                                 @foreach($paymentMethods as $bank)
                                     <div class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg bg-slate-50">
@@ -159,7 +164,7 @@
                                             <p class="font-mono text-slate-600 text-sm">{{ $bank->nomor_rekening }}</p>
                                             <p class="text-xs text-slate-500">a.n {{ $bank->atas_nama }}</p>
                                         </div>
-                                        <button onclick="navigator.clipboard.writeText('{{ $bank->nomor_rekening }}'); alert('No Rekening Disalin!')"
+                                        <button onclick="navigator.clipboard.writeText('{{ $bank->nomor_rekening }}'); alert('No Rekening Disalin!')" 
                                                 class="ml-auto text-teal-600 hover:text-teal-800 text-xs font-bold">
                                             SALIN
                                         </button>
@@ -167,11 +172,11 @@
                                 @endforeach
                             </div>
 
-
+                            {{-- Form Upload --}}
                             <form action="{{ route('customer.pesanan.upload', $pesanan->id_pesanan) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <label class="block text-sm font-bold text-slate-700 mb-2">Upload Bukti Transfer</label>
-
+                                
                                 <div class="relative border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:bg-slate-50 transition cursor-pointer" id="drop-area">
                                     <input type="file" name="bukti_bayar" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
                                     <div id="preview-container">
@@ -181,8 +186,8 @@
                                     </div>
                                     <img id="img-preview" class="hidden max-h-40 mx-auto rounded shadow-sm mt-2">
                                 </div>
-
-
+                                
+                                {{-- Input Jumlah Bayar (Otomatis terisi Total, tapi bisa diedit jika perlu) --}}
                                 <input type="hidden" name="jumlah_bayar" value="{{ $pesanan->grand_total }}">
 
                                 <button type="submit" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-500/30 transition-transform active:scale-95">
@@ -192,7 +197,7 @@
                         </div>
                     </div>
 
-
+                    {{-- Tombol Batalkan --}}
                     <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pesanan?');">
                         @csrf
                         <button type="submit" class="w-full text-slate-400 hover:text-red-500 text-sm font-medium py-3 transition-colors">
@@ -205,7 +210,7 @@
                         <i class="fas fa-hourglass-half text-4xl text-blue-300 mb-3"></i>
                         <h3 class="font-bold text-blue-800 mb-1">Bukti Terkirim</h3>
                         <p class="text-sm text-blue-600">Admin sedang memverifikasi pembayaran Anda. Mohon tunggu 1x24 jam.</p>
-
+                        
                         @if($pesanan->pembayaran)
                             <div class="mt-4">
                                 <p class="text-xs text-slate-500 mb-1">Bukti yang diupload:</p>
@@ -240,9 +245,7 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // 1. LOGIC TIMER HITUNG MUNDUR
+    document.addEventListener('DOMContentLoaded', function() {        
         const timerEl = document.getElementById('countdown-timer');
         if (timerEl) {
             const deadlineTime = parseInt(timerEl.getAttribute('data-deadline'));
