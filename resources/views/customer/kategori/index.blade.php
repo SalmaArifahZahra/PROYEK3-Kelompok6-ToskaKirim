@@ -7,7 +7,7 @@
 
         <aside class="w-1/4 bg-white p-5 rounded-lg shadow">
 
-            <h3 class="font-bold text-lg text-gray-900 mb-4">
+            <h3 class="font-semibold text-lg text-gray-900 mb-4">
                 {{ $kategoriUtama->nama_kategori }}
             </h3>
 
@@ -41,12 +41,23 @@
         </aside>
 
         <div class="flex-1">
-            <h2 class="text-xl mb-4 font-poppins">
-                <span class="font-semibold">Home ></span>
-                <span class="font-semibold text-blue-600 ">{{ $kategoriUtama->nama_kategori }}</span>
-            </h2>
 
 
+            <nav class="mb-7 text-sm text-slate-500" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-1">
+                    <li>
+                        <a href="{{ route('customer.dashboard') }}" class="hover:text-teal-600 transition-colors">
+                            Home
+                        </a>
+                    </li>
+
+                    <li class="text-slate-400">/</li>
+
+                    <li class="text-slate-800 font-semibold">
+                        {{ $kategoriUtama->nama_kategori }}
+                    </li>
+                </ol>
+            </nav>
 
             @include('component.customer.card_produk', [
                 'produk' => $produkList,
