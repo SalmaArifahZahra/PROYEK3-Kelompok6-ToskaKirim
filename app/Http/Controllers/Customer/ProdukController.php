@@ -9,6 +9,7 @@ use App\Models\Kategori;
 
 class ProdukController extends Controller
 {
+    // Menampilkan halaman detail produk
     public function detail($id)
     {
         $produk = Produk::with('detail')->findOrFail($id);
@@ -22,6 +23,8 @@ class ProdukController extends Controller
 
         return view('customer.produk.detail', compact('produk', 'produkLainnya'));
     }
+    
+    // Pencarian produk
     public function search(Request $request)
     {
         $keyword = strtolower($request->input('q', ''));

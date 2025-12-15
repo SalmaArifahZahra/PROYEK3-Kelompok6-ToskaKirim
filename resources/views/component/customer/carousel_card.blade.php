@@ -1,77 +1,105 @@
-<div class="w-full max-w-6xl mx-auto mt-6 px-4">
+<div class="w-full max-w-7xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+    
+    <div class="relative group">
+        <div class="swiper main-swiper overflow-hidden rounded-2xl">
+            <div class="swiper-wrapper">
+                {{-- Slide 1 --}}
+                <div class="swiper-slide">
+                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider1.png') }}" alt="Promo 1" 
+                             class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                    </div>
+                </div>
+                {{-- Slide 2 --}}
+                <div class="swiper-slide">
+                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider2.png') }}" alt="Promo 2" 
+                             class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                    </div>
+                </div>
+                {{-- Slide 3 --}}
+                <div class="swiper-slide">
+                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider1.png') }}" alt="Promo 3" 
+                             class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                    </div>
+                </div>
 
-    <div class="swiper overflow-hidden">
-        <div class="swiper-wrapper">
-            <div class="swiper-slide rounded-lg overflow-hidden shadow">
-                <img src="{{ asset('images/slider1.png') }}" alt="slide1" class="w-full h-40 object-cover">
+                {{-- Slide 4 --}}
+                <div class="swiper-slide">
+                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider2.png') }}" alt="Promo 4" 
+                             class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                    </div>
+                </div>
             </div>
-
-            <div class="swiper-slide rounded-lg overflow-hidden shadow">
-                <img src="{{ asset('images/slider2.png') }}" alt="slide2" class="w-full h-40 object-cover">
-            </div>
-
-            <div class="swiper-slide rounded-lg overflow-hidden shadow">
-                <img src="{{ asset('images/slider1.png') }}" alt="slide3" class="w-full h-40 object-cover">
-            </div>
-
-            <div class="swiper-slide rounded-lg overflow-hidden shadow">
-                <img src="{{ asset('images/slider2.png') }}" alt="slide4" class="w-full h-40 object-cover">
-            </div>
+            <div class="swiper-pagination"></div>
         </div>
 
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev-custom absolute top-1/2 -left-4 z-10 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-teal-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-teal-50">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="swiper-button-next-custom absolute top-1/2 -right-4 z-10 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-teal-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-teal-50">
+            <i class="fas fa-chevron-right"></i>
+        </div>
 
-        <div class="swiper-pagination mt-3"></div>
     </div>
 </div>
 
+@push('styles')
 <style>
-    .swiper-button-prev,
-    .swiper-button-next {
-        color: #fff;
-        width: 25px;
-        height: 25px;
+    .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        background: #cbd5e1; 
+        opacity: 1;
+        transition: all 0.3s;
     }
-
     .swiper-pagination-bullet-active {
-        background-color: #5BC6BC !important;
-        opacity: 1 !important;
+        background: #0d9488 !important; 
+        width: 24px; 
+        border-radius: 4px;
     }
 </style>
-
+@endpush
 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const swiper = new Swiper('.swiper', {
+            new Swiper('.main-swiper', {
                 loop: true,
-                spaceBetween: 17,
+                spaceBetween: 20,
                 autoplay: {
-                    delay: 2500,
+                    delay: 4000,
                     disableOnInteraction: false,
                 },
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
+                breakpoints: {
+                    320: {
+                        slidesPerView: 1, 
+                        spaceBetween: 10
+                    },
+                    640: {
+                        slidesPerView: 2, 
+                        spaceBetween: 15
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 20
+                    }
                 },
                 pagination: {
                     el: '.swiper-pagination',
                     clickable: true,
                 },
-                breakpoints: {
-                    320: {
-                        slidesPerView: 1
-                    },
-                    640: {
-                        slidesPerView: 2
-                    },
-                    1024: {
-                        slidesPerView: 3
-                    }
+                navigation: {
+                    nextEl: '.swiper-button-next-custom',
+                    prevEl: '.swiper-button-prev-custom',
                 },
                 grabCursor: true,
-                speed: 720
             });
         });
     </script>

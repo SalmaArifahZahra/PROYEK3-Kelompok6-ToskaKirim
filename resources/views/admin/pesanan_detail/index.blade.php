@@ -86,7 +86,7 @@
                         <p class="text-gray-500">Ongkos Kirim</p>
                         <p class="font-semibold text-gray-900">
                             {{ $pesanan->ongkir->nama_ongkir ?? '-' }} - 
-                            Rp {{ number_format($pesanan->ongkir->harga ?? 0, 0, ',', '.') }}
+                            Rp {{ number_format($pesanan->ongkir->total_ongkir ?? 0, 0, ',', '.') }}
                         </p>
                     </div>
                 </div>
@@ -149,7 +149,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Ongkos Kirim</span>
-                        <span class="font-medium text-gray-900">Rp {{ number_format($pesanan->ongkir->harga ?? 0, 0, ',', '.') }}</span>
+                        <span class="font-medium text-gray-900">Rp {{ number_format($pesanan->ongkir->total_ongkir ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="border-t border-gray-200 pt-3 flex justify-between">
                         <span class="font-semibold text-gray-900">Grand Total</span>

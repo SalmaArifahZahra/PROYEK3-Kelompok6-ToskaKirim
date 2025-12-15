@@ -67,7 +67,7 @@ class AuthController extends Controller
             'temp_user_email' => $user->email,
         ]);
 
-        return redirect()->route('customer.profile.complete')
+        return redirect()->route('login')
                          ->with('success', 'Registrasi berhasil! Silakan lengkapi data diri Anda.');
     }
 

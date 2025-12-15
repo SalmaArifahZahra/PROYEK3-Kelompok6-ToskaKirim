@@ -66,15 +66,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}', [CustomerProdukController::class, 'detail'])->name('produk.detail');
         });
 
-        // Alur 'Lengkapi Profil' setelah register
-        Route::get('/profile/complete', [AlamatUserController::class, 'create'])
-            ->name('profile.complete');
-
-        // CRUD Alamat Lengkap
-        Route::resource('alamat', AlamatUserController::class);
-        Route::post('/alamat/{alamat}/set-utama', [AlamatUserController::class, 'setUtama'])
-            ->name('alamat.setUtama');
-
         // Kategori & Sub-Kategori
         Route::get('/kategori/{kategori}', [CustomerKategoriController::class, 'index'])
             ->name('kategori.index');
@@ -86,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [CustomerKeranjangController::class, 'index'])->name('index');
             Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
             Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
+            Route::delete('/bulk/destroy', [CustomerKeranjangController::class, 'destroyBulk'])->name('destroyBulk');
             Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
             Route::post('/checkout', [CustomerPesananController::class, 'checkoutFromCart'])->name('checkout');
         });
@@ -95,20 +87,21 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
             Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show');
             Route::post('/store', [CustomerPesananController::class, 'storeFromConfirm'])->name('store');
-            Route::get('/store', function() {
-            return redirect()->route('customer.keranjang.index')->with('error', 'Terjadi kesalahan validasi data. Silakan coba checkout ulang.');
+            Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
             Route::post('/{id}/upload', [CustomerPesananController::class, 'uploadBukti'])->name('upload');
             Route::post('/{id}/cancel', [CustomerPesananController::class, 'cancel'])->name('cancel');
-        });
-            Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
+            Route::post('/{id}/selesai', [CustomerPesananController::class, 'selesai'])->name('selesai');
         });
 
+        // Alamat APIs
         Route::prefix('alamat')->name('alamat.')->group(function () {
-            Route::get('/', [AlamatUserController::class, 'index'])->name('index');
-            Route::get('/create', [AlamatUserController::class, 'create'])->name('create');
+            // API Endpoints (AJAX) - Semua operasi alamat via modal checkout
             Route::post('/store', [AlamatUserController::class, 'store'])->name('store');
-            Route::get('/{alamat}/edit', [AlamatUserController::class, 'edit'])->name('edit');
-            Route::put('/{alamat}/update', [AlamatUserController::class, 'update'])->name('update');
+            Route::get('/api/all', [AlamatUserController::class, 'getAllUserAddresses'])->name('api.all');
+            Route::get('/api/{alamat}', [AlamatUserController::class, 'getAddressDetail'])->name('api.detail');
+            Route::put('/api/{alamat}', [AlamatUserController::class, 'updateAddress'])->name('api.update');
+            Route::delete('/api/{alamat}', [AlamatUserController::class, 'deleteAddress'])->name('api.delete');
+            Route::post('/api/{alamat}/utama', [AlamatUserController::class, 'setUtamaApi'])->name('api.setUtama');
         });
     });
 

@@ -4,140 +4,162 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlamatUser;
-use App\Models\User;
 use App\Http\Requests\StoreAlamatUserRequest;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
-
 
 class AlamatUserController extends Controller
 {
-
-    // Menampilkan daftar alamat user
-    public function index(): View
-    {
-        $alamatList = Auth::user()->alamatUser()
-            ->orderBy('is_utama', 'desc')
-            ->get();
-
-        return view('customer.profile.complete_profile', [
-            'alamatList' => $alamatList
-        ]);
-    }
-
-    // Menampilkan form untuk menambahkan alamat baru
-    // Bisa diakses tanpa auth jika sedang registrasi
-    public function create(): View
-    {
-        return view('customer.profile.complete_profile');
-    }
-
-    // Memproses penyimpanan alamat baru
-    public function store(StoreAlamatUserRequest $request): RedirectResponse
+    // Simpan alamat baru
+    public function store(StoreAlamatUserRequest $request)
     {
         $data = $request->validated();
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User tidak ditemukan.'], 401);
+        }
+        
+        $data['id_user'] = $user->id_user;
+        $countAlamat = AlamatUser::where('id_user', $data['id_user'])->count();
 
-        // Cek registrasi baru
-        $isNewRegistration = session()->has('temp_user_id');
-
-        if ($isNewRegistration) {
-            // Untuk user baru, ambil user ID dari session
-            $userId = session('temp_user_id');
-            $user = User::find($userId);
-
-            if (!$user) {
-                return redirect()->route('register')
-                    ->withErrors(['error' => 'Sesi registrasi tidak valid. Silakan daftar ulang.']);
-            }
-
-            $data['id_user'] = $userId;
+        // alamat pertama otomatis utama
+        if ($countAlamat == 0) {
+            $data['is_utama'] = true;
         } else {
-            // Untuk user yang sudah login
-            $user = $request->user();
-            if (!$user) {
-                return redirect()->route('login')
-                    ->withErrors(['error' => 'Anda harus login terlebih dahulu.']);
-            }
-            $data['id_user'] = $user->id_user;
+            $data['is_utama'] = $request->boolean('is_utama');
         }
 
-        $userHasAddress = $user->alamatUser()->count() > 0;
-
-        // Jika user belum punya alamat, set alamat pertama ini sebagai utama
-        if (!$userHasAddress) {
-            $data['is_utama'] = true;
-        } elseif ($request->input('is_utama')) {
-            // Atau jika user explicitly set alamat ini sebagai utama
-            $data['is_utama'] = true;
-        }
-
-        $alamat = AlamatUser::create($data);
-
-        // Jika ini alamat utama, unset alamat utama lainnya
+        // Jika diset sebagai utama, reset alamat lain
         if ($data['is_utama']) {
-            $alamat->setAsUtama();
+            AlamatUser::where('id_user', $data['id_user'])->update(['is_utama' => false]);
         }
 
-        if ($isNewRegistration) {
-            session()->forget('temp_user_id');
-            return redirect()->route('login')
-                ->with('success', 'Registrasi dan profil berhasil disimpan! Silakan login dengan email dan password yang telah Anda buat.');
-        }
+        AlamatUser::create($data);
 
-        return redirect()->route('customer.dashboard')
-            ->with('success', 'Alamat berhasil disimpan!');
-    }
-
-    // Menampilkan form untuk mengedit alamat
-    public function edit(AlamatUser $alamat): View
-    {
-        // $this->authorize('update', $alamat); ← hapus ini jika tidak pakai Policy
-
-        return view('customer.profile.complete_profile', [
-            'alamat' => $alamat
+        return response()->json([
+            'success' => true,
+            'message' => 'Alamat berhasil disimpan.'
         ]);
     }
 
-
-    // Memperbarui data alamat
-    public function update(StoreAlamatUserRequest $request, AlamatUser $alamat): RedirectResponse
+    // Ambil semua alamat user yang sedang login
+    public function getAllUserAddresses()
     {
-        $this->authorize('update', $alamat);
+        $alamats = Auth::user()->alamatUser()
+            ->orderBy('is_utama', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $alamat->update($request->validated());
-
-        return redirect()->route('customer.alamat.index')
-            ->with('success', 'Alamat berhasil diperbarui.');
+        return response()->json([
+            'success' => true,
+            'data' => $alamats
+        ]);
     }
 
-    // Menghapus alamat
-    public function destroy(AlamatUser $alamat): RedirectResponse
+    // Ambil detail alamat tertentu (JSON)
+    public function showApi($alamat)
     {
-        $this->authorize('delete', $alamat);
+        $alamat = AlamatUser::where('id_alamat', $alamat)->first();
+
+        if (!$alamat) {
+            return response()->json(['success' => false, 'message' => 'Alamat tidak ditemukan'], 404);
+        }
+
+        if ($alamat->id_user !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $alamat
+        ]);
+    }
+
+    // Update alamat
+    public function updateAddress(StoreAlamatUserRequest $request, AlamatUser $alamat)
+    {
+        if ($alamat->id_user !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $data = $request->validated();
+
+        if ($request->boolean('is_utama')) {
+             AlamatUser::where('id_user', Auth::id())->update(['is_utama' => false]);
+             $data['is_utama'] = true;
+        } else {
+            if ($alamat->is_utama) {
+                $data['is_utama'] = true; 
+            }
+        }
+
+        $alamat->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Alamat berhasil diperbarui',
+            'data' => $alamat
+        ]);
+    }
+
+    // Hapus alamat
+    public function deleteAddress(AlamatUser $alamat)
+    {
+        if ($alamat->id_user !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $jumlahAlamat = AlamatUser::where('id_user', Auth::id())->count();
+
+        if ($jumlahAlamat <= 1) {
+            // Gagal hapus karena ini satu-satunya alamat
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak dapat menghapus. Anda wajib memiliki minimal satu alamat pengiriman.'
+            ]);
+        }
 
         if ($alamat->is_utama) {
-            $alamatLain = Auth::user()->alamatUser()->where('id_alamat', '!=', $alamat->id_alamat)->first();
+            $alamatLain = AlamatUser::where('id_user', Auth::id())
+                ->where('id_alamat', '!=', $alamat->id_alamat)
+                ->orderBy('created_at', 'desc')
+                ->first();
+                
             if ($alamatLain) {
-                $alamatLain->setAsUtama();
+                $alamatLain->update(['is_utama' => true]);
             }
         }
 
         $alamat->delete();
 
-        return redirect()->route('customer.alamat.index')
-            ->with('success', 'Alamat berhasil dihapus.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Alamat berhasil dihapus'
+        ]);
     }
 
-    // Menetapkan alamat sebagai alamat utama
-    public function setUtama(AlamatUser $alamat): RedirectResponse
+    // Set alamat sebagai utama
+    public function setUtamaApi(AlamatUser $alamat)
     {
-        $this->authorize('setUtama', $alamat);
+        if ($alamat->id_user !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
 
-        $alamat->setAsUtama();
+        if ($alamat->is_utama) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Alamat ini sudah dipilih sebagai alamat utama.'
+            ]);
+        }
 
-        return redirect()->route('customer.alamat.index')
-            ->with('success', 'Alamat utama berhasil diubah.');
+        AlamatUser::where('id_user', Auth::id())->update(['is_utama' => false]);
+
+        $alamat->update(['is_utama' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Alamat utama berhasil diubah',
+            'data' => $alamat
+        ]);
     }
 }
