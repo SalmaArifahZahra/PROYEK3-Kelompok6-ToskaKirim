@@ -3,134 +3,173 @@
 @section('title', 'Keranjang Belanja')
 
 @section('content')
-    <div class="max-w-6xl mx-auto mt-6">
 
-        <h1 class="text-2xl font-semibold mb-6">Keranjang Belanja</h1>
+    <div class="max-w-6xl mx-auto mt-8 px-4">
 
-        @if ($keranjang->isEmpty())
+        <h1 class="text-2xl font-bold text-slate-800 mb-6">Keranjang Belanja</h1>
 
-            <p class="text-center text-gray-500 py-10">Keranjang kosong.</p>
-        @else
-            <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex font-semibold text-gray-700">
-
-                <div class="w-1/12 flex justify-center">
-                    <input type="checkbox" id="selectAllTop" class="w-4 h-4">
-                </div>
-
-                <div class="w-2/6">Produk</div>
-                <div class="w-1/6">Harga Satuan</div>
-                <div class="w-1/6">Kuantitas</div>
-                <div class="w-1/6">Total Harga</div>
-                <div class="w-1/6 text-center">Aksi</div>
-            </div>
-
-            <div class="mt-2 space-y-4">
-
-                @foreach ($keranjang as $item)
-                    @php
-                        $produkDetail = $item->produkDetail;
-                        $produk = $produkDetail->produk;
-                        $totalHarga = $item->quantity * $produkDetail->harga_jual;
-                    @endphp
-
-                    <div class="bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center">
-
-                        <div class="w-1/12 flex justify-center">
-                            <input type="checkbox" class="itemCheckbox w-4 h-4" data-id="{{ $item->id_produk_detail }}">
-                        </div>
-
-                        <div class="w-2/6">
-                            <a href="{{ route('customer.produk.detail', $produk->id_produk) }}" class="flex gap-4 group">
-
-                                <img src="{{ $produk->foto_url }}"
-                                    class="w-20 h-20 rounded object-contain group-hover:opacity-80 transition-opacity duration-300">
-
-                                <div class="flex flex-col justify-center">
-                                    <p class="font-medium group-hover:text-orange-500 transition-colors duration-300">
-                                        {{ $produk->nama }}
-                                    </p>
-                                    <p class="text-sm text-gray-500">Varian: {{ $produkDetail->nama_varian }}</p>
-                                </div>
-                            </a>
-                        </div>
-
-                        <div class="w-1/6 font-semibold text-gray-700">
-                            Rp {{ number_format($produkDetail->harga_jual) }}
-                        </div>
-
-                        <div class="w-1/6 flex items-center">
-                            <div class="flex items-center gap-2">
-                                <button class="minusBtn px-3 py-1 border rounded  hover:bg-gray-100"
-                                    data-id="{{ $item->id_produk_detail }}">-</button>
-
-                                <input type="number" value="{{ $item->quantity }}" min="1"
-                                    class="qtyInput w-14 text-center border rounded "
-                                    data-id="{{ $item->id_produk_detail }}">
-
-                                <button class="plusBtn px-3 py-1 border rounded  hover:bg-gray-100"
-                                    data-id="{{ $item->id_produk_detail }}">+</button>
-                            </div>
-                        </div>
-
-                        <div class="w-1/6 font-bold text-red-600" id="total-{{ $item->id_produk_detail }}"
-                            data-price="{{ $produkDetail->harga_jual }}">
-                            Rp {{ number_format($totalHarga) }}
-                        </div>
-
-                        <div class="w-1/6 flex justify-center items-center">
-                            <form action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
-                                method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button"
-                                    class="btn-delete px-3 py-1 border border-red-500 text-red-500 rounded hover:bg-red-50 transition-colors">
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
-
-                    </div>
-                @endforeach
-
-            </div>
-
-            <div class="mt-6 bg-white p-4 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.05)] flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="selectAll" class="w-4 h-4">
-                    <label for="selectAll" class="text-gray-700">Pilih Semua ({{ $keranjang->count() }})</label>
-
-                    <button id="deleteSelected" class="ml-4 text-red-500 hover:underline">
-                        Hapus
-                    </button>
-
-                    <form id="formBulkDelete" action="{{ route('customer.keranjang.destroyBulk') }}" method="POST"
-                        style="display: none;">
-                        @csrf
-                        @method('DELETE')
-                        <input type="hidden" name="selected_ids" id="bulkDeleteInput">
-                    </form>
-                </div>
-
-                <div class="flex items-center gap-6">
-                    <div class="text-right">
-                        <p class="text-gray-600 text-sm">Total (<span id="selectedCount">0</span> produk):</p>
-                        <p class="text-red-600 font-bold text-xl">Rp <span id="grandTotal">0</span></p>
-                    </div>
-
-                    <form id="formCheckoutReal" action="{{ route('customer.keranjang.checkout') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="items" id="itemsInputHidden">
-
-                        <button type="submit"
-                            class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 font-bold shadow-md transition-transform transform hover:scale-105">
-                            Checkout
-                        </button>
-                    </form>
-                </div>
+        @if (session('error'))
+            <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">
+                <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
             </div>
         @endif
-    </div>
 
+        @if ($keranjang->isEmpty())
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-12 text-center">
+                <div class="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shopping-cart text-3xl text-slate-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700 mb-2">Keranjang Anda Kosong</h3>
+                <p class="text-slate-500 mb-6">Sepertinya Anda belum menambahkan produk apapun.</p>
+                <a href="{{ route('customer.dashboard') }}"
+                    class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition font-medium">
+                    Mulai Belanja
+                </a>
+            </div>
+        @else
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden mb-6">
+                <div
+                    class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center font-semibold text-slate-700 text-sm">
+                    <div class="w-1/12 flex justify-center">
+                        <input type="checkbox" id="selectAllTop"
+                            class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer">
+                    </div>
+                    <div class="w-5/12 md:w-4/12">Produk</div>
+                    <div class="hidden md:block md:w-2/12 text-right pr-8">Harga Satuan</div>
+                    <div class="w-3/12 md:w-2/12 text-center">Kuantitas</div>
+                    <div class="w-3/12 md:w-2/12 text-right pr-4">Total Harga</div>
+                    <div class="hidden md:block md:w-1/12 text-center">Aksi</div>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    @foreach ($keranjang as $item)
+                        @php
+                            $produkDetail = $item->produkDetail;
+                            $produk = $produkDetail->produk;
+                            $totalHarga = $item->quantity * $produkDetail->harga_jual;
+                        @endphp
+
+                        <div class="p-6 flex items-center hover:bg-slate-50 transition-colors">
+                            <div class="w-1/12 flex justify-center">
+                                <input type="checkbox"
+                                    class="itemCheckbox w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer"
+                                    data-id="{{ $item->id_produk_detail }}">
+                            </div>
+
+                            <div class="w-5/12 md:w-4/12">
+                                <a href="{{ route('customer.produk.detail', $produk->id_produk) }}"
+                                    class="flex gap-4 group items-center">
+                                    <div
+                                        class="w-16 h-16 shrink-0 border border-slate-200 rounded-md overflow-hidden bg-white">
+                                        <img src="{{ $produk->foto_url }}"
+                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <div class="flex flex-col justify-center">
+                                        <p
+                                            class="font-medium text-slate-800 group-hover:text-teal-600 transition-colors line-clamp-2">
+                                            {{ $produk->nama }}
+                                        </p>
+                                        <p class="text-xs text-slate-500 mt-1 bg-slate-100 px-2 py-0.5 rounded w-fit">
+                                            Varian: {{ $produkDetail->nama_varian }}
+                                        </p>
+                                        <div class="md:hidden mt-2">
+                                            <form
+                                                action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
+                                                method="POST">
+                                                @csrf @method('DELETE')
+                                                <button type="submit"
+                                                    class="text-xs text-red-500 hover:text-red-700">Hapus</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="hidden md:block md:w-2/12 text-right pr-8 text-slate-600 text-sm">
+                                Rp {{ number_format($produkDetail->harga_jual, 0, ',', '.') }}
+                            </div>
+
+                            <div class="w-3/12 md:w-2/12 flex justify-center">
+                                <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden">
+                                    <button
+                                        class="minusBtn px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 transition"
+                                        data-id="{{ $item->id_produk_detail }}">-</button>
+
+                                    <input type="number" value="{{ $item->quantity }}" min="1"
+                                        class="qtyInput w-12 text-center border-x border-slate-300 text-sm focus:outline-none py-1"
+                                        data-id="{{ $item->id_produk_detail }}">
+
+                                    <button
+                                        class="plusBtn px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 transition"
+                                        data-id="{{ $item->id_produk_detail }}">+</button>
+                                </div>
+                            </div>
+
+                            <div class="w-3/12 md:w-2/12 text-right pr-4 font-bold text-orange-600 text-sm md:text-base"
+                                id="total-{{ $item->id_produk_detail }}" data-price="{{ $produkDetail->harga_jual }}">
+                                Rp {{ number_format($totalHarga, 0, ',', '.') }}
+                            </div>
+
+                            <div class="hidden md:block md:w-1/12 text-center">
+                                <form action="{{ route('customer.keranjang.destroy', $item->id_produk_detail) }}"
+                                    method="POST">
+                                    @csrf @method('DELETE')
+                                    <button type="button"
+                                        class="btn-delete text-slate-400 hover:text-red-500 transition-colors tooltip"
+                                        title="Hapus Item">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6 sticky bottom-0 z-10">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="selectAll"
+                                class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer">
+                            <label for="selectAll" class="text-slate-700 text-sm font-medium cursor-pointer">Pilih Semua
+                                ({{ $keranjang->count() }})</label>
+                        </div>
+                        <span class="text-slate-300">|</span>
+                        <button id="deleteSelected"
+                            class="text-red-500 hover:text-red-700 text-sm font-medium hover:underline disabled:opacity-50">
+                            Hapus 
+                        </button>
+
+                        <form id="formBulkDelete" action="{{ route('customer.keranjang.destroyBulk') }}" method="POST"
+                            style="display: none;">
+                            @csrf @method('DELETE')
+                            <input type="hidden" name="selected_ids" id="bulkDeleteInput">
+                        </form>
+                    </div>
+
+                    <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
+                        <div class="text-right">
+                            <p class="text-slate-500 text-xs">Total (<span id="selectedCount">0</span> produk):</p>
+                            <p class="text-orange-600 font-bold text-xl">Rp <span id="grandTotal">0</span></p>
+                        </div>
+
+                        <form id="formCheckoutReal" action="{{ route('customer.keranjang.checkout') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="items" id="itemsInputHidden">
+
+                            <button type="submit"
+                                class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg shadow-orange-500/30 transition-all hover:scale-105 active:scale-95">
+                                Checkout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -138,10 +177,9 @@
             function updateTotal(id, qty) {
                 const totalEl = document.getElementById('total-' + id);
                 const price = parseFloat(totalEl.dataset.price);
-                totalEl.textContent = 'Rp ' + (price * qty).toLocaleString('id-ID');
+                totalEl.textContent = 'Rp ' + (price * qty).toLocaleString('id-ID').replace(/,/g, '.');
                 updateSelectedInfo();
             }
-
 
             document.querySelectorAll('.plusBtn, .minusBtn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -154,6 +192,7 @@
 
                     input.value = val;
                     updateTotal(id, val);
+
                 });
             });
 
@@ -163,18 +202,17 @@
                     updateTotal(this.dataset.id, parseInt(this.value));
                 });
             });
+
             document.querySelectorAll('.btn-delete').forEach(button => {
                 button.addEventListener('click', function() {
-
                     let form = this.closest("form");
-
                     Swal.fire({
-                        title: 'Yakin ingin menghapus?',
-                        text: "Produk ini akan dihapus dari keranjang.",
+                        title: 'Hapus produk?',
+                        text: "Produk akan dihapus dari keranjang.",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#94a3b8',
                         confirmButtonText: 'Ya, hapus',
                         cancelButtonText: 'Batal'
                     }).then((result) => {
@@ -182,7 +220,6 @@
                             form.submit();
                         }
                     });
-
                 });
             });
 
@@ -193,12 +230,10 @@
                 document.querySelectorAll('.itemCheckbox').forEach(chk => {
                     if (chk.checked) {
                         selectedCount++;
-
                         const id = chk.dataset.id;
                         const qty = parseInt(document.querySelector('.qtyInput[data-id="' + id + '"]')
                             .value);
                         const price = parseFloat(document.getElementById('total-' + id).dataset.price);
-
                         grandTotal += qty * price;
                     }
                 });
@@ -208,53 +243,46 @@
             }
 
 
-
-            document.getElementById('selectAllTop').addEventListener('change', function() {
+            document.getElementById('selectAllTop')?.addEventListener('change', function() {
                 const checked = this.checked;
-
                 document.getElementById('selectAll').checked = checked;
                 document.querySelectorAll('.itemCheckbox').forEach(chk => chk.checked = checked);
-
                 updateSelectedInfo();
             });
 
-
-
-            document.getElementById('selectAll').addEventListener('change', function() {
+            document.getElementById('selectAll')?.addEventListener('change', function() {
                 const checked = this.checked;
-
                 document.getElementById('selectAllTop').checked = checked;
                 document.querySelectorAll('.itemCheckbox').forEach(chk => chk.checked = checked);
-
                 updateSelectedInfo();
             });
-
-
 
             document.querySelectorAll('.itemCheckbox').forEach(chk => {
                 chk.addEventListener('change', function() {
-
                     const all = document.querySelectorAll('.itemCheckbox').length;
                     const checked = document.querySelectorAll('.itemCheckbox:checked').length;
 
-                    document.getElementById('selectAll').checked = (all === checked);
-                    document.getElementById('selectAllTop').checked = (all === checked);
+
+                    const allChecked = (all > 0 && all === checked);
+                    if (document.getElementById('selectAll')) document.getElementById('selectAll')
+                        .checked = allChecked;
+                    if (document.getElementById('selectAllTop')) document.getElementById(
+                        'selectAllTop').checked = allChecked;
 
                     updateSelectedInfo();
                 });
             });
 
-            document.getElementById('formCheckoutReal').addEventListener('submit', function(e) {
+
+            document.getElementById('formCheckoutReal')?.addEventListener('submit', function(e) {
                 const selected = [];
                 document.querySelectorAll('.itemCheckbox:checked').forEach(chk => {
                     const id = chk.dataset.id;
                     const qtyInput = document.querySelector('.qtyInput[data-id="' + id + '"]');
-
                     if (qtyInput) {
-                        const qty = parseInt(qtyInput.value);
                         selected.push({
                             id_produk_detail: id,
-                            quantity: qty
+                            quantity: parseInt(qtyInput.value)
                         });
                     }
                 });
@@ -264,51 +292,44 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Belum ada produk',
-                        text: 'Silakan centang minimal 1 produk untuk checkout.'
+                        text: 'Silakan centang minimal 1 produk untuk checkout.',
+                        confirmButtonColor: '#f97316'
                     });
                     return false;
                 }
 
-                const jsonString = JSON.stringify(selected);
-                document.getElementById('itemsInputHidden').value = jsonString;
-
-                console.log("Mengirim data:", jsonString);
+                document.getElementById('itemsInputHidden').value = JSON.stringify(selected);
                 return true;
             });
 
-            document.getElementById('deleteSelected').addEventListener('click', function() {
-
-
+            document.getElementById('deleteSelected')?.addEventListener('click', function() {
                 const selectedIds = [];
                 document.querySelectorAll('.itemCheckbox:checked').forEach(chk => {
                     selectedIds.push(chk.dataset.id);
                 });
 
-
                 if (selectedIds.length === 0) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Pilih Produk',
-                        text: 'Silakan centang minimal 1 produk yang ingin dihapus.'
+                        text: 'Silakan centang produk yang ingin dihapus.',
+                        confirmButtonColor: '#f97316'
                     });
                     return;
                 }
 
                 Swal.fire({
-                    title: 'Yakin ingin menghapus ' + selectedIds.length + ' produk?',
-                    text: "Produk yang dipilih akan dihapus dari keranjang.",
+                    title: 'Hapus ' + selectedIds.length + ' produk?',
+                    text: "Produk yang dipilih akan dihapus permanen dari keranjang.",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#94a3b8',
                     confirmButtonText: 'Ya, hapus semua',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-
                         document.getElementById('bulkDeleteInput').value = selectedIds.join(',');
-
-                        // 5. Submit form
                         document.getElementById('formBulkDelete').submit();
                     }
                 });

@@ -53,7 +53,7 @@
                     <div
                         class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-3 mb-3 gap-2">
                         <div class="flex items-center gap-2 text-sm">
-                            <span class="font-bold text-slate-700">INV-{{ $pesanan->id_pesanan }}</span>
+                            <span class="font-bold text-slate-700">ID Pesanan-{{ $pesanan->id_pesanan }}</span>
                             <span class="text-slate-400">•</span>
                             <span class="text-slate-500">{{ $pesanan->waktu_pesanan->format('d M Y, H:i') }}</span>
                         </div>

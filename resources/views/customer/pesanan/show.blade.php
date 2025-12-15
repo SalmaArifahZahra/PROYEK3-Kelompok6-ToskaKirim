@@ -33,7 +33,7 @@
             <ol class="flex items-center gap-2">
                 <li><a href="{{ route('customer.pesanan.index') }}" class="hover:underline">Pesanan Saya</a></li>
                 <li>/</li>
-                <li class="text-slate-700 font-medium">INV-{{ $pesanan->id_pesanan }}</li>
+                <li class="text-slate-700 font-medium">ID Pesanan-{{ $pesanan->id_pesanan }}</li>
             </ol>
             
             <span class="text-xs text-slate-400">
