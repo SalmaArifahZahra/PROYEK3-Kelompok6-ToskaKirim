@@ -46,21 +46,22 @@ class AlamatUserSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 4, // Siti Nurhaliza
+                'id_user' => 4, 
                 'label_alamat' => 'Rumah',
                 'nama_penerima' => 'Siti Nurhaliza',
                 'telepon_penerima' => '082345678901',
-                'kota_kabupaten' => 'Jakarta Timur',
-                'kecamatan' => 'Matraman',
-                'kelurahan' => 'Palmeriam',
-                'rt' => '008',
-                'rw' => '004',
-                'no_rumah' => '25',
-                'jalan_patokan' => 'Jl. Palmeriam Raya No. 25, dekat Taman Palmeriam',
+                'kota_kabupaten' => 'Kota Bandung',
+                'kecamatan' => 'Arcamanik',
+                'kelurahan' => 'Sukamiskin',
+                'rt' => '003',
+                'rw' => '007',
+                'no_rumah' => '12',
+                'jalan_patokan' => 'Jl. Arcamanik Endah No. 12, dekat Lapangan Arcamanik',
                 'is_utama' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
             [
                 'id_user' => 5, // Ahmad Rizky
                 'label_alamat' => 'Rumah',

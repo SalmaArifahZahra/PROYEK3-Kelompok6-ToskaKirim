@@ -103,6 +103,13 @@
                     <button id="deleteSelected" class="ml-4 text-red-500 hover:underline">
                         Hapus
                     </button>
+
+                    <form id="formBulkDelete" action="{{ route('customer.keranjang.destroyBulk') }}" method="POST"
+                        style="display: none;">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="selected_ids" id="bulkDeleteInput">
+                    </form>
                 </div>
 
                 <div class="flex items-center gap-6">
@@ -115,9 +122,10 @@
                     <form id="formCheckoutReal" action="{{ route('customer.keranjang.checkout') }}" method="POST">
                         @csrf
                         <input type="hidden" name="items" id="itemsInputHidden">
-                        
-                        <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 font-bold shadow-md transition-transform transform hover:scale-105">
-                            Checkout Sekarang
+
+                        <button type="submit"
+                            class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 font-bold shadow-md transition-transform transform hover:scale-105">
+                            Checkout
                         </button>
                     </form>
                 </div>
@@ -238,38 +246,74 @@
                 });
             });
 
-            // Checkout form submission: collect selected items
             document.getElementById('formCheckoutReal').addEventListener('submit', function(e) {
-                // Ambil semua checkbox yang dicentang
                 const selected = [];
                 document.querySelectorAll('.itemCheckbox:checked').forEach(chk => {
                     const id = chk.dataset.id;
                     const qtyInput = document.querySelector('.qtyInput[data-id="' + id + '"]');
-                    
-                    if(qtyInput) {
+
+                    if (qtyInput) {
                         const qty = parseInt(qtyInput.value);
-                        selected.push({ id_produk_detail: id, quantity: qty });
+                        selected.push({
+                            id_produk_detail: id,
+                            quantity: qty
+                        });
                     }
                 });
 
-                // Validasi: Jika kosong, stop submit
                 if (selected.length === 0) {
-                    e.preventDefault(); // Batalkan submit
-                    Swal.fire({ 
-                        icon: 'warning', 
-                        title: 'Belum ada produk', 
-                        text: 'Silakan centang minimal 1 produk untuk checkout.' 
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Belum ada produk',
+                        text: 'Silakan centang minimal 1 produk untuk checkout.'
                     });
                     return false;
                 }
 
-                // Masukkan data JSON ke input hidden
                 const jsonString = JSON.stringify(selected);
                 document.getElementById('itemsInputHidden').value = jsonString;
 
                 console.log("Mengirim data:", jsonString);
-                // Biarkan form melakukan submit secara alami (POST)
-                return true; 
+                return true;
+            });
+
+            document.getElementById('deleteSelected').addEventListener('click', function() {
+
+
+                const selectedIds = [];
+                document.querySelectorAll('.itemCheckbox:checked').forEach(chk => {
+                    selectedIds.push(chk.dataset.id);
+                });
+
+
+                if (selectedIds.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pilih Produk',
+                        text: 'Silakan centang minimal 1 produk yang ingin dihapus.'
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Yakin ingin menghapus ' + selectedIds.length + ' produk?',
+                    text: "Produk yang dipilih akan dihapus dari keranjang.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus semua',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        document.getElementById('bulkDeleteInput').value = selectedIds.join(',');
+
+                        // 5. Submit form
+                        document.getElementById('formBulkDelete').submit();
+                    }
+                });
             });
         });
     </script>

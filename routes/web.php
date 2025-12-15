@@ -77,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [CustomerKeranjangController::class, 'index'])->name('index');
             Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
             Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
+            Route::delete('/bulk/destroy', [CustomerKeranjangController::class, 'destroyBulk'])->name('destroyBulk');
             Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
             Route::post('/checkout', [CustomerPesananController::class, 'checkoutFromCart'])->name('checkout');
         });

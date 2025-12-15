@@ -117,7 +117,7 @@ class PesananController extends Controller
         DB::beginTransaction();
         try {
             $ongkirService = new OngkirService();
-            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamatUtama->id_alamat);
+            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamat->id_alamat);
 
             if (!empty($ongkirData['error'])) {
                 throw new \Exception('Gagal menghitung ongkir: ' . $ongkirData['error']);
