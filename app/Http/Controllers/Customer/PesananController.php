@@ -68,7 +68,7 @@ class PesananController extends Controller
         // 4. Load Data Pendukung
         $paymentMethods = MetodePembayaran::where('is_active', 1)->get();
         $layananPengiriman = LayananPengiriman::where('is_active', 1)->get();
-        
+
         // 5. Hitung Estimasi Ongkir (Default layanan pertama)
         $selectedLayanan = $layananPengiriman->first();
         $ongkir = 0;
@@ -103,7 +103,7 @@ class PesananController extends Controller
 
         $user = Auth::user();
         $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
-        
+
         // Parsing Item
         $itemsData = $this->parseItems($request->input('items'));
         if (!$itemsData) {
@@ -119,7 +119,7 @@ class PesananController extends Controller
             // 1. Hitung Ongkir Real
             $ongkirService = new OngkirService();
             $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamatUtama->id_alamat);
-            
+
             if (!empty($ongkirData['error'])) {
                 throw new \Exception('Gagal menghitung ongkir: ' . $ongkirData['error']);
             }
@@ -220,7 +220,7 @@ class PesananController extends Controller
 
         DB::transaction(function () use ($pesanan, $request) {
             $this->savePaymentProof($request, $pesanan);
-            
+
             $pesanan->update([
                 'status_pesanan' => StatusPesananEnum::MENUNGGU_VERIFIKASI
             ]);
@@ -286,7 +286,7 @@ class PesananController extends Controller
             if (!isset($item['id_produk_detail'], $item['quantity'])) continue;
 
             $produkVarian = ProdukDetail::with('produk')->find($item['id_produk_detail']);
-            
+
             if (!$produkVarian) {
                 throw new \Exception("Produk ID {$item['id_produk_detail']} tidak ditemukan.");
             }
@@ -327,7 +327,7 @@ class PesananController extends Controller
     private function savePaymentProof(Request $request, Pesanan $pesanan)
     {
         $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
-        
+
         Pembayaran::updateOrCreate(
             ['id_pesanan' => $pesanan->id_pesanan],
             [
@@ -345,7 +345,7 @@ class PesananController extends Controller
             return redirect()->route('customer.pesanan.index')
                 ->with('success', 'Pesanan COD berhasil dibuat!');
         }
-        
+
         if ($request->hasFile('bukti_bayar')) {
             return redirect()->route('customer.pesanan.index')
                 ->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');

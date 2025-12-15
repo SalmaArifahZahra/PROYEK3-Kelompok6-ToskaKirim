@@ -82,27 +82,60 @@ Route::middleware(['auth'])->group(function () {
             ->name('kategori.show');
 
         // Keranjang Belanja Customer
+        // Route::prefix('keranjang')->name('keranjang.')->group(function () {
+        //     Route::get('/', [CustomerKeranjangController::class, 'index'])->name('index');
+        //     Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
+        //     Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
+        //     Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
+        //     Route::post('/checkout', [CustomerPesananController::class, 'checkoutFromCart'])->name('checkout');
+        // });
+        // Keranjang Belanja Customer
         Route::prefix('keranjang')->name('keranjang.')->group(function () {
             Route::get('/', [CustomerKeranjangController::class, 'index'])->name('index');
             Route::post('/add', [CustomerKeranjangController::class, 'add'])->name('add');
             Route::delete('/{id_produk_detail}', [CustomerKeranjangController::class, 'destroy'])->name('destroy');
             Route::post('/update-qty/{id_produk_detail}', [CustomerKeranjangController::class, 'updateQty'])->name('updateQty');
+
+            // Route Checkout Utama (POST)
             Route::post('/checkout', [CustomerPesananController::class, 'checkoutFromCart'])->name('checkout');
+
+            // TAMBAHKAN INI: Fallback jika halaman checkout diakses via GET (refresh/redirect back)
+            Route::get('/checkout', function () {
+                return redirect()->route('customer.keranjang.index');
+            });
         });
 
         // Checkout & Pesanan
+        // Route::prefix('pesanan')->name('pesanan.')->group(function () {
+        //     Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
+        //     Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show');
+        //     Route::post('/store', [CustomerPesananController::class, 'storeFromConfirm'])->name('store');
+        //     Route::get('/store', function () {
+        //         return redirect()->route('customer.keranjang.index')->with('error', 'Terjadi kesalahan validasi data. Silakan coba checkout ulang.');
+        //         Route::post('/{id}/upload', [CustomerPesananController::class, 'uploadBukti'])->name('upload');
+        //         Route::post('/{id}/cancel', [CustomerPesananController::class, 'cancel'])->name('cancel');
+        //     });
+        //     Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
+        // });
+
+        // Route Pesanan
         Route::prefix('pesanan')->name('pesanan.')->group(function () {
             Route::get('/', [CustomerPesananController::class, 'index'])->name('index');
             Route::get('/{id}', [CustomerPesananController::class, 'show'])->name('show');
+
             Route::post('/store', [CustomerPesananController::class, 'storeFromConfirm'])->name('store');
-            Route::get('/store', function() {
-            return redirect()->route('customer.keranjang.index')->with('error', 'Terjadi kesalahan validasi data. Silakan coba checkout ulang.');
+
+            // Fallback GET store (opsional, untuk keamanan)
+            Route::get('/store', function () {
+                return redirect()->route('customer.keranjang.index');
+            });
+
             Route::post('/{id}/upload', [CustomerPesananController::class, 'uploadBukti'])->name('upload');
             Route::post('/{id}/cancel', [CustomerPesananController::class, 'cancel'])->name('cancel');
-        });
+
             Route::post('/calculate-ongkir', [CustomerPesananController::class, 'calculateOngkir'])->name('calculateOngkir');
         });
-
+        
         Route::prefix('alamat')->name('alamat.')->group(function () {
             Route::get('/', [AlamatUserController::class, 'index'])->name('index');
             Route::get('/create', [AlamatUserController::class, 'create'])->name('create');
