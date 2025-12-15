@@ -1,10 +1,9 @@
 @extends('layouts.layout_customer')
-
+{{-- ketika behasil memesan maka redirest halaman ini --}}
 @section('title', 'Detail Pesanan #' . $pesanan->id_pesanan)
 
 @section('content')
-
-
+    {{-- TIMER PEMBAYARAN --}}
     @if ($pesanan->status_pesanan->value == 'menunggu_pembayaran' && !$isExpired)
         <div class="sticky top-20 z-40 bg-orange-50 border-b border-orange-200 p-4 mb-6 shadow-sm">
             <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">

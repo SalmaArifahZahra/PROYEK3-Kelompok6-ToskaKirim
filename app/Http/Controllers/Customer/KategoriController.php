@@ -9,7 +9,7 @@ use Illuminate\View\View;
 
 class KategoriController extends Controller
 {
-    // Halaman INDEX: Menampilkan kategori utama dan produk di dalamnya
+    // Menampilkan kategori utama dan produk di dalamnya
     public function index(Kategori $kategori): View
     {
         if ($kategori->parent_id !== null) {
@@ -32,11 +32,10 @@ class KategoriController extends Controller
         ]);
     }
 
-    // Halaman SHOW: Menampilkan sub-kategori tertentu dan produk di dalamnya
+    // Menampilkan sub-kategori tertentu dan produk di dalamnya
     public function show(Kategori $subKategori)
     {
         if ($subKategori->parent_id === null) {
-            // Kategori utama → redirect ke index
             return redirect()->route('customer.kategori.index', $subKategori->id_kategori);
         }
 

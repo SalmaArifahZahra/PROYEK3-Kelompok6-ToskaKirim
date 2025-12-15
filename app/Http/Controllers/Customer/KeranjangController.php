@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class KeranjangController extends Controller
 {
+    //Menampilkan halaman keranjang
     public function index()
     {
         $keranjang = Keranjang::with('produk.detail')
@@ -28,6 +29,7 @@ class KeranjangController extends Controller
         return view('customer.keranjang.index', compact('keranjang', 'produks', 'cartCount'));
     }
 
+    //Tambah Item ke Keranjang
     public function add(Request $request)
     {
         $request->validate([
@@ -53,7 +55,7 @@ class KeranjangController extends Controller
         ]);
     }
 
-
+    //Delete Item Keranjang
     public function destroy($id_produk_detail)
     {
         $item = Keranjang::where('id_produk_detail', $id_produk_detail)
@@ -67,6 +69,8 @@ class KeranjangController extends Controller
 
         return back()->with('error', 'Produk tidak ditemukan.');
     }
+
+    //Delete All Item Keranjang yang dipilih
     public function destroyBulk(Request $request)
     {
         $request->validate([
@@ -76,7 +80,7 @@ class KeranjangController extends Controller
         $ids = explode(',', $request->input('selected_ids'));
 
         $deleted = Keranjang::whereIn('id_produk_detail', $ids)
-            ->where('id_user', auth()->id())
+            ->where('id_user',  auth::id())
             ->delete();
 
         if ($deleted) {
@@ -86,6 +90,7 @@ class KeranjangController extends Controller
         return back()->with('error', 'Gagal menghapus produk atau produk tidak ditemukan.');
     }
 
+    //update quantity keranjang
     public function updateQty(Request $request, $id)
     {
         $request->validate([

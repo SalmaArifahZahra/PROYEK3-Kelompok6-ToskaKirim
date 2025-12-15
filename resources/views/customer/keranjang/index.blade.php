@@ -117,7 +117,6 @@
                         <p class="text-red-600 font-bold text-xl">Rp <span id="grandTotal">0</span></p>
                     </div>
 
-                    <!-- Hidden form to submit selected items to checkout -->
                     <form id="formCheckoutReal" action="{{ route('customer.keranjang.checkout') }}" method="POST">
                         @csrf
                         <input type="hidden" name="items" id="itemsInputHidden">

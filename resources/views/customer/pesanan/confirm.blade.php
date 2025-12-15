@@ -24,7 +24,6 @@
             <input type="hidden" name="id_layanan_pengiriman" id="selectedLayananInput"
                 value="{{ $selectedLayananId ?? 1 }}">
 
-            {{-- Card Alamat --}}
             <div class="bg-white border border-slate-200 rounded-lg p-4 mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-teal-600 font-semibold">Alamat Pengiriman</h3>
@@ -50,7 +49,6 @@
 
             <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                 <div class="p-6">
-                    {{-- Produk --}}
                     <div class="mb-6">
                         <h3 class="text-slate-700 font-medium mb-3">Produk Dipesan</h3>
                         <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
@@ -92,7 +90,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        {{-- KIRI: Layanan & Pembayaran --}}
                         <div class="md:col-span-8">
                             {{-- Layanan Pengiriman --}}
                             <div class="border border-slate-200 rounded-lg p-5 mb-6">
@@ -177,7 +174,6 @@
 
                                         <div class="relative border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:bg-slate-50 transition cursor-pointer"
                                             id="drop-area">
-                                            <!-- ✅ TAMBAHKAN disabled saat awal -->
                                             <input type="file" name="bukti_bayar" id="bukti_bayar_input"
                                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled>
                                             <div id="preview-container">
@@ -193,7 +189,6 @@
                             </div>
                         </div>
 
-                        {{-- KANAN: Ringkasan --}}
                         <div class="md:col-span-4">
                             <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 sticky top-24">
                                 <h3 class="font-semibold text-slate-700 mb-4">Ringkasan Pembayaran</h3>
@@ -201,17 +196,14 @@
                                     <div class="bg-white rounded p-3 border border-slate-200">
                                         <div class="flex justify-between mb-2">
                                             <span class="text-slate-600 text-xs">Jarak Pengiriman:</span>
-                                            {{-- ID HARUS SAMA --}}
                                             <span class="font-medium text-xs" id="distanceDisplay">0 km</span>
                                         </div>
                                         <div class="flex justify-between mb-2">
                                             <span class="text-slate-600 text-xs">Tarif per km:</span>
-                                            {{-- ID HARUS SAMA --}}
                                             <span class="font-medium text-xs" id="tarifDisplay">Rp 0</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-slate-600">Ongkos Kirim</span>
-                                            {{-- ID HARUS SAMA --}}
                                             <span class="font-medium" id="ongkirDisplay">Rp 0</span>
                                         </div>
                                     </div>
@@ -219,7 +211,6 @@
                                     <hr class="border-slate-200">
                                     <div class="flex justify-between text-lg font-bold text-teal-600">
                                         <span>Total Tagihan</span>
-                                        {{-- ID HARUS SAMA --}}
                                         <span id="totalDisplay">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
@@ -250,16 +241,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log("Script Loaded - All Systems Go");
 
-            // Di bagian script form submit
             document.getElementById('checkoutForm').addEventListener('submit', function(e) {
                 console.log('Form submitted');
                 console.log('Metode Pembayaran:', document.querySelector(
                     'input[name="metode_pembayaran"]:checked')?.value);
                 console.log('Items:', document.getElementById('itemsInput').value);
-                // Lanjutkan submit
             });
 
-            // LOGIC ONGKIR DINAMIS
             const subtotal = {{ $subtotal ?? 0 }};
             const items = [
                 @if (isset($selectedItems))
@@ -275,7 +263,6 @@
             const itemsInput = document.getElementById('itemsInput');
             if (itemsInput) itemsInput.value = JSON.stringify(items);
 
-            // Ongkir Logic
             const selectedLayananRadio = document.querySelector(
                 'input[name="id_layanan_pengiriman_radio"]:checked');
             if (selectedLayananRadio) calculateAndUpdateOngkir(selectedLayananRadio.value);
@@ -289,7 +276,6 @@
             });
 
             function calculateAndUpdateOngkir(layananId) {
-                // Loading state
                 if (document.getElementById('distanceDisplay')) document.getElementById('distanceDisplay')
                     .textContent = '...';
                 if (document.getElementById('tarifDisplay')) document.getElementById('tarifDisplay').textContent =
@@ -310,7 +296,6 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
-                            // Gunakan fallback '|| 0' untuk mencegah error 'undefined'
                             const ongkir = data.data.total_ongkir || 0;
                             const jarak = data.data.jarak || 0;
                             const tarif = data.data.tarif_per_km || 0;
@@ -322,7 +307,6 @@
                             const elTotal = document.getElementById('totalDisplay');
 
                             if (elDistance) elDistance.textContent = jarak.toFixed(2) + ' km';
-                            // toLocaleString aman karena tarif sudah pasti angka (atau 0)
                             if (elTarif) elTarif.textContent = 'Rp ' + tarif.toLocaleString('id-ID') + '/km';
                             if (elOngkir) elOngkir.textContent = 'Rp ' + ongkir.toLocaleString('id-ID');
                             if (elTotal) elTotal.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
@@ -339,11 +323,9 @@
                     })
                     .catch(error => {
                         console.error('Ongkir Error:', error);
-                        // Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal koneksi ke server.' });
                     });
             }
 
-            // LOGIC METODE PEMBAYARAN & TOMBOL
             const fileInput = document.querySelector('input[name="bukti_bayar"]');
             const btnSubmit = document.getElementById('btn-submit');
             const transferInfo = document.getElementById('transfer-info');
@@ -400,8 +382,7 @@
                 }
             }
 
-
-            // LOGIC MODAL ALAMAT
+            // modal alamat
             const modal = document.getElementById('addressModal');
             const btnOpen = document.getElementById('btnEditAlamat');
             const btnClose = document.getElementById('closeAddressModal');
@@ -414,8 +395,7 @@
             const formContainer = document.getElementById('addressFormContainer');
             const addBtnContainer = document.getElementById('addAddressButtonContainer');
             const form = document.getElementById('addressForm');
-
-            // Elemen Form
+     
             const addressIdInput = document.getElementById('addressId');
             const provinsiSelect = document.getElementById('provinsi');
             const kotaSelect = document.getElementById('kota_kabupaten_select');
@@ -431,12 +411,10 @@
                 document.body.appendChild(modal);
             }
 
-            // --- BUKA MODAL ---
             if (btnOpen) {
                 btnOpen.addEventListener('click', (e) => {
                     e.preventDefault();
                     loadAddresses();
-                    // Load provinsi hanya jika kosong
                     if (provinsiSelect && provinsiSelect.options.length <= 1) {
                         fetchData('provinces', provinsiSelect, 'Provinsi');
                     }
@@ -445,7 +423,6 @@
                 });
             }
 
-            // --- TUTUP MODAL ---
             function hideModal() {
                 modal.classList.add('hidden');
                 document.body.style.overflow = '';
@@ -454,20 +431,17 @@
             if (btnClose) btnClose.addEventListener('click', hideModal);
             if (btnCancel) btnCancel.addEventListener('click', hideModal);
 
-            // --- RESET TAMPILAN KE LIST ---
             function resetFormView() {
                 formContainer.classList.add('hidden');
                 addBtnContainer.classList.remove('hidden');
                 form.reset();
-                addressIdInput.value = ''; // Reset ID penting!
+                addressIdInput.value = '';
 
-                // Reset Select Wilayah
                 if (kotaSelect) kotaSelect.innerHTML = '<option value="">Pilih Kota</option>';
                 if (kecamatanSelect) kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
                 if (kelurahanSelect) kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
             }
 
-            // --- LOAD LIST ALAMAT ---
             function loadAddresses() {
                 listContainer.innerHTML =
                     '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-teal-600 mb-2"></i><br>Memuat data...</div>';
@@ -516,13 +490,11 @@
                         </div>
                     `;
 
-                    // Klik card = klik radio
                     el.addEventListener('click', (e) => {
                         if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
                             const radio = el.querySelector('input[type="radio"]');
                             if (radio) {
                                 radio.checked = true;
-                                // Visual update
                                 Array.from(listContainer.children).forEach(c => {
                                     c.classList.remove('border-teal-500', 'bg-teal-50',
                                         'ring-1', 'ring-teal-500');
@@ -538,9 +510,7 @@
                 });
             }
 
-            // --- GLOBAL: EDIT ALAMAT (FIXED POPULATE) ---
             window.editAddress = function(id) {
-                // Tampilkan loading swal
                 Swal.fire({
                     title: 'Memuat...',
                     didOpen: () => Swal.showLoading()
@@ -553,7 +523,6 @@
                         if (res.success) {
                             const d = res.data;
 
-                            // 1. Isi Input Text Standard
                             document.getElementById('addressId').value = d.id_alamat;
                             document.getElementById('label_alamat').value = d.label_alamat;
                             document.getElementById('nama_penerima').value = d.nama_penerima;
@@ -563,13 +532,12 @@
                             document.getElementById('rt').value = d.rt || '';
                             document.getElementById('rw').value = d.rw || '';
 
-                            // 2. Isi Hidden Values Wilayah
+
                             if (kotaHidden) kotaHidden.value = d.kota_kabupaten;
                             if (kecamatanHidden) kecamatanHidden.value = d.kecamatan;
                             if (kelurahanHidden) kelurahanHidden.value = d.kelurahan;
 
-                            // 3. VISUAL HACK: Tampilkan Nama Wilayah di Dropdown (Dummy Option)
-                            // Agar user melihat "Bandung" dan bukan "Pilih Kota" saat edit
+
                             kotaSelect.innerHTML =
                                 `<option value="${d.kota_kabupaten}" selected>${d.kota_kabupaten}</option>`;
                             kecamatanSelect.innerHTML =
@@ -577,10 +545,6 @@
                             kelurahanSelect.innerHTML =
                                 `<option value="${d.kelurahan}" selected>${d.kelurahan}</option>`;
 
-                            // Provinsi biarkan pilih ulang jika ingin ganti, atau set dummy juga
-                            // provinsiSelect.value = ... (Susah tanpa ID)
-
-                            // 4. Ganti Judul & Tampilkan Form
                             document.getElementById('formTitle').textContent = 'Edit Alamat';
                             formContainer.classList.remove('hidden');
                             addBtnContainer.classList.add('hidden');
@@ -595,7 +559,6 @@
                     .catch(e => Swal.fire('Error', 'Terjadi kesalahan koneksi', 'error'));
             };
 
-            // --- GLOBAL: HAPUS ALAMAT ---
             window.deleteAddress = function(id) {
                 Swal.fire({
                     title: 'Hapus Alamat?',
@@ -627,7 +590,6 @@
                 });
             };
 
-            // --- SUBMIT FORM TAMBAH / EDIT ---
             if (form) {
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -666,7 +628,6 @@
                                 resetFormView();
                                 loadAddresses();
                             } else {
-                                // Tampilkan error validasi jika ada
                                 let msg = res.message || 'Gagal menyimpan data.';
                                 if (res.errors) {
                                     msg = Object.values(res.errors).flat().join('\n');
@@ -689,7 +650,6 @@
                 });
             }
 
-            // --- SUBMIT PILIH ALAMAT UTAMA ---
             if (btnSubmitModal) {
                 btnSubmitModal.addEventListener('click', () => {
                     const selected = document.querySelector('input[name="selectedAddressModal"]:checked');
@@ -725,7 +685,6 @@
                 });
             }
 
-            // --- TOGGLE FORM TAMBAH ---
             if (btnAdd) {
                 btnAdd.addEventListener('click', () => {
                     resetFormView();
@@ -733,9 +692,8 @@
                     formContainer.classList.remove('hidden');
                     addBtnContainer.classList.add('hidden');
 
-                    // Load Provinsi untuk form baru
-                    if (provinsiSelect) fetchData('provinces', provinsiSelect, 'Provinsi');
 
+                    if (provinsiSelect) fetchData('provinces', provinsiSelect, 'Provinsi');
                     formContainer.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center'
@@ -747,7 +705,6 @@
                 btnCancelForm.addEventListener('click', resetFormView);
             }
 
-            // --- API WILAYAH FETCHING ---
             async function fetchData(endpoint, selectElement, placeholder) {
                 try {
                     const response = await fetch(`${API_WILAYAH}/${endpoint}`);
@@ -767,7 +724,7 @@
                 }
             }
 
-            // Event Listeners Wilayah (Change)
+
             if (provinsiSelect) {
                 provinsiSelect.addEventListener('change', function() {
                     if (this.value) {
@@ -783,7 +740,6 @@
                     if (this.value) {
                         fetchData(`districts/${this.value}`, kecamatanSelect, 'Kecamatan');
                         kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
-                        // Simpan Nama ke Hidden
                         if (kotaHidden) kotaHidden.value = this.options[this.selectedIndex].text;
                     }
                 });

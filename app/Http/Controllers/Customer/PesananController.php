@@ -93,7 +93,7 @@ class PesananController extends Controller
 
         $user = Auth::user();
 
-        // Jika ada id_alamat dari modal, gunakan itu. Jika tidak, gunakan alamat utama
+        // Jika ada id_alamat dari modal, gunakan yang ada. Jika tidak, gunakan alamat utama
         $alamat = null;
         if ($request->id_alamat) {
             $alamat = $user->alamatUser()->where('id_alamat', $request->id_alamat)->first();
@@ -184,7 +184,7 @@ class PesananController extends Controller
             ->with(['detail.produkDetail.produk', 'ongkir', 'pembayaran', 'layananPengiriman'])
             ->findOrFail($id);
 
-  
+
         $paymentMethods = MetodePembayaran::where('is_active', 1)->get();
         $deadline = Carbon::parse($pesanan->waktu_pesanan)->addHours(24);
         $deadlineTimestamp = $deadline->timestamp * 1000;
@@ -193,7 +193,7 @@ class PesananController extends Controller
         return view('customer.pesanan.show', compact(
             'pesanan',
             'deadline',
-            'deadlineTimestamp', 
+            'deadlineTimestamp',
             'paymentMethods',
             'isExpired'
         ));
@@ -257,8 +257,6 @@ class PesananController extends Controller
         if (!empty($ongkirData['error'])) {
             return response()->json(['success' => false, 'error' => $ongkirData['error']], 400);
         }
-
-        // PERBAIKAN: Return data lengkap, bukan cuma formatted
         return response()->json([
             'success' => true,
             'data' => [
@@ -338,21 +336,6 @@ class PesananController extends Controller
         );
     }
 
-    // private function redirectAfterOrder(Request $request, Pesanan $pesanan)
-    // {
-    //     if ($request->metode_pembayaran === 'COD') {
-    //         return redirect()->route('customer.pesanan.index')
-    //             ->with('success', 'Pesanan COD berhasil dibuat!');
-    //     }
-
-    //     if ($request->hasFile('bukti_bayar')) {
-    //         return redirect()->route('customer.pesanan.index')
-    //             ->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');
-    //     }
-
-    //     return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
-    //         ->with('success', 'Pesanan berhasil. Silahkan lakukan pembayaran.');
-    // }
     private function redirectAfterOrder(Request $request, Pesanan $pesanan)
     {
         if ($request->metode_pembayaran === 'COD') {
@@ -360,13 +343,11 @@ class PesananController extends Controller
                 ->with('success', 'Pesanan COD berhasil dibuat!');
         }
 
-        // ✅ PERBAIKAN: Cek file benar-benar ada DAN valid
         if ($request->hasFile('bukti_bayar') && $request->file('bukti_bayar')->isValid()) {
             return redirect()->route('customer.pesanan.index')
                 ->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');
         }
 
-        // Jika tidak ada bukti, arahkan ke halaman detail untuk upload
         return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
             ->with('success', 'Pesanan berhasil. Silahkan lakukan pembayaran.');
     }
