@@ -13,8 +13,6 @@
     </h2>
 
     @if($produk->count() > 0)
-
-        {{-- Panggil komponen card produk --}}
         @include('component.customer.card_produk', [
             'produk' => $produk,
             'hideTitle' => true   {{-- Supaya judul "Produk Pilihan" tidak tampil --}}

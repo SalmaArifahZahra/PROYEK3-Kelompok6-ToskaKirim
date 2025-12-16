@@ -28,14 +28,14 @@ class PesananSeeder extends Seeder
             ],
             [
                 'id_user' => 4, // Siti Nurhaliza
-                'id_ongkir' => 2, // 5 km
+                'id_ongkir' => 2, // 5 km (Bandung)
                 'waktu_pesanan' => now()->subDays(3),
                 'subtotal_produk' => 105000.00,
-                'grand_total' => 130000.00, // subtotal + ongkir 25000
+                'grand_total' => 130000.00,
                 'status_pesanan' => 'dikirim',
                 'penerima_nama' => 'Siti Nurhaliza',
                 'penerima_telepon' => '082345678901',
-                'alamat_lengkap' => 'Jl. Palmeriam Raya No. 25, RT 008/RW 004, Kelurahan Palmeriam, Kecamatan Matraman, Jakarta Timur',
+                'alamat_lengkap' => 'Jl. Arcamanik Endah No. 12, RT 003/RW 007, Kelurahan Sukamiskin, Kecamatan Arcamanik, Kota Bandung',
                 'created_at' => now()->subDays(3),
                 'updated_at' => now()->subDays(1),
             ],

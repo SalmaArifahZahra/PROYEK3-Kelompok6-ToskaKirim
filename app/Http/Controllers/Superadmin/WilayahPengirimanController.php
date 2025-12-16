@@ -12,10 +12,25 @@ class WilayahPengirimanController extends Controller
     public function index() {
         $wilayah = WilayahPengiriman::orderBy('kota_kabupaten')
                     ->orderBy('kecamatan')
-                    ->orderBy('kelurahan')
-                    ->paginate(50);
-                    
-        return view('superadmin.wilayah.index', compact('wilayah'));
+                    ->orderBy('kelurahan');
+        
+        // Search parameter
+        $search = $request->get('search', '');
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('kelurahan', 'ILIKE', "%{$search}%")
+                  ->orWhere('kecamatan', 'ILIKE', "%{$search}%")
+                  ->orWhere('kota_kabupaten', 'ILIKE', "%{$search}%");
+            });
+        }
+        
+        $wilayah = $query->paginate(50);
+        $wilayah->appends($request->query());
+        
+        return view('superadmin.wilayah.index', [
+            'wilayah' => $wilayah,
+            'search' => $search
+        ]);
     }
 
     // Update manual jarak
@@ -54,7 +69,6 @@ class WilayahPengirimanController extends Controller
             $kec = trim($w->kecamatan);
             $kot = trim($w->kota_kabupaten);
 
-            // --- STRATEGI BERLAPIS (PRIORITAS PENCARIAN) ---
             $queries = [
                 // Paling Akurat
                 "$kel, $kec, $kot",
@@ -82,11 +96,9 @@ class WilayahPengirimanController extends Controller
                     $data = json_decode($response->getBody(), true);
 
                     if (!empty($data)) {
-                        // KETEMU!
                         $destLat = $data[0]['lat'];
                         $destLon = $data[0]['lon'];
 
-                        // Hitung
                         $jarakKm = $this->hitungJarakHaversine($tokoLat, $tokoLon, $destLat, $destLon);
                         $jarakRute = $jarakKm * 1.3; 
 

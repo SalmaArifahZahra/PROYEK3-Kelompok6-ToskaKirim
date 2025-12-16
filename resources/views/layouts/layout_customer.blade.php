@@ -13,6 +13,7 @@
         rel="stylesheet">
 
 
+    {{-- Swiper carousel--}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

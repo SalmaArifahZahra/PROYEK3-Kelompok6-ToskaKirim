@@ -22,257 +22,184 @@ use Carbon\Carbon;
 
 class PesananController extends Controller
 {
-    // Menampilkan Daftar Pesanan dengan Filter Status
+    // Menampilkan daftar pesanan customer
     public function index(Request $request)
     {
-        $status = $request->query('status');
-
-        $query = Pesanan::where('id_user', Auth::id())
+        $pesananList = Pesanan::where('id_user', Auth::id())
             ->with(['detail.produkDetail', 'pembayaran'])
-            ->latest('waktu_pesanan');
+            ->when($request->query('status'), function ($query, $status) {
+                return $query->where('status_pesanan', $status);
+            })
+            ->latest('waktu_pesanan')
+            ->get();
 
-        if ($status) {
-            $query->where('status_pesanan', $status);
-        }
-
-        $pesananList = $query->get();
-
-        return view('customer.pesanan.index', compact('pesananList', 'status'));
+        return view('customer.pesanan.index', [
+            'pesananList' => $pesananList,
+            'status' => $request->query('status')
+        ]);
     }
 
-    // Membuat Pesanan dari Keranjang (old single-item method - no longer used, removed)
-
-
-    // Show confirmation page for checkout: display selected items before creating pesanan
+    // Menampilkan halaman konfirmasi pesanan dari keranjang
     public function checkoutFromCart(Request $request)
     {
-        // 1. Ambil data items
-        $itemsInput = $request->input('items');
-
-        // 2. Decode JSON String menjadi Array PHP
-        $items = is_string($itemsInput) ? json_decode($itemsInput, true) : $itemsInput;
-
-        // 3. Validasi: Pastikan hasil decode adalah array dan tidak kosong
-        if (!is_array($items) || empty($items)) {
-            return back()->with('error', 'Tidak ada produk yang dipilih atau data tidak valid.');
-        }
-
-        $selectedItems = [];
-        $subtotal = 0;
-
-        // 4. Looping data items
-        foreach ($items as $item) {
-            // Pastikan key yang diperlukan ada
-            if (!isset($item['id_produk_detail'], $item['quantity'])) {
-                continue; // Skip jika data rusak
-            }
-
-            // Ambil data produk dari DB
-            $produkVarian = ProdukDetail::with('produk')->find($item['id_produk_detail']);
-
-            // Cek apakah produk ditemukan
-            if (!$produkVarian) {
-                return back()->with('error', 'Salah satu produk tidak ditemukan.');
-            }
-
-            // Cek Stok
-            if ($produkVarian->stok < $item['quantity']) {
-                return back()->with('error', "Stok tidak mencukupi untuk: {$produkVarian->nama_varian} (Sisa: {$produkVarian->stok})");
-            }
-
-            $lineSubtotal = $produkVarian->harga_jual * $item['quantity'];
-            $subtotal += $lineSubtotal;
-
-            $selectedItems[] = [
-                'produk_detail' => $produkVarian,
-                'quantity' => $item['quantity'],
-                'subtotal' => $lineSubtotal
-            ];
+        $itemsData = $this->parseItems($request->input('items'));
+        if (!$itemsData) {
+            return redirect()->route('customer.keranjang.index')
+                ->with('error', 'Tidak ada produk yang dipilih.');
         }
 
         $user = Auth::user();
         $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
 
-        // Cek Alamat
-        if (!$alamatUtama) {
-            return redirect()->route('customer.alamat.create')
-                             ->with('error', 'Silahkan atur alamat utama sebelum melakukan pemesanan.');
+        try {
+            $summary = $this->calculateOrderSummary($itemsData, false);
+        } catch (\Exception $e) {
+            return redirect()->route('customer.keranjang.index')->with('error', $e->getMessage());
         }
 
-        // 5. Ambil Metode Pembayaran
         $paymentMethods = MetodePembayaran::where('is_active', 1)->get();
+        $layananPengiriman = LayananPengiriman::where('is_active', 1)->get();
+        $selectedLayanan = $layananPengiriman->first();
 
-        // 6. Ambil Layanan Pengiriman yang Active
-        $layananPengiriman = \App\Models\LayananPengiriman::where('is_active', 1)->get();
-        $selectedLayanan = null;
-        if ($layananPengiriman->count() == 1) {
-            $selectedLayanan = $layananPengiriman->first()->id;
-        }
+        // Jika belum ada alamat utama, jangan hitung ongkir — tampilkan kosong di view
+        $ongkir = null;
 
-        // 7. Hitung ongkir berdasarkan layanan default (jika hanya 1) atau default value
-        $ongkir = 0;
-        if ($selectedLayanan) {
+        if ($selectedLayanan && $alamatUtama) {
             $ongkirService = new OngkirService();
-            $ongkirData = $ongkirService->hitungOngkir($selectedLayanan, $alamatUtama->id_alamat);
-            $ongkir = $ongkirData['total_ongkir'];
+            $ongkirResult = $ongkirService->hitungOngkir($selectedLayanan->id, $alamatUtama->id_alamat);
+            $ongkir = $ongkirResult['total_ongkir'] ?? 0;
         }
 
-        $grandTotal = $subtotal + $ongkir;
-
-        // 8. Lempar ke View Konfirmasi
         return view('customer.pesanan.confirm', [
-            'selectedItems' => $selectedItems,
-            'subtotal' => $subtotal,
+            'selectedItems' => $summary['items'],
+            'subtotal' => $summary['subtotal'],
             'ongkir' => $ongkir,
-            'grandTotal' => $grandTotal,
+            'grandTotal' => $summary['subtotal'] + ($ongkir ?? 0),
             'alamatUtama' => $alamatUtama,
             'paymentMethods' => $paymentMethods,
             'layananPengiriman' => $layananPengiriman,
-            'selectedLayanan' => $selectedLayanan
+            'selectedLayananId' => $selectedLayanan->id ?? null
         ]);
     }
 
-    // Create pesanan from confirmed items
+    // Proses penyimpanan pesanan dari konfirmasi
     public function storeFromConfirm(Request $request)
     {
         $request->validate([
             'items' => 'required|json',
             'metode_pembayaran' => 'required',
-            'id_layanan_pengiriman' => 'required|exists:layanan_pengiriman,id',
+            'id_layanan_pengiriman' => 'nullable|exists:layanan_pengiriman,id',
+            'id_alamat' => 'nullable|exists:alamat_user,id_alamat',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $user = Auth::user();
-        $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
-        $items = json_decode($request->input('items'), true);
+
+        // Jika ada id_alamat dari modal, gunakan yang ada. Jika tidak, gunakan alamat utama
+        $alamat = null;
+        if ($request->id_alamat) {
+            $alamat = $user->alamatUser()->where('id_alamat', $request->id_alamat)->first();
+        } else {
+            $alamat = $user->alamatUser()->where('is_utama', true)->first();
+        }
+
+        if (!$alamat) {
+            // Jika user belum punya alamat, kembalikan ke halaman konfirmasi
+            // dan tampilkan notifikasi agar menambahkan alamat terlebih dahulu.
+            return back()->with('error', 'Anda belum memiliki alamat pengiriman. Silakan tambahkan alamat terlebih dahulu.');
+        }
+
+        $itemsData = $this->parseItems($request->input('items'));
+        if (!$itemsData) {
+            return redirect()->route('customer.keranjang.index')->with('error', 'Data keranjang tidak valid.');
+        }
+
+        $idLayanan = $request->id_layanan_pengiriman ?? LayananPengiriman::where('is_active', 1)->value('id');
+        if (!$idLayanan) return back()->with('error', 'Layanan pengiriman tidak tersedia.');
 
         DB::beginTransaction();
         try {
-            // 1. Tentukan Status Awal
-            $statusPesanan = StatusPesananEnum::MENUNGGU_PEMBAYARAN; // Default (Bayar Nanti)
-            
-            // Cek Metode Pembayaran
-            if ($request->metode_pembayaran == 'COD') {
-                $statusPesanan = StatusPesananEnum::DIPROSES; // Langsung diproses admin
-            } elseif ($request->hasFile('bukti_bayar')) {
-                $statusPesanan = StatusPesananEnum::MENUNGGU_VERIFIKASI; // Jika langsung upload
-            }
-
-            // 2. Hitung Ongkir Dinamis
             $ongkirService = new OngkirService();
-            $ongkirData = $ongkirService->hitungOngkir(
-                $request->id_layanan_pengiriman,
-                $alamatUtama->id_alamat
-            );
+            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamat->id_alamat);
 
-            // Cek jika ada error dalam kalkulasi ongkir
-            if ($ongkirData['error']) {
-                DB::rollBack();
-                return back()->with('error', 'Kalkulasi ongkir gagal: ' . $ongkirData['error']);
+            if (!empty($ongkirData['error'])) {
+                throw new \Exception('Gagal menghitung ongkir: ' . $ongkirData['error']);
             }
-
-            // 3. Buat Data Ongkir & Pesanan Header
-            $ongkir = Ongkir::create([
+            $summary = $this->calculateOrderSummary($itemsData, true);
+            $ongkirRecord = Ongkir::create([
                 'jarak' => $ongkirData['jarak'],
                 'tarif_per_km' => $ongkirData['tarif_per_km'],
                 'total_ongkir' => $ongkirData['total_ongkir']
             ]);
-            
+
+            $statusPesanan = $this->determineOrderStatus($request);
+
             $pesanan = Pesanan::create([
                 'id_user' => $user->id_user,
-                'id_ongkir' => $ongkir->id_ongkir,
-                'id_layanan_pengiriman' => $request->id_layanan_pengiriman,
+                'id_ongkir' => $ongkirRecord->id_ongkir,
+                'id_layanan_pengiriman' => $idLayanan,
                 'waktu_pesanan' => now(),
-                'subtotal_produk' => 0,
-                'grand_total' => 0,
                 'status_pesanan' => $statusPesanan,
-                'penerima_nama' => $alamatUtama->nama_penerima,
-                'penerima_telepon' => $alamatUtama->telepon_penerima,
-                'alamat_lengkap' => "{$alamatUtama->jalan_patokan}, {$alamatUtama->kelurahan}, {$alamatUtama->kecamatan}, {$alamatUtama->kota_kabupaten}",
+                'metode_pembayaran' => $request->metode_pembayaran,
+                'penerima_nama' => $alamat->nama_penerima,
+                'penerima_telepon' => $alamat->telepon_penerima,
+                'alamat_lengkap' => "{$alamat->jalan_patokan}, {$alamat->kelurahan}, {$alamat->kecamatan}, {$alamat->kota_kabupaten}",
+                'subtotal_produk' => $summary['subtotal'],
+                'grand_total' => $summary['subtotal'] + $ongkirData['total_ongkir']
             ]);
 
-            // 4. Simpan Detail Produk
-            $subtotal = 0;
-            foreach ($items as $item) {
-                $produkVarian = ProdukDetail::findOrFail($item['id_produk_detail']);
-                
-                // Kurangi Stok (Penting!)
-                $produkVarian->decrement('stok', $item['quantity']);
-
-                $lineSubtotal = $produkVarian->harga_jual * $item['quantity'];
-                $subtotal += $lineSubtotal;
-
+            foreach ($summary['items'] as $item) {
                 PesananDetail::create([
                     'id_pesanan' => $pesanan->id_pesanan,
-                    'id_produk_detail' => $produkVarian->id_produk_detail,
+                    'id_produk_detail' => $item['produk_detail']->id_produk_detail,
                     'kuantitas' => $item['quantity'],
-                    'harga_beli' => $produkVarian->harga_jual,
-                    'subtotal_item' => $lineSubtotal
+                    'harga_saat_beli' => $item['produk_detail']->harga_jual,
+                    'subtotal_item' => $item['subtotal']
                 ]);
             }
-
-            // Update Total
-            $grandTotal = $subtotal + $ongkir->total_ongkir;
-            $pesanan->update(['subtotal_produk' => $subtotal, 'grand_total' => $grandTotal]);
-
-            // 5. Handle Bukti Pembayaran (Jika ada)
-            if ($request->metode_pembayaran != 'COD' && $request->hasFile('bukti_bayar')) {
-                $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
-                
-                Pembayaran::create([
-                    'id_pesanan' => $pesanan->id_pesanan,
-                    'bukti_bayar' => $path,
-                    'jumlah_bayar' => $grandTotal,
-                    'tanggal_bayar' => now(),
-                    'status_pembayaran' => StatusPembayaranEnum::MENUNGGU_VERIFIKASI
-                ]);
+            if (
+                $request->metode_pembayaran !== 'COD' &&
+                $request->hasFile('bukti_bayar') &&
+                $request->file('bukti_bayar')->isValid()
+            ) {
+                $this->savePaymentProof($request, $pesanan);
             }
 
-            // 6. Hapus Keranjang
-            foreach ($items as $item) {
-                Keranjang::where('id_user', $user->id_user)
-                    ->where('id_produk_detail', $item['id_produk_detail'])
-                    ->delete();
-            }
+            $productIds = array_column($itemsData, 'id_produk_detail');
+            Keranjang::where('id_user', $user->id_user)
+                ->whereIn('id_produk_detail', $productIds)
+                ->delete();
 
             DB::commit();
 
-            // 6. Redirect Sesuai Kondisi
-            if ($request->metode_pembayaran == 'COD') {
-                return redirect()->route('customer.pesanan.index')->with('success', 'Pesanan COD berhasil dibuat!');
-            }
-            
-            if ($request->hasFile('bukti_bayar')) {
-                return redirect()->route('customer.pesanan.index')->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');
-            }
-
-            // Jika Bayar Nanti (Transfer tapi belum upload)
-            return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
-                ->with('success', 'Pesanan dibuat. Silahkan lakukan pembayaran.');
-
+            return $this->redirectAfterOrder($request, $pesanan);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal membuat pesanan: ' . $e->getMessage());
+            return redirect()->route('customer.keranjang.index')
+                ->with('error', 'Gagal memproses pesanan: ' . $e->getMessage());
         }
     }
 
-    // Menampilkan Detail Pesanan
     public function show($id)
     {
-        $pesanan = \App\Models\Pesanan::where('id_pesanan', $id)
-            ->with(['detail.produkDetail.produk', 'ongkir', 'pembayaran'])
+        $pesanan = Pesanan::where('id_pesanan', $id)
+            ->where('id_user', Auth::id())
+            ->with(['detail.produkDetail.produk', 'ongkir', 'pembayaran', 'layananPengiriman'])
             ->findOrFail($id);
 
 
-        $pengaturan = Pengaturan::first();
-        $alamatUtama = Auth::user()->alamatUser()->where('is_utama', true)->first();
-
-
-        // Hitung Deadline (Waktu Pesanan + 24 Jam)
+        $paymentMethods = MetodePembayaran::where('is_active', 1)->get();
         $deadline = Carbon::parse($pesanan->waktu_pesanan)->addHours(24);
         $deadlineTimestamp = $deadline->timestamp * 1000;
+        $isExpired = now()->greaterThan($deadline);
 
-        return view('customer.pesanan.show', compact('pesanan', 'pengaturan', 'deadline', 'deadlineTimestamp', 'alamatUtama'));
+        return view('customer.pesanan.show', compact(
+            'pesanan',
+            'deadline',
+            'deadlineTimestamp',
+            'paymentMethods',
+            'isExpired'
+        ));
     }
 
     // Upload Bukti Pembayaran
@@ -289,69 +216,16 @@ class PesananController extends Controller
             return back()->with('error', 'Status pesanan tidak valid untuk upload bukti.');
         }
 
-        // Upload File
-        $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
-
-        DB::transaction(function () use ($pesanan, $request, $path) {
-            Pembayaran::updateOrCreate(
-                ['id_pesanan' => $pesanan->id_pesanan],
-                [
-                    'bukti_bayar' => $path,
-                    'jumlah_bayar' => $request->jumlah_bayar,
-                    'tanggal_bayar' => now(),
-                    'status_pembayaran' => StatusPembayaranEnum::MENUNGGU_VERIFIKASI
-                ]
-            );
+        DB::transaction(function () use ($pesanan, $request) {
+            $this->savePaymentProof($request, $pesanan);
 
             $pesanan->update([
                 'status_pesanan' => StatusPesananEnum::MENUNGGU_VERIFIKASI
             ]);
         });
 
-        // return redirect()->('customer.pesanan.index')
-        return redirect('customer/pesanan')
-            ->with('success', 'Bukti pembayaran berhasil diupload! Menunggu verifikasi admin.');
-    }
-
-    // API: Hitung ongkir berdasarkan layanan pengiriman
-    public function calculateOngkir(Request $request)
-    {
-        $request->validate([
-            'id_layanan_pengiriman' => 'required|exists:layanan_pengiriman,id',
-        ]);
-
-        $user = Auth::user();
-        $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
-
-        if (!$alamatUtama) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Alamat utama tidak ditemukan'
-            ], 400);
-        }
-
-        $ongkirService = new OngkirService();
-        $ongkirData = $ongkirService->hitungOngkir(
-            $request->id_layanan_pengiriman,
-            $alamatUtama->id_alamat
-        );
-
-        if ($ongkirData['error']) {
-            return response()->json([
-                'success' => false,
-                'error' => $ongkirData['error']
-            ], 400);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'jarak' => $ongkirData['jarak'],
-                'tarif_per_km' => $ongkirData['tarif_per_km'],
-                'total_ongkir' => $ongkirData['total_ongkir'],
-                'total_ongkir_formatted' => 'Rp ' . number_format($ongkirData['total_ongkir'], 0, ',', '.')
-            ]
-        ]);
+        return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
+            ->with('success', 'Bukti pembayaran berhasil diupload!');
     }
 
     // Batalkan Pesanan
@@ -359,11 +233,139 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::where('id_user', Auth::id())->findOrFail($id);
 
-        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN && StatusPembayaranEnum::MENUNGGU_VERIFIKASI) {
+        // Hanya bisa batal jika status Menunggu Pembayaran
+        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN ||
+            $pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_VERIFIKASI) {
             $pesanan->update(['status_pesanan' => StatusPesananEnum::DIBATALKAN]);
             return back()->with('success', 'Pesanan berhasil dibatalkan.');
         }
 
-        return back()->with('error', 'Pesanan tidak dapat dibatalkan.');
+        return back()->with('error', 'Pesanan tidak dapat dibatalkan saat ini.');
+    }
+
+    // Hitung Ongkir Dinamis dari Checkout
+    public function calculateOngkir(Request $request)
+    {
+        $request->validate(['id_layanan_pengiriman' => 'required|exists:layanan_pengiriman,id']);
+
+        $user = Auth::user();
+        $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
+
+        if (!$alamatUtama) {
+            return response()->json(['success' => false, 'error' => 'Alamat utama tidak ditemukan'], 400);
+        }
+
+        $ongkirService = new OngkirService();
+        $ongkirData = $ongkirService->hitungOngkir($request->id_layanan_pengiriman, $alamatUtama->id_alamat);
+
+        if (!empty($ongkirData['error'])) {
+            return response()->json(['success' => false, 'error' => $ongkirData['error']], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'jarak' => $ongkirData['jarak'],
+                'tarif_per_km' => $ongkirData['tarif_per_km'],
+                'total_ongkir' => $ongkirData['total_ongkir'],
+                'total_ongkir_formatted' => $ongkirData['total_ongkir_formatted']
+            ]
+        ]);
+    }
+
+    private function parseItems($itemsInput)
+    {
+        $items = is_string($itemsInput) ? json_decode($itemsInput, true) : $itemsInput;
+        return (is_array($items) && !empty($items)) ? $items : null;
+    }
+
+    private function calculateOrderSummary(array $itemsData, bool $decreaseStock = false)
+    {
+        $selectedItems = [];
+        $subtotal = 0;
+
+        foreach ($itemsData as $item) {
+            if (!isset($item['id_produk_detail'], $item['quantity'])) continue;
+
+            $produkVarian = ProdukDetail::with('produk')->find($item['id_produk_detail']);
+
+            if (!$produkVarian) {
+                throw new \Exception("Produk ID {$item['id_produk_detail']} tidak ditemukan.");
+            }
+
+            if ($produkVarian->stok < $item['quantity']) {
+                throw new \Exception("Stok tidak cukup untuk: {$produkVarian->nama_varian}.");
+            }
+
+            // Kurangi stok jika diminta (saat finalisasi pesanan)
+            if ($decreaseStock) {
+                $produkVarian->decrement('stok', $item['quantity']);
+            }
+
+            $lineSubtotal = $produkVarian->harga_jual * $item['quantity'];
+            $subtotal += $lineSubtotal;
+
+            $selectedItems[] = [
+                'produk_detail' => $produkVarian,
+                'quantity' => $item['quantity'],
+                'subtotal' => $lineSubtotal
+            ];
+        }
+
+        return ['items' => $selectedItems, 'subtotal' => $subtotal];
+    }
+
+    private function determineOrderStatus(Request $request)
+    {
+        if ($request->metode_pembayaran === 'COD') {
+            return StatusPesananEnum::MENUNGGU_VERIFIKASI;
+        }
+        if ($request->hasFile('bukti_bayar')) {
+            return StatusPesananEnum::MENUNGGU_VERIFIKASI;
+        }
+        return StatusPesananEnum::MENUNGGU_PEMBAYARAN;
+    }
+
+    private function savePaymentProof(Request $request, Pesanan $pesanan)
+    {
+        $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
+
+        Pembayaran::updateOrCreate(
+            ['id_pesanan' => $pesanan->id_pesanan],
+            [
+                'bukti_bayar' => $path,
+                'jumlah_bayar' => $request->jumlah_bayar ?? $pesanan->grand_total,
+                'tanggal_bayar' => now(),
+                'status_pembayaran' => StatusPembayaranEnum::MENUNGGU_VERIFIKASI
+            ]
+        );
+    }
+
+    private function redirectAfterOrder(Request $request, Pesanan $pesanan)
+    {
+        if ($request->metode_pembayaran === 'COD') {
+            return redirect()->route('customer.pesanan.index')
+                ->with('success', 'Pesanan COD berhasil dibuat!');
+        }
+
+        if ($request->hasFile('bukti_bayar') && $request->file('bukti_bayar')->isValid()) {
+            return redirect()->route('customer.pesanan.index')
+                ->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');
+        }
+
+        return redirect()->route('customer.pesanan.show', $pesanan->id_pesanan)
+            ->with('success', 'Pesanan berhasil. Silahkan lakukan pembayaran.');
+    }
+
+    public function selesai($id)
+    {
+        $pesanan = Pesanan::where('id_user', Auth::id())->findOrFail($id);
+        if ($pesanan->status_pesanan == StatusPesananEnum::DIKIRIM) {
+            
+            $pesanan->update([
+                'status_pesanan' => StatusPesananEnum::SELESAI,
+            ]);
+            return back()->with('success', 'Terima kasih! Pesanan telah diselesaikan.');
+        }
+        return back()->with('error', 'Pesanan tidak dapat diselesaikan saat ini.');
     }
 }

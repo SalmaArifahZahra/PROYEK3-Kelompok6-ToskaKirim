@@ -12,9 +12,8 @@ use App\Models\keranjang;
 
 class DashboardController extends Controller
 {
-    /**
-     * Menampilkan halaman dashboard customer.
-     */
+
+    //  Menampilkan halaman dashboard customer
     public function index(): View
     {
         $cartCount = Keranjang::where('id_user', Auth::id())->sum('quantity');

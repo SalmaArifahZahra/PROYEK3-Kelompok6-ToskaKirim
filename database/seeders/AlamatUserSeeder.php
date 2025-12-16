@@ -46,7 +46,7 @@ class AlamatUserSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 4, // Siti Nurhaliza
+                'id_user' => 4, 
                 'label_alamat' => 'Rumah',
                 'nama_penerima' => 'Siti Nurhaliza',
                 'telepon_penerima' => '082345678901',
@@ -61,6 +61,7 @@ class AlamatUserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
             [
                 'id_user' => 5, // Ahmad Rizky
                 'label_alamat' => 'Rumah',

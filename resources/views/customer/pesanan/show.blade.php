@@ -1,323 +1,323 @@
 @extends('layouts.layout_customer')
-
-@section('title', 'Detail Pesanan')
+{{-- ketika behasil memesan maka redirest halaman ini --}}
+@section('title', 'Detail Pesanan #' . $pesanan->id_pesanan)
 
 @section('content')
-
-     @if ($pesanan->status_pesanan == 'menunggu_pembayaran')
-        <div
-            class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-center z-50 shadow-lg">
-            <p class="text-orange-600 font-medium mb-1">Selesaikan Pembayaran Dalam:</p>
-
-            <div id="countdown-timer" class="text-2xl font-bold text-orange-700 tracking-wider"
-                data-deadline="{{ $deadlineTimestamp }}">
-                Loading...
+    {{-- TIMER PEMBAYARAN --}}
+    @if ($pesanan->status_pesanan->value == 'menunggu_pembayaran' && !$isExpired)
+        <div class="sticky top-20 z-40 bg-orange-50 border-b border-orange-200 p-4 mb-6 shadow-sm">
+            <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 text-orange-700">
+                    <i class="fas fa-clock text-2xl"></i>
+                    <div>
+                        <p class="font-bold text-sm">Selesaikan Pembayaran Dalam:</p>
+                        <p class="text-xs">Pesanan akan otomatis dibatalkan jika melewati batas waktu.</p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div id="countdown-timer" class="text-2xl font-bold text-orange-600 tracking-wider font-mono"
+                        data-deadline="{{ $deadlineTimestamp }}">
+                        -- : -- : --
+                    </div>
+                    <p class="text-xs text-orange-500 font-medium">
+                        Batas: {{ \Carbon\Carbon::parse($deadline)->format('d M Y, H:i') }} WIB
+                    </p>
+                </div>
             </div>
-
-            <p class="text-xs text-gray-500 mt-2">
-                Batas Akhir: {{ \Carbon\Carbon::parse($deadline)->format('d M Y, H:i') }} WIB
-            </p>
         </div>
     @endif
 
-    <div class="max-w-5xl mx-auto my-8 px-4 relative z-10">
-
-        <nav class="text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
+    <div class="max-w-5xl mx-auto my-8 px-4">
+        <nav class="text-sm text-slate-500 mb-6 flex justify-between items-center">
             <ol class="flex items-center gap-2">
-                <li><a href="{{ route('customer.keranjang.index') }}" class="hover:underline">Home</a></li>
+                <li><a href="{{ route('customer.pesanan.index') }}" class="hover:underline">Pesanan Saya</a></li>
                 <li>/</li>
-                <li><a href="{{ route('customer.keranjang.index') }}" class="hover:underline">Keranjang</a></li>
-                <li>/</li>
-                <li class="text-slate-700 font-medium">Pesanan</li>
+                <li class="text-slate-700 font-medium">ID Pesanan-{{ $pesanan->id_pesanan }}</li>
             </ol>
+            
+            <span class="text-xs text-slate-400">
+                Dipesan pada: {{ $pesanan->waktu_pesanan->format('d M Y, H:i') }}
+            </span>
         </nav>
 
-        <div class="bg-white border border-slate-200 rounded-lg p-4 mb-6">
-            <h3 class="text-teal-600 font-semibold mb-3">Alamat Pengiriman</h3>
-
-            @if ($alamatUtama)
-                <div class="flex justify-between items-start">
-                    <div class="text-sm">
-                        <p class="font-medium text-slate-800">{{ $alamatUtama->nama_penerima }}</p>
-                        <p class="text-slate-600">{{ $alamatUtama->telepon_penerima }}</p>
-
-                        <p class="text-slate-700 mt-1">
-                            {{ $alamatUtama->jalan_patokan }},
-                            RT {{ $alamatUtama->rt }}/RW {{ $alamatUtama->rw }},
-                            {{ $alamatUtama->kelurahan }},
-                            {{ $alamatUtama->kecamatan }},
-                            {{ $alamatUtama->kota_kabupaten }}
-                        </p>
-
-                        <p class="text-xs text-teal-500 font-medium mt-1">Utama</p>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            <div class="md:col-span-8 space-y-6">
+                <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-700">Detail Produk</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold
+                            @if($pesanan->status_pesanan->value == 'menunggu_pembayaran') bg-orange-100 text-orange-600
+                            @elseif($pesanan->status_pesanan->value == 'menunggu_verifikasi') bg-blue-100 text-blue-600
+                            @elseif($pesanan->status_pesanan->value == 'diproses') bg-indigo-100 text-indigo-600
+                            @elseif($pesanan->status_pesanan->value == 'dikirim') bg-teal-100 text-teal-600
+                            @elseif($pesanan->status_pesanan->value == 'selesai') bg-green-100 text-green-600
+                            @else bg-red-100 text-red-600 @endif">
+                            {{ strtoupper(str_replace('_', ' ', $pesanan->status_pesanan->value)) }}
+                        </span>
                     </div>
 
-                    <button onclick="openAlamatModal()"
-                        class="px-3 py-1 border border-teal-500 text-teal-600 rounded hover:bg-teal-50 text-sm">
-                        Ubah
-                    </button>
-                </div>
-            @else
-                <div class="text-center py-4">
-                    <p class="text-slate-600 mb-2">Anda belum memiliki alamat pengiriman</p>
-                    <a href="{{ route('customer.alamat.create') }}"
-                        class="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
-                        Tambah Alamat
-                    </a>
-                </div>
-            @endif
-        </div>
-
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="p-6">
-
-                <div class="mb-6">
-                    <h3 class="text-slate-700 font-medium mb-3">Produk Dipesan</h3>
-
-                    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
-
-                        <div
-                            class="grid grid-cols-12 bg-slate-50 border-b border-slate-200 py-3 px-4 text-sm font-semibold text-slate-600">
-                            <div class="col-span-6">Produk</div>
-                            <div class="col-span-2 text-right">Harga Satuan</div>
-                            <div class="col-span-2 text-center">Jumlah</div>
-                            <div class="col-span-2 text-right">Subtotal Produk</div>
-                        </div>
-
+   
+                    <div class="divide-y divide-slate-100">
                         @foreach ($pesanan->detail as $detail)
-                            @php
-                                $prodDetail = $detail->produkDetail;
-                                $produk = $prodDetail ? $prodDetail->produk : null;
-                            @endphp
-
-                            <div class="grid grid-cols-12 items-center bg-teal-50 border-b border-slate-200 py-4 px-4">
-                                <div class="col-span-6 flex items-center gap-3">
-                                    <img src="{{ $produk && $produk->foto_url ? $produk->foto_url : ($prodDetail && $prodDetail->foto ? asset('produk/' . $prodDetail->foto) : asset('images/icon_toska.png')) }}"
-                                        class="w-16 h-16 rounded object-cover" alt="">
-
-                                    <div>
-                                        <div class="font-medium text-slate-800 text-sm">
-                                            {{ $produk ? $produk->nama : 'Produk Tidak Tersedia' }}
-                                        </div>
-                                        <div class="text-xs text-slate-500">
-                                            variasi:
-                                            {{ $prodDetail ? $prodDetail->nama_varian ?? '-' : 'Varian Tidak Tersedia' }}
-                                        </div>
+                            <div class="p-6 flex gap-4">
+                                <img src="{{ $detail->produkDetail->produk->foto_url ?? asset('images/no-image.png') }}"
+                                     class="w-20 h-20 rounded-md object-cover border border-slate-100 shrink-0">
+                                
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-slate-800">{{ $detail->produkDetail->produk->nama }}</h4>
+                                    <p class="text-xs text-slate-500 mb-1">Varian: {{ $detail->produkDetail->nama_varian }}</p>
+                                    <div class="flex justify-between items-end mt-2">
+                                        <p class="text-sm text-slate-600">{{ $detail->kuantitas }} x Rp {{ number_format($detail->harga_beli, 0, ',', '.') }}</p>
+                                        <p class="font-semibold text-slate-800">Rp {{ number_format($detail->subtotal_item, 0, ',', '.') }}</p>
                                     </div>
-                                </div>
-
-                                <div class="col-span-2 text-right text-sm font-medium text-slate-700">
-                                    Rp
-                                    {{ number_format($detail->harga_beli ?? ($prodDetail ? $prodDetail->harga_jual : 0), 0, ',', '.') }}
-                                </div>
-
-                                <div class="col-span-2 text-center text-sm font-medium text-slate-700">
-                                    {{ $detail->kuantitas }}
-                                </div>
-
-                                <div class="col-span-2 text-right text-sm font-semibold text-slate-800">
-                                    Rp {{ number_format($detail->subtotal_item, 0, ',', '.') }}
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 </div>
 
-                <div class="grid grid-cols-12 gap-6">
-                    <div class="col-span-8">
-                        <div class="border border-slate-100 rounded-lg p-4">
-
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-sm font-medium">Metode Pembayaran</div>
-                                <div class="text-xs text-slate-500">Pilih metode pembayaran</div>
-                            </div>
-
-                            <div class="space-y-3">
-
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <input type="radio" name="metode_pembayaran" class="h-4 w-4" value="COD">
-                                    <span class="text-sm font-medium text-slate-700">Cash on Delivery (COD)</span>
-                                </label>
-
-                                <div class="pt-2">
-                                    <p class="text-xs text-slate-500 mb-2">Transfer Bank / E-Wallet</p>
-
-                                    <label class="flex items-center gap-3 cursor-pointer">
-                                        <input type="radio" name="metode_pembayaran" class="h-4 w-4" value="BCA">
-                                        <span class="text-sm font-medium text-slate-700">Transfer Bank BCA</span>
-                                    </label>
-
-                                    <label class="flex items-center gap-3 cursor-pointer mt-2">
-                                        <input type="radio" name="metode_pembayaran" class="h-4 w-4" value="BRI">
-                                        <span class="text-sm font-medium text-slate-700">Transfer Bank BRI</span>
-                                    </label>
-
-                                    <label class="flex items-center gap-3 cursor-pointer mt-2">
-                                        <input type="radio" name="metode_pembayaran" class="h-4 w-4" value="QRIS">
-                                        <span class="text-sm font-medium text-slate-700">QRIS</span>
-                                    </label>
-                                </div>
-
-                            </div>
-
-                            <div class="mt-4 text-right">
-                                <button class="text-sm bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
-                                    Simpan Metode Pembayaran
-                                </button>
-                            </div>
-
-                        </div>
+                <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                        <h3 class="font-bold text-slate-700">Informasi Pengiriman</h3>
                     </div>
-
-                    {{-- Total --}}
-                    <div class="col-span-4">
-                        <div class="bg-white border border-slate-100 rounded-lg p-4">
-                            <div class="text-sm flex justify-between">
-                                <span>Subtotal Pesanan</span>
-                                <span>Rp. {{ number_format($pesanan->subtotal_produk, 0, ',', '.') }}</span>
+                    <div class="p-6 text-sm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-slate-500 text-xs mb-1 uppercase tracking-wide">Penerima</p>
+                                <p class="font-semibold text-slate-800 text-base">{{ $pesanan->penerima_nama }}</p>
+                                <p class="text-slate-600 mt-1">{{ $pesanan->penerima_telepon }}</p>
                             </div>
-
-                            <div class="text-sm flex justify-between mt-2">
-                                <span>Subtotal Pengiriman</span>
-                                <span>Rp. 15.000</span>
+                            <div>
+                                <p class="text-slate-500 text-xs mb-1 uppercase tracking-wide">Alamat Tujuan</p>
+                                <p class="text-slate-700 leading-relaxed">{{ $pesanan->alamat_lengkap }}</p>
                             </div>
-
-                            <hr class="my-3">
-
-                            <div class="text-base font-semibold flex justify-between text-teal-500">
-                                <span>Total Pembayaran</span>
-                                <span>Rp. {{ number_format($pesanan->subtotal_produk + 15000, 0, ',', '.') }}</span>
+                            @if($pesanan->layananPengiriman)
+                            <div class="md:col-span-2 pt-4 border-t border-slate-100">
+                                <p class="text-slate-500 text-xs mb-1 uppercase tracking-wide">Layanan Ekspedisi</p>
+                                <p class="font-semibold text-teal-600 text-base">
+                                    {{ $pesanan->layananPengiriman->nama_layanan }} 
+                                    <span class="text-slate-500 font-normal text-sm ml-2">
+                                        (Estimasi {{ $pesanan->layananPengiriman->estimasi_waktu }})
+                                    </span>
+                                </p>
                             </div>
-
-                            <div class="mt-4">
-                                {{-- Button Buat Pesanan --}}
-                                <button onclick="location.href='{{ route('customer.pesanan.index') }}'"
-                                    class="w-full bg-rose-500 hover:bg-rose-600 text-white py-3 rounded">
-                                    Buat Pesanan
-                                </button>
-                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
 
             </div>
-        </div>
-    </div>
 
-    <div id="modalEditAlamat" class="fixed inset-0 bg-gray-200 bg-opacity-50 z-50 hidden flex items-center justify-center">
 
-        <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl relative animate-fadeIn">
-            <button onclick="closeAlamatModal()"
-                class="absolute top-3 right-3 text-gray-600 hover:text-black text-lg font-bold">✕</button>
+            <div class="md:col-span-8 space-y-6 sticky top-24">
 
-            <h2 class="text-xl font-semibold mb-4">Ubah Alamat Pengiriman</h2>
-
-            <form action="{{ route('customer.alamat.update', $alamatUtama->id_alamat) }}" method="POST">
-                @csrf
-                @method('PUT')
-
-                <div class="mb-3">
-                    <label class="block text-sm mb-1">Nama Penerima</label>
-                    <input type="text" name="nama_penerima" class="w-full border px-3 py-2 rounded"
-                        value="{{ $alamatUtama->nama_penerima }}">
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-sm mb-1">Telepon</label>
-                    <input type="text" name="telepon_penerima" class="w-full border px-3 py-2 rounded"
-                        value="{{ $alamatUtama->telepon_penerima }}">
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-sm mb-1">Jalan / Patokan</label>
-                    <input type="text" name="jalan_patokan" class="w-full border px-3 py-2 rounded"
-                        value="{{ $alamatUtama->jalan_patokan }}">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm mb-1">Kelurahan</label>
-                        <input type="text" name="kelurahan" class="w-full border px-3 py-2 rounded"
-                            value="{{ $alamatUtama->kelurahan }}">
+                <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                        <h3 class="font-bold text-slate-700">Rincian Pembayaran</h3>
                     </div>
 
-                    <div>
-                        <label class="block text-sm mb-1">Kecamatan</label>
-                        <input type="text" name="kecamatan" class="w-full border px-3 py-2 rounded"
-                            value="{{ $alamatUtama->kecamatan }}">
+                    <div class="p-6 space-y-3 text-sm">
+                        <div class="flex justify-between text-slate-600">
+                            <span>Total Harga Produk</span>
+                            <span>Rp {{ number_format($pesanan->subtotal_produk, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>Ongkos Kirim</span>
+                            <span>Rp {{ number_format($pesanan->ongkir->total_ongkir, 0, ',', '.') }}</span>
+                        </div>
+                        <hr class="border-slate-100 my-4">
+                        <div class="flex justify-between font-bold text-lg text-teal-600">
+                            <span>Total Tagihan</span>
+                            <span>Rp {{ number_format($pesanan->grand_total, 0, ',', '.') }}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-3">
-                    <label class="block text-sm mb-1">Kota / Kabupaten</label>
-                    <input type="text" name="kota_kabupaten" class="w-full border px-3 py-2 rounded"
-                        value="{{ $alamatUtama->kota_kabupaten }}">
-                </div>
 
-                <button class="mt-5 w-full bg-teal-600 text-white py-2 rounded-lg">
-                    Simpan Perubahan
-                </button>
-            </form>
+                @if($pesanan->status_pesanan->value == 'menunggu_pembayaran')
+                    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-700">Pembayaran</h3>
+                            <p class="text-xs text-slate-500 mt-1">Silakan transfer ke rekening di bawah:</p>
+                        </div>
 
+                        <div class="p-6">
+                            <div class="space-y-4 mb-6">
+                                @foreach($paymentMethods as $bank)
+                                    <div class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg bg-white hover:border-slate-300 transition-colors">
+                                        @if($bank->gambar)
+                                            <img src="{{ asset('storage/' . $bank->gambar) }}" class="h-8 w-auto object-contain">
+                                        @else
+                                            <div class="h-8 w-12 bg-slate-100 rounded flex items-center justify-center text-xs font-bold text-slate-400">BANK</div>
+                                        @endif
+                                        <div class="overflow-hidden flex-1">
+                                            <p class="font-bold text-slate-700 text-sm truncate">{{ $bank->nama_bank }}</p>
+                                            <p class="font-mono text-slate-600 text-sm truncate">{{ $bank->nomor_rekening }}</p>
+                                        </div>
+                                        <button onclick="navigator.clipboard.writeText('{{ $bank->nomor_rekening }}'); alert('No Rekening Disalin!')" 
+                                                class="text-teal-600 hover:text-teal-800 text-xs font-bold shrink-0">
+                                            SALIN
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <form action="{{ route('customer.pesanan.upload', $pesanan->id_pesanan) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Upload Bukti Transfer</label>
+                                <div class="relative border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition cursor-pointer group" id="drop-area">
+                                    <input type="file" name="bukti_bayar" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                                    <div id="preview-container" class="group-hover:scale-105 transition-transform">
+                                        <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
+                                        <p class="text-xs text-slate-500">Klik atau tarik foto ke sini</p>
+                                        <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG (Max 2MB)</p>
+                                    </div>
+                                    <img id="img-preview" class="hidden max-h-40 mx-auto rounded shadow-sm mt-2">
+                                </div>
+                                
+                                <input type="hidden" name="jumlah_bayar" value="{{ $pesanan->grand_total }}">
+
+                                <button type="submit" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-500/30 transition-transform active:scale-95">
+                                    Kirim Bukti Pembayaran
+                                </button>
+                            </form>
+                            
+                            <div class="mt-4 pt-4 border-t border-slate-100">
+                                <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?');">
+                                    @csrf
+                                    <button type="submit" class="w-full py-2.5 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all">
+                                        Batalkan Pesanan
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                @elseif($pesanan->status_pesanan->value == 'menunggu_verifikasi')
+                    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-700">Status Pembayaran</h3>
+                        </div>
+                        <div class="p-6 text-center">
+                            <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-hourglass-half text-2xl text-blue-500"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-800">Bukti Sedang Diverifikasi</h4>
+                            <p class="text-sm text-slate-500 mt-2 mb-4">Mohon tunggu 1x24 jam, admin sedang mengecek pembayaran Anda.</p>
+                            
+                            @if($pesanan->pembayaran)
+                                <div class="border rounded p-2 inline-block">
+                                    <p class="text-[10px] text-slate-400 mb-1 text-left">Bukti Anda:</p>
+                                    <a href="{{ asset('storage/'.$pesanan->pembayaran->bukti_bayar) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$pesanan->pembayaran->bukti_bayar) }}" class="h-16 rounded object-cover">
+                                    </a>
+                                </div>
+                            @endif
+                            <div class="mt-4 pt-4 border-t border-slate-100">
+                                <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?');">
+                                    @csrf
+                                    <button type="submit" class="w-full py-2.5 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all">
+                                        Batalkan Pesanan
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                @elseif($pesanan->status_pesanan->value == 'diproses' || $pesanan->status_pesanan->value == 'dikirim')
+                    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-700">Lacak Pengiriman</h3>
+                        </div>
+                        <div class="p-6 text-center">
+                            <div class="bg-teal-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-shipping-fast text-2xl text-teal-500"></i>
+                            </div>
+                            
+                            @if($pesanan->status_pesanan->value == 'dikirim')
+                                <h4 class="font-bold text-slate-800">Paket Sedang Dikirim</h4>
+                                <p class="text-sm text-slate-500 mt-2">Kurir sedang mengantar paket ke alamat tujuan.</p>
+                                
+                                {{-- TOMBOL PESANAN SELESAI (BARU) --}}
+                                <div class="mt-6 pt-6 border-t border-slate-100">
+                                    <p class="text-sm text-slate-600 mb-3">Sudah menerima paket?</p>
+                                    
+                                    <form action="{{ route('customer.pesanan.selesai', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin paket sudah diterima dengan baik? Status akan menjadi Selesai.');">
+                                        @csrf
+                                        <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-lg font-bold shadow-lg shadow-teal-500/30 hover:bg-teal-700 transition-transform active:scale-95">
+                                            <i class="fas fa-check-circle mr-2"></i> Pesanan Diterima
+                                        </button>
+                                    </form>
+                                </div>
+
+                            @else
+                                <h4 class="font-bold text-slate-800">Sedang Dikemas</h4>
+                                <p class="text-sm text-slate-500 mt-2">Penjual sedang menyiapkan barang pesanan Anda.</p>
+                            @endif
+
+                            {{-- Tombol Lacak (Opsional, jika ada link tracking) --}}
+                            {{-- <button class="w-full mt-4 bg-slate-100 text-slate-600 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors">
+                                Lihat Detail Pelacakan
+                            </button> --}}
+                        </div>
+                    </div>
+                @endif
+
+            </div>
         </div>
     </div>
-
-    <script>
-        const modal = document.getElementById('modalEditAlamat');
-
-        function openAlamatModal() {
-            modal.classList.remove('hidden');
-        }
-
-        function closeAlamatModal() {
-            modal.classList.add('hidden');
-        }
-
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeAlamatModal();
-            }
-        });
-    </script>
-
-    {{-- ===== Countdown Timer ===== --}}
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-
-                const timerEl = document.getElementById('countdown-timer');
-
-                if (!timerEl) return;
-
-                const deadlineTime = parseInt(timerEl.getAttribute('data-deadline'));
-
-                const updateTimer = setInterval(function() {
-                    const now = new Date().getTime();
-                    const distance = deadlineTime - now;
-
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                    timerEl.innerHTML =
-                        (hours < 10 ? "0" + hours : hours) + " : " +
-                        (minutes < 10 ? "0" + minutes : minutes) + " : " +
-                        (seconds < 10 ? "0" + seconds : seconds);
-
-                    if (distance < 0) {
-                        clearInterval(updateTimer);
-                        timerEl.innerHTML = "WAKTU HABIS";
-                        timerEl.classList.add('text-red-600');
-
-                        setTimeout(() => {
-                            location.reload();
-                        }, 2000);
-                    }
-
-                }, 1000);
-
-            });
-        </script>
-    @endpush
-
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {        
+        const timerEl = document.getElementById('countdown-timer');
+        if (timerEl) {
+            const deadlineTime = parseInt(timerEl.getAttribute('data-deadline'));
+
+            const updateTimer = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = deadlineTime - now;
+
+                if (distance < 0) {
+                    clearInterval(updateTimer);
+                    timerEl.innerHTML = "WAKTU HABIS";
+                    timerEl.classList.add('text-red-600');
+                    setTimeout(() => location.reload(), 2000); 
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                timerEl.innerHTML =
+                    (hours < 10 ? "0" + hours : hours) + " : " +
+                    (minutes < 10 ? "0" + minutes : minutes) + " : " +
+                    (seconds < 10 ? "0" + seconds : seconds);
+            }, 1000);
+        }
+
+        // 2. LOGIC PREVIEW GAMBAR UPLOAD
+        const fileInput = document.getElementById('file-input');
+        const imgPreview = document.getElementById('img-preview');
+        const previewContainer = document.getElementById('preview-container');
+
+        if(fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imgPreview.src = e.target.result;
+                        imgPreview.classList.remove('hidden');
+                        previewContainer.classList.add('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+@endpush
