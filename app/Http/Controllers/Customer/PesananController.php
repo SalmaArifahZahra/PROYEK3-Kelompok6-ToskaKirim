@@ -60,9 +60,11 @@ class PesananController extends Controller
         $paymentMethods = MetodePembayaran::where('is_active', 1)->get();
         $layananPengiriman = LayananPengiriman::where('is_active', 1)->get();
         $selectedLayanan = $layananPengiriman->first();
-        $ongkir = 0;
 
-        if ($selectedLayanan) {
+        // Jika belum ada alamat utama, jangan hitung ongkir — tampilkan kosong di view
+        $ongkir = null;
+
+        if ($selectedLayanan && $alamatUtama) {
             $ongkirService = new OngkirService();
             $ongkirResult = $ongkirService->hitungOngkir($selectedLayanan->id, $alamatUtama->id_alamat);
             $ongkir = $ongkirResult['total_ongkir'] ?? 0;
@@ -72,7 +74,7 @@ class PesananController extends Controller
             'selectedItems' => $summary['items'],
             'subtotal' => $summary['subtotal'],
             'ongkir' => $ongkir,
-            'grandTotal' => $summary['subtotal'] + $ongkir,
+            'grandTotal' => $summary['subtotal'] + ($ongkir ?? 0),
             'alamatUtama' => $alamatUtama,
             'paymentMethods' => $paymentMethods,
             'layananPengiriman' => $layananPengiriman,
@@ -102,8 +104,9 @@ class PesananController extends Controller
         }
 
         if (!$alamat) {
-            return redirect()->route('customer.keranjang.index')
-                ->with('error', 'Alamat tidak ditemukan. Silakan atur alamat terlebih dahulu.');
+            // Jika user belum punya alamat, kembalikan ke halaman konfirmasi
+            // dan tampilkan notifikasi agar menambahkan alamat terlebih dahulu.
+            return back()->with('error', 'Anda belum memiliki alamat pengiriman. Silakan tambahkan alamat terlebih dahulu.');
         }
 
         $itemsData = $this->parseItems($request->input('items'));
@@ -231,7 +234,8 @@ class PesananController extends Controller
         $pesanan = Pesanan::where('id_user', Auth::id())->findOrFail($id);
 
         // Hanya bisa batal jika status Menunggu Pembayaran
-        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN) {
+        if ($pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_PEMBAYARAN ||
+            $pesanan->status_pesanan === StatusPesananEnum::MENUNGGU_VERIFIKASI) {
             $pesanan->update(['status_pesanan' => StatusPesananEnum::DIBATALKAN]);
             return back()->with('success', 'Pesanan berhasil dibatalkan.');
         }

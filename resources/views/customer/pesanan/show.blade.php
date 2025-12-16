@@ -214,6 +214,14 @@
                                     </a>
                                 </div>
                             @endif
+                            <div class="mt-4 pt-4 border-t border-slate-100">
+                                <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?');">
+                                    @csrf
+                                    <button type="submit" class="w-full py-2.5 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all">
+                                        Batalkan Pesanan
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
 

@@ -1,11 +1,11 @@
-<div id="addressModal" class="hidden relative z-[999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<div id="addressModal" class="hidden fixed inset-0 z-[9999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     
-    <div class="fixed inset-0 bg-gray-900/75 transition-opacity"></div>
+    <div class="fixed inset-0 bg-gray-900/75 transition-opacity backdrop-blur-sm"></div>
 
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             
-            <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-200">
+            <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-200">
                 
                 <div class="bg-white px-4 py-4 sm:px-6 border-b border-gray-100 flex justify-between items-center sticky top-0 z-20">
                     <div>
@@ -39,36 +39,36 @@
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Label Alamat</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Label Alamat <span class="text-red-500">*</span></label>
                                     <input type="text" id="label_alamat" name="label_alamat" required placeholder="Rumah, Kantor" class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Penerima</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Penerima <span class="text-red-500">*</span></label>
                                     <input type="text" id="nama_penerima" name="nama_penerima" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-gray-700 mb-1">No. Telepon</label>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">No. Telepon <span class="text-red-500">*</span></label>
                                 <input type="tel" id="telepon_penerima" name="telepon_penerima" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-gray-700 mb-1">Provinsi</label>
-                                <select id="provinsi" class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Provinsi <span class="text-red-500">*</span></label>
+                                <select id="provinsi" class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500" required>
                                     <option value="">Pilih Provinsi</option>
                                 </select>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Kota/Kabupaten</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Kota/Kabupaten <span class="text-red-500">*</span></label>
                                     <select id="kota_kabupaten_select" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                         <option value="">Pilih Kota</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Kecamatan</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Kecamatan <span class="text-red-500">*</span></label>
                                     <select id="kecamatan_select" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                         <option value="">Pilih Kecamatan</option>
                                     </select>
@@ -76,29 +76,29 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-gray-700 mb-1">Kelurahan</label>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Kelurahan <span class="text-red-500">*</span></label>
                                 <select id="kelurahan_select" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                     <option value="">Pilih Kelurahan</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-gray-700 mb-1">Jalan & Patokan</label>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Jalan & Patokan <span class="text-red-500">*</span></label>
                                 <textarea id="jalan_patokan" name="jalan_patokan" rows="2" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500"></textarea>
                             </div>
 
                             <div class="grid grid-cols-3 gap-3">
                                 <div>
-                                    <label class="block text-[10px] font-semibold text-gray-500">No. Rumah</label>
-                                    <input type="text" id="no_rumah" name="no_rumah" class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
+                                    <label class="block text-[10px] font-semibold text-gray-500">No. Rumah <span class="text-red-500">*</span></label>
+                                    <input type="text" id="no_rumah" name="no_rumah" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-semibold text-gray-500">RT</label>
-                                    <input type="text" id="rt" name="rt" class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
+                                    <label class="block text-[10px] font-semibold text-gray-500">RT <span class="text-red-500">*</span></label>
+                                    <input type="text" id="rt" name="rt" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-semibold text-gray-500">RW</label>
-                                    <input type="text" id="rw" name="rw" class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
+                                    <label class="block text-[10px] font-semibold text-gray-500">RW <span class="text-red-500">*</span></label>
+                                    <input type="text" id="rw" name="rw" required class="w-full text-sm border-gray-300 rounded-md focus:border-teal-500 focus:ring-teal-500">
                                 </div>
                             </div>
 
