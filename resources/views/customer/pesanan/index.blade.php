@@ -38,6 +38,12 @@
                 Dikirim
             </a>
 
+            <a href="{{ route('customer.pesanan.index', ['status' => 'dibatalkan']) }}"
+                class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
+           {{ $status == 'dibatalkan' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                Dibatalkan
+            </a>
+
             <a href="{{ route('customer.pesanan.index', ['status' => 'selesai']) }}"
                 class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors
            {{ $status == 'selesai' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">

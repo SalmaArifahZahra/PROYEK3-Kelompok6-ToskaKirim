@@ -196,15 +196,15 @@
                                     <div class="bg-white rounded p-3 border border-slate-200">
                                         <div class="flex justify-between mb-2">
                                             <span class="text-slate-600 text-xs">Jarak Pengiriman:</span>
-                                            <span class="font-medium text-xs" id="distanceDisplay">0 km</span>
+                                            <span class="font-medium text-xs" id="distanceDisplay">@if(is_null($ongkir)) - @else 0 km @endif</span>
                                         </div>
                                         <div class="flex justify-between mb-2">
                                             <span class="text-slate-600 text-xs">Tarif per km:</span>
-                                            <span class="font-medium text-xs" id="tarifDisplay">Rp 0</span>
+                                            <span class="font-medium text-xs" id="tarifDisplay">@if(is_null($ongkir)) - @else Rp 0 @endif</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-slate-600">Ongkos Kirim</span>
-                                            <span class="font-medium" id="ongkirDisplay">Rp 0</span>
+                                            <span class="font-medium" id="ongkirDisplay">@if(is_null($ongkir)) - @else Rp {{ number_format($ongkir ?? 0, 0, ',', '.') }} @endif</span>
                                         </div>
                                     </div>
 
@@ -215,10 +215,19 @@
                                     </div>
                                 </div>
                                 <div class="mt-6 space-y-3">
+                                    @if(!$alamatUtama)
+                                    <button type="submit" id="btn-submit" disabled
+                                        class="w-full bg-orange-500 text-white font-bold py-3 rounded-lg shadow opacity-50 cursor-not-allowed">
+                                        Buat Pesanan
+                                    </button>
+                                    <p class="text-sm text-red-500 text-center">Anda belum memiliki alamat pengiriman. Klik "Ubah Alamat" untuk menambah alamat terlebih dahulu.</p>
+                                    @else
                                     <button type="submit" id="btn-submit"
                                         class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors">
                                         Buat Pesanan
                                     </button>
+                                    @endif
+
                                     <a href="{{ route('customer.keranjang.index') }}"
                                         class="block w-full text-center text-slate-500 hover:text-slate-700 text-sm font-medium">
                                         Batalkan
@@ -460,9 +469,16 @@
 
             function renderList(data) {
                 listContainer.innerHTML = '';
-                if (data.length === 0) {
+                const mainSubmit = document.getElementById('btn-submit');
+
+                if (!data || data.length === 0) {
                     listContainer.innerHTML =
                         '<div class="text-center py-8 text-gray-500 bg-slate-50 rounded border border-dashed">Belum ada alamat.</div>';
+                    if (mainSubmit) {
+                        mainSubmit.disabled = true;
+                        mainSubmit.classList.add('opacity-50');
+                        mainSubmit.classList.add('cursor-not-allowed');
+                    }
                     return;
                 }
 
@@ -508,6 +524,13 @@
                     });
                     listContainer.appendChild(el);
                 });
+
+                // If we have at least one address, enable main submit
+                if (mainSubmit) {
+                    mainSubmit.disabled = false;
+                    mainSubmit.classList.remove('opacity-50');
+                    mainSubmit.classList.remove('cursor-not-allowed');
+                }
             }
 
             window.editAddress = function(id) {

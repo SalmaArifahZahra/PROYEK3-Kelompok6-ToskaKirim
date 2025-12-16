@@ -75,6 +75,12 @@ class AlamatUserController extends Controller
         ]);
     }
 
+    // Compatibility wrapper for route name getAddressDetail
+    public function getAddressDetail($alamat)
+    {
+        return $this->showApi($alamat);
+    }
+
     // Update alamat
     public function updateAddress(StoreAlamatUserRequest $request, AlamatUser $alamat)
     {
