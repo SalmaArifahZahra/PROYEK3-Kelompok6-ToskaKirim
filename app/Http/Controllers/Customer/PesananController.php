@@ -51,6 +51,10 @@ class PesananController extends Controller
         $user = Auth::user();
         $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
 
+        if (!$alamatUtama) {
+            return redirect()->route('customer.keranjang.index')
+                ->with('error', 'Silakan atur alamat utama pengiriman terlebih dahulu sebelum checkout.');
+        }
         try {
             $summary = $this->calculateOrderSummary($itemsData, false);
         } catch (\Exception $e) {
