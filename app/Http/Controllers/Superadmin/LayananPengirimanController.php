@@ -8,7 +8,6 @@ class LayananPengirimanController extends Controller
 {
     public function index() {
         $layanan = LayananPengiriman::all();
-        // Kamu perlu buat view: admin.layanan.index
         return view('superadmin.layanan.index', compact('layanan'));
     }
 

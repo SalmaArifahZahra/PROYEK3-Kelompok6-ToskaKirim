@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Superadmin;
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\WilayahPengiriman;
+use App\Models\Pengaturan;
+use App\Models\Pesanan;
+use App\Models\MetodePembayaran;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,19 +21,54 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    // Menampilkan Dashboard Superadmin (Sesuai Figma)
     public function dashboard()
     {
-        // Hitung data untuk ringkasan (opsional, biar dashboard gak kosong)
+        // 1. STATISTIK USER
         $totalAdmin = User::where('peran', 'admin')->count();
-        $totalPayment = 0;
-        return view('superadmin.dashboard', compact('totalAdmin', 'totalPayment'));
+        $totalCustomer = User::where('peran', 'customer')->count();
+        
+        // 2. TOTAL PENDAPATAN 
+        $totalPendapatan = 0;
+
+        if (Schema::hasTable('pesanan')) {
+            try {
+                $totalPendapatan = Pesanan::where('status_pesanan', 'selesai')
+                                          ->sum('grand_total'); 
+            } catch (\Exception $e) {
+                $totalPendapatan = 0;
+            }
+        }
+
+        // 3. STATISTIK LOGISTIK 
+        $totalWilayah = WilayahPengiriman::count();
+        $wilayahTerisi = WilayahPengiriman::where('jarak_km', '>', 0)->count();
+        
+        $persenLogistik = $totalWilayah > 0 ? round(($wilayahTerisi / $totalWilayah) * 100, 1) : 0;
+
+        // 4. DATA LAINNYA
+        $latestAdmins = User::where('peran', 'admin')->latest()->take(5)->get();
+
+        $cekWA = Pengaturan::where('key', 'nomor_wa')->exists();
+        $cekAlamat = Pengaturan::where('key', 'alamat_toko')->exists();
+        $cekPayment = MetodePembayaran::count() > 0;
+        
+        $tokoSiap = $cekWA && $cekAlamat && $cekPayment;
+
+        return view('superadmin.dashboard', compact(
+            'totalAdmin', 
+            'totalCustomer', 
+            'totalPendapatan', 
+            'persenLogistik', 
+            'wilayahTerisi', 
+            'totalWilayah',
+            'latestAdmins', 
+            'tokoSiap'
+        ));
     }
 
-    // Menampilkan Daftar Admin (Sesuai Figma "Daftar Admin")
+    // Menampilkan Daftar Admin 
     public function index()
     {
-        // Hanya ambil user yang role-nya 'admin'
         $admins = User::where('peran', 'admin')->orderBy('nama')->get(); 
         return view('superadmin.users.index', compact('admins'));
     }
@@ -44,7 +84,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
-            'peran' => 'required|in:admin', // Superadmin cuma bikin Admin
+            'peran' => 'required|in:admin', 
         ]);
 
         User::create([
@@ -69,7 +109,6 @@ class UserController extends Controller
     // Memperbarui data user.
     public function update(Request $request, User $user): RedirectResponse
     {
-        // Validasi
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'email' => [
@@ -98,10 +137,10 @@ class UserController extends Controller
                          ->with('success', 'Data user berhasil diperbarui.');
     }
 
-    // Menghapus user.
+    // Menghapus user
     public function destroy(User $user): RedirectResponse
     {
-        // Safety check: Superadmin tidak boleh menghapus dirinya sendiri
+        // Safety check
         if ($user->id_user === Auth::id()) {
              return back()->with('error', 'Anda tidak bisa menghapus akun Anda sendiri.');
         }

@@ -108,7 +108,6 @@
 </div>
 
 <script>
-    // Script Search Sederhana
     document.getElementById('searchBox').addEventListener('keyup', function() {
         let value = this.value.toLowerCase();
         let rows = document.querySelectorAll("#tableContent tr");

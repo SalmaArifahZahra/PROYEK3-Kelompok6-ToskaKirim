@@ -27,14 +27,11 @@ class AlamatUserController extends Controller
         ]);
     }
 
-    // Menampilkan form untuk menambahkan alamat baru
-    // Bisa diakses tanpa auth jika sedang registrasi
     public function create(): View
     {
         return view('customer.profile.complete_profile');
     }
 
-    // Memproses penyimpanan alamat baru
     public function store(StoreAlamatUserRequest $request): RedirectResponse
     {
         $data = $request->validated();
