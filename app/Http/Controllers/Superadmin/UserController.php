@@ -44,7 +44,7 @@ class UserController extends Controller
                 'required' => true,
                 'url' => route('superadmin.kontrol_toko.index'),
                 'icon' => 'fa-store',
-                'color' => 'teal' // Warna tema
+                'color' => 'teal'
             ],
             [
                 'title' => 'Metode Pembayaran',
@@ -69,15 +69,15 @@ class UserController extends Controller
                 'desc' => 'Kategori Utama',
                 'count' => Kategori::count(),
                 'required' => true,
-                'url' => route('admin.kategori.index'), // Arahkan ke rute admin biasa
+                'url' => route('admin.kategori.index'), 
                 'icon' => 'fa-tags',
                 'color' => 'orange'
             ],
             [
                 'title' => 'Database Wilayah',
                 'desc' => 'Jarak Terhitung',
-                'count' => $wilayahTerisi, // Pakai variabel logistik tadi
-                'target' => $totalWilayah, // Targetnya harus semua wilayah
+                'count' => $wilayahTerisi, 
+                'target' => $totalWilayah, 
                 'required' => true,
                 'url' => route('superadmin.wilayah.index'),
                 'icon' => 'fa-map-location-dot',
@@ -89,7 +89,6 @@ class UserController extends Controller
         $completedTasks = 0;
         $totalTasks = count($checklist);
         foreach($checklist as $item) {
-            // Logika selesai: Jika count > 0 (atau khusus wilayah, jika terisi > 0)
             if($item['count'] > 0) $completedTasks++;
         }
         $progressPersen = ($totalTasks > 0) ? round(($completedTasks / $totalTasks) * 100) : 0;

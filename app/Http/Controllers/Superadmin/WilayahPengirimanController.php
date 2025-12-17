@@ -9,13 +9,14 @@ use Illuminate\Support\Facades\Http;
 
 class WilayahPengirimanController extends Controller
 {
-    public function index() {
-        $wilayah = WilayahPengiriman::orderBy('kota_kabupaten')
+    public function index(Request $request)
+    {
+        $query = WilayahPengiriman::orderBy('kota_kabupaten')
                     ->orderBy('kecamatan')
-                    ->orderBy('kelurahan');
-        
-        // Search parameter
+                    ->orderBy('kelurahan');   
+
         $search = $request->get('search', '');
+
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('kelurahan', 'ILIKE', "%{$search}%")
@@ -26,11 +27,8 @@ class WilayahPengirimanController extends Controller
         
         $wilayah = $query->paginate(50);
         $wilayah->appends($request->query());
-        
-        return view('superadmin.wilayah.index', [
-            'wilayah' => $wilayah,
-            'search' => $search
-        ]);
+
+        return view('superadmin.wilayah.index', compact('wilayah', 'search'));
     }
 
     // Update manual jarak
