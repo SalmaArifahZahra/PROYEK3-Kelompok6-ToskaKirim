@@ -41,7 +41,7 @@ class PesananDetailController extends Controller
         // Update status pembayaran jika ada
         if ($pesanan->pembayaran) {
             $pesanan->pembayaran->update([
-                'status_pembayaran' => 'verified'
+                'status_pembayaran' => 'diterima'
             ]);
         }
 
