@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Superadmin;
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\MetodePembayaran;
+use App\Models\LayananPengiriman;
+use App\Models\Kategori;
+use App\Models\Produk;
+use App\Models\Pengaturan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,10 +24,69 @@ class UserController extends Controller
     // Menampilkan Dashboard Superadmin (Sesuai Figma)
     public function dashboard()
     {
-        // Hitung data untuk ringkasan (opsional, biar dashboard gak kosong)
+        // Data statistik
         $totalAdmin = User::where('peran', 'admin')->count();
-        $totalPayment = 0;
-        return view('superadmin.dashboard', compact('totalAdmin', 'totalPayment'));
+        $totalPayment = MetodePembayaran::count();
+
+        // Checklist data penting untuk operasional toko
+        $checklist = [
+            [
+                'id' => 'metode_pembayaran',
+                'title' => 'Metode Pembayaran',
+                'description' => 'Atur metode pembayaran (COD, Transfer Bank, E-Wallet)',
+                'count' => MetodePembayaran::count(),
+                'required' => true,
+                'url' => route('superadmin.payments.index'),
+                'icon' => 'fa-credit-card'
+            ],
+            [
+                'id' => 'layanan_pengiriman',
+                'title' => 'Layanan Pengiriman',
+                'description' => 'Atur layanan pengiriman dan tarif per km',
+                'count' => LayananPengiriman::count(),
+                'required' => true,
+                'url' => route('superadmin.layanan.index'),
+                'icon' => 'fa-truck'
+            ],
+            [
+                'id' => 'kategori_produk',
+                'title' => 'Kategori Produk',
+                'description' => 'Buat kategori produk utama',
+                'count' => Kategori::whereNull('parent_id')->count(),
+                'required' => true,
+                'url' => route('admin.kategori.index'),
+                'icon' => 'fa-folder'
+            ],
+            [
+                'id' => 'produk',
+                'title' => 'Produk',
+                'description' => 'Tambahkan produk dan varian ke katalog',
+                'count' => Produk::count(),
+                'required' => false,
+                'url' => route('admin.produk.selectKategori'),
+                'icon' => 'fa-box'
+            ],
+            [
+                'id' => 'pengaturan_toko',
+                'title' => 'Pengaturan Toko',
+                'description' => 'Atur informasi dan kebijakan toko',
+                'count' => Pengaturan::count(),
+                'required' => false,
+                'url' => route('superadmin.kontrol_toko.index'),
+                'icon' => 'fa-cog'
+            ]
+        ];
+
+        // Hitung status checklist
+        $completedCount = 0;
+        foreach ($checklist as $item) {
+            if ($item['count'] > 0) {
+                $completedCount++;
+            }
+        }
+        $totalRequired = count(array_filter($checklist, fn($item) => $item['required']));
+
+        return view('superadmin.dashboard', compact('totalAdmin', 'totalPayment', 'checklist', 'completedCount', 'totalRequired'));
     }
 
     // Menampilkan Daftar Admin (Sesuai Figma "Daftar Admin")
