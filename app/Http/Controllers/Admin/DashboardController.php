@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Ongkir;
-use App\Models\Pembayaran;
+use App\Models\MetodePembayaran;
+use App\Models\LayananPengiriman;
 use App\Models\Kategori;
 use App\Models\Produk;
 use App\Models\Pengaturan;
@@ -17,35 +17,35 @@ class DashboardController extends Controller
     public function index(): View
     {
         // Hitung data penting untuk operasional toko
-        $totalOngkir = Ongkir::count();
-        $totalPembayaran = Pembayaran::count();
+        $totalMetodePembayaran = MetodePembayaran::count();
+        $totalLayananPengiriman = LayananPengiriman::count();
         $totalKategori = Kategori::whereNull('parent_id')->count();
         $totalProduk = Produk::count();
         $totalPengaturan = Pengaturan::count();
         
-        // Checklist data penting
+        // Checklist data penting untuk operasional toko
         $checklist = [
             [
-                'title' => 'Layanan Pengiriman',
-                'description' => 'Minimal 1 metode pengiriman agar customer dapat checkout',
-                'count' => $totalOngkir,
-                'icon' => 'fa-truck',
-                'url' => route('admin.dashboard'), // Superadmin yang atur
+                'title' => 'Metode Pembayaran',
+                'description' => 'Minimal 1 metode pembayaran diperlukan agar customer dapat checkout',
+                'count' => $totalMetodePembayaran,
+                'icon' => 'fa-credit-card',
+                'url' => '#',
                 'required' => true,
                 'managed_by' => 'superadmin'
             ],
             [
-                'title' => 'Metode Pembayaran',
-                'description' => 'Minimal 1 metode pembayaran agar customer dapat checkout',
-                'count' => $totalPembayaran,
-                'icon' => 'fa-credit-card',
-                'url' => route('admin.dashboard'), // Superadmin yang atur
+                'title' => 'Layanan Pengiriman',
+                'description' => 'Minimal 1 layanan pengiriman diperlukan agar customer dapat checkout',
+                'count' => $totalLayananPengiriman,
+                'icon' => 'fa-truck',
+                'url' => '#',
                 'required' => true,
-                'managed_by' => 'superadmin'
+                'managed_by' => 'admin'
             ],
             [
                 'title' => 'Kategori Produk',
-                'description' => 'Minimal 1 kategori untuk mengorganisir produk',
+                'description' => 'Minimal 1 kategori diperlukan untuk mengorganisir produk',
                 'count' => $totalKategori,
                 'icon' => 'fa-tags',
                 'url' => route('admin.kategori.index'),
@@ -54,7 +54,7 @@ class DashboardController extends Controller
             ],
             [
                 'title' => 'Produk',
-                'description' => 'Minimal 1 produk dengan varian agar customer dapat berbelanja',
+                'description' => 'Minimal 1 produk dengan varian diperlukan agar customer dapat berbelanja',
                 'count' => $totalProduk,
                 'icon' => 'fa-box',
                 'url' => route('admin.produk.selectKategori'),
@@ -63,11 +63,11 @@ class DashboardController extends Controller
             ],
             [
                 'title' => 'Pengaturan Toko',
-                'description' => 'Informasi toko untuk ditampilkan ke customer',
+                'description' => 'Informasi toko seperti nama, alamat, kontak untuk ditampilkan ke customer',
                 'count' => $totalPengaturan,
                 'icon' => 'fa-store',
-                'url' => route('admin.dashboard'), // Superadmin yang atur
-                'required' => true,
+                'url' => '#',
+                'required' => false,
                 'managed_by' => 'superadmin'
             ],
         ];
@@ -82,8 +82,8 @@ class DashboardController extends Controller
             'checklist' => $checklist,
             'totalRequired' => $totalRequired,
             'completedCount' => $completedCount,
-            'totalOngkir' => $totalOngkir,
-            'totalPembayaran' => $totalPembayaran,
+            'totalMetodePembayaran' => $totalMetodePembayaran,
+            'totalLayananPengiriman' => $totalLayananPengiriman,
             'totalKategori' => $totalKategori,
             'totalProduk' => $totalProduk,
         ]);

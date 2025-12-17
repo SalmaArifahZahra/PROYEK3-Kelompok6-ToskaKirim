@@ -38,7 +38,7 @@
         <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between border-l-4 border-orange-500">
             <div>
                 <h3 class="text-lg font-semibold text-gray-700">Metode Pembayaran</h3>
-                <p class="text-3xl font-bold text-orange-600">{{ $totalPembayaran }}</p>
+                <p class="text-3xl font-bold text-orange-600">{{ $totalMetodePembayaran }}</p>
             </div>
             <div class="text-4xl text-orange-200">
                 <i class="fas fa-credit-card"></i>
@@ -59,9 +59,9 @@
     {{-- Checklist Data Penting --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="bg-gradient-to-r from-[#5BC6BC] to-[#4aa89e] px-6 py-4">
-            <h2 class="text-xl font-bold text-black flex items-center gap-2">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
                 <i class="fas fa-list-check"></i>
-                Checklist Kesiapan Operasional
+                Checklist Kesiapan Operasional Toko
             </h2>
         </div>
 
@@ -102,7 +102,7 @@
                                     @endif
                                     @if (!$canManage)
                                         <span class="px-2 py-1 text-xs font-bold bg-blue-100 text-blue-700 rounded-full">
-                                            Dikelola Superadmin
+                                            <i class="fas fa-shield-alt"></i> Dikelola Superadmin
                                         </span>
                                     @endif
                                 </div>
@@ -131,7 +131,7 @@
                                 </a>
                             @else
                                 <div class="px-4 py-2 rounded font-medium bg-gray-200 text-gray-500 cursor-not-allowed" title="Hanya Superadmin yang dapat mengelola">
-                                    <i class="fas fa-lock"></i>
+                                    <i class="fas fa-lock"></i> Terkunci
                                 </div>
                             @endif
                         </div>
@@ -143,7 +143,7 @@
         {{-- Progress Bar --}}
         <div class="px-6 py-4 bg-gray-50 border-t">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700">Progress Kesiapan</span>
+                <span class="text-sm font-semibold text-gray-700">Progress Kesiapan Operasional</span>
                 <span class="text-sm font-bold text-gray-800">{{ $totalRequired > 0 ? round(($completedCount / $totalRequired) * 100) : 0 }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
@@ -151,6 +151,13 @@
                      style="width: {{ $totalRequired > 0 ? ($completedCount / $totalRequired) * 100 : 0 }}%">
                 </div>
             </div>
+            <p class="text-xs text-gray-500 mt-2">
+                @if ($completedCount === $totalRequired)
+                    <i class="fas fa-check-circle text-green-500"></i> Semua data penting sudah lengkap! Toko siap untuk operasional.
+                @else
+                    <i class="fas fa-info-circle text-orange-500"></i> Masih ada {{ $totalRequired - $completedCount }} data penting yang perlu dilengkapi.
+                @endif
+            </p>
         </div>
     </div>
 </div>
