@@ -119,20 +119,10 @@
                             {{-- Metode Pembayaran --}}
                             <div class="border border-slate-200 rounded-lg p-5 mb-6">
                                 <h3 class="font-semibold text-slate-700 mb-4">Pilih Metode Pembayaran</h3>
+                                @if ($paymentMethods->isEmpty())
+                                    <div class="text-center py-6 text-slate-500 text-sm">Tidak ada metode pembayaran tersedia.</div>
+                                @else
                                 <div class="space-y-4">
-                                    <label
-                                        class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
-                                        <input type="radio" name="metode_pembayaran" value="COD"
-                                            class="h-4 w-4 text-teal-600 focus:ring-teal-500" required>
-                                        <div class="flex items-center gap-3">
-                                            <i class="fas fa-money-bill-wave text-teal-600 text-xl"></i>
-                                            <span class="font-medium text-slate-700">Cash on Delivery (COD)</span>
-                                        </div>
-                                    </label>
-
-                                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider mt-4">Transfer Bank
-                                        / E-Wallet</p>
-
                                     @foreach ($paymentMethods as $method)
                                         <label
                                             class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
@@ -141,13 +131,19 @@
                                                 data-bank="{{ $method->nama_bank }}"
                                                 data-rek="{{ $method->nomor_rekening }}"
                                                 data-name="{{ $method->atas_nama }}"
-                                                data-img="{{ $method->gambar ? asset('storage/' . $method->gambar) : '' }}">
+                                                data-img="{{ $method->gambar ? asset('storage/' . $method->gambar) : '' }}"
+                                                required
+                                                @if ($loop->first) checked @endif>
                                             <div class="flex items-center gap-3 w-full">
                                                 @if ($method->gambar)
                                                     <img src="{{ asset('storage/' . $method->gambar) }}"
                                                         class="h-8 w-auto object-contain">
                                                 @else
-                                                    <i class="fas fa-university text-slate-400 text-xl"></i>
+                                                    @if (strtoupper($method->nama_bank) === 'COD')
+                                                        <i class="fas fa-money-bill-wave text-teal-600 text-xl"></i>
+                                                    @else
+                                                        <i class="fas fa-university text-slate-400 text-xl"></i>
+                                                    @endif
                                                 @endif
                                                 <span class="font-medium text-slate-700">{{ $method->nama_bank }}</span>
                                             </div>
@@ -186,6 +182,7 @@
                                         <p class="text-xs text-slate-500 mt-1">* Kosongkan jika ingin membayar nanti.</p>
                                     </div>
                                 </div>
+                                @endif
                             </div>
                         </div>
 
@@ -373,7 +370,7 @@
 
             document.querySelectorAll('input[name="metode_pembayaran"]').forEach(radio => {
                 radio.addEventListener('change', function() {
-                    if (this.value === 'COD') {
+                    if (strtoupper(this.dataset.bank) === 'COD' || this.dataset.bank === 'COD') {
                         if (transferInfo) transferInfo.classList.add('hidden');
                         if (btnSubmit) {
                             btnSubmit.textContent = 'Buat Pesanan (COD)';
