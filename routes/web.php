@@ -105,7 +105,8 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // --- Rute Admin & Superadmin ---
+    // --- Rute Admin Operasional (Role: admin & superadmin) ---
+    // Prefix URL: /admin
     Route::middleware('role:admin,superadmin')->prefix('admin')->name('admin.')->group(function () {
 
         // Rute landing page Admin
@@ -169,34 +170,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('pelanggan', [AdminPelangganController::class, 'index'])->name('pelanggan.index');
     });
 
-    Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
-
-        // Dashboard (Halaman Awal setelah Login)
-        Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
-        Route::resource('users', SuperAdminUserController::class);
-        Route::resource('payments', MetodePembayaranController::class);
-
-        Route::get('/kontrol-toko', [KontrolTokoController::class, 'index'])->name('kontrol_toko.index');
-        Route::post('/kontrol-toko', [KontrolTokoController::class, 'update'])->name('kontrol_toko.update');
-
-        // --- MANAJEMEN LOGISTIK & TARIF ---
-
-        // 1. Layanan Pengiriman
+    // --- Rute Logistik & Tarif (SHARED: Admin & Superadmin) ---
+    Route::middleware(['auth', 'role:admin,superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+        
         Route::resource('layanan', LayananPengirimanController::class)->except(['create', 'show', 'edit']);
-
-        // 2. Promo Ongkir
         Route::resource('promo', PromoOngkirController::class)->except(['create', 'show', 'edit']);
-
-        // 3. Wilayah & Jarak
         Route::get('wilayah', [WilayahPengirimanController::class, 'index'])->name('wilayah.index');
         Route::put('wilayah/{id}', [WilayahPengirimanController::class, 'update'])->name('wilayah.update');
         Route::post('wilayah/auto-calculate', [WilayahPengirimanController::class, 'hitungJarakOtomatis'])->name('wilayah.auto');
+    });
 
-        // Rute CRUD User
-        // Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
-        // Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
-        // Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-        // Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-        // Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+        Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
+        Route::resource('users', SuperAdminUserController::class);
+        Route::resource('payments', MetodePembayaranController::class);
+        Route::get('/kontrol-toko', [KontrolTokoController::class, 'index'])->name('kontrol_toko.index');
+        Route::post('/kontrol-toko', [KontrolTokoController::class, 'update'])->name('kontrol_toko.update');
     });
 });

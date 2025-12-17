@@ -256,7 +256,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Metode Pembayaran',
-                        text: 'Silakan pilih metode pembayaran terlebih dahulu.',
+                        text: 'Hubungi admin untuk menambahkan metode pembayaran.',
                         confirmButtonText: 'Baik'
                     });
                     return false;
@@ -367,6 +367,18 @@
             const fileInput = document.querySelector('input[name="bukti_bayar"]');
             const btnSubmit = document.getElementById('btn-submit');
             const transferInfo = document.getElementById('transfer-info');
+
+            // Check jika tidak ada payment methods atau layanan pengiriman
+            const hasPaymentMethods = document.querySelectorAll('input[name="metode_pembayaran"]').length > 0;
+            const hasShippingServices = document.querySelectorAll('input[name="id_layanan_pengiriman_radio"]').length > 0;
+
+            if (!hasPaymentMethods || !hasShippingServices) {
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnSubmit.textContent = 'Belum Bisa Checkout';
+                }
+            }
 
             document.querySelectorAll('input[name="metode_pembayaran"]').forEach(radio => {
                 radio.addEventListener('change', function() {
