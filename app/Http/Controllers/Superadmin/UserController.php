@@ -2,177 +2,106 @@
 
 namespace App\Http\Controllers\Superadmin;
 
-use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\WilayahPengiriman;
+use App\Models\Pengaturan;
+use App\Models\Pesanan;
 use App\Models\MetodePembayaran;
 use App\Models\LayananPengiriman;
 use App\Models\Kategori;
 use App\Models\Produk;
-use App\Models\Pengaturan;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
-    // Menampilkan Dashboard Superadmin (Sesuai Figma)
     public function dashboard()
     {
-        // Data statistik
+        // --- BAGIAN 1: STATISTIK UTAMA (METRIK BISNIS) ---
         $totalAdmin = User::where('peran', 'admin')->count();
-        $totalPayment = MetodePembayaran::count();
+        $totalCustomer = User::where('peran', 'customer')->count();
+        
+        // Hitung Pendapatan (Safe Mode)
+        $totalPendapatan = 0;
+        if (Schema::hasTable('pesanan')) {
+            try {
+                $totalPendapatan = Pesanan::where('status_pesanan', 'selesai')->sum('grand_total'); 
+            } catch (\Exception $e) { $totalPendapatan = 0; }
+        }
 
-        // Checklist data penting untuk operasional toko
+        // Hitung Logistik (Cakupan Wilayah)
+        $totalWilayah = WilayahPengiriman::count();
+        $wilayahTerisi = WilayahPengiriman::where('jarak_km', '>', 0)->count();
+        $persenLogistik = $totalWilayah > 0 ? round(($wilayahTerisi / $totalWilayah) * 100, 1) : 0;
+
+
+        // --- BAGIAN 2: CHECKLIST KESIAPAN SISTEM (DARI VERSI 1) ---
         $checklist = [
             [
-                'id' => 'metode_pembayaran',
+                'title' => 'Identitas Toko',
+                'desc' => 'WA & Alamat Toko',
+                'count' => Pengaturan::whereIn('key', ['nomor_wa', 'alamat_toko'])->count() >= 2 ? 1 : 0,
+                'required' => true,
+                'url' => route('superadmin.kontrol_toko.index'),
+                'icon' => 'fa-store',
+                'color' => 'teal' // Warna tema
+            ],
+            [
                 'title' => 'Metode Pembayaran',
-                'description' => 'Atur metode pembayaran (COD, Transfer Bank, E-Wallet)',
+                'desc' => 'Bank / E-Wallet',
                 'count' => MetodePembayaran::count(),
                 'required' => true,
                 'url' => route('superadmin.payments.index'),
-                'icon' => 'fa-credit-card'
+                'icon' => 'fa-credit-card',
+                'color' => 'blue'
             ],
             [
-                'id' => 'layanan_pengiriman',
-                'title' => 'Layanan Pengiriman',
-                'description' => 'Atur layanan pengiriman dan tarif per km',
+                'title' => 'Layanan Kirim',
+                'desc' => 'Reguler / Express',
                 'count' => LayananPengiriman::count(),
                 'required' => true,
                 'url' => route('superadmin.layanan.index'),
-                'icon' => 'fa-truck'
+                'icon' => 'fa-truck',
+                'color' => 'indigo'
             ],
             [
-                'id' => 'kategori_produk',
                 'title' => 'Kategori Produk',
-                'description' => 'Buat kategori produk utama',
-                'count' => Kategori::whereNull('parent_id')->count(),
+                'desc' => 'Kategori Utama',
+                'count' => Kategori::count(),
                 'required' => true,
-                'url' => route('admin.kategori.index'),
-                'icon' => 'fa-folder'
+                'url' => route('admin.kategori.index'), // Arahkan ke rute admin biasa
+                'icon' => 'fa-tags',
+                'color' => 'orange'
             ],
             [
-                'id' => 'produk',
-                'title' => 'Produk',
-                'description' => 'Tambahkan produk dan varian ke katalog',
-                'count' => Produk::count(),
-                'required' => false,
-                'url' => route('admin.produk.selectKategori'),
-                'icon' => 'fa-box'
-            ],
-            [
-                'id' => 'pengaturan_toko',
-                'title' => 'Pengaturan Toko',
-                'description' => 'Atur informasi dan kebijakan toko',
-                'count' => Pengaturan::count(),
-                'required' => false,
-                'url' => route('superadmin.kontrol_toko.index'),
-                'icon' => 'fa-cog'
+                'title' => 'Database Wilayah',
+                'desc' => 'Jarak Terhitung',
+                'count' => $wilayahTerisi, // Pakai variabel logistik tadi
+                'target' => $totalWilayah, // Targetnya harus semua wilayah
+                'required' => true,
+                'url' => route('superadmin.wilayah.index'),
+                'icon' => 'fa-map-location-dot',
+                'color' => 'rose'
             ]
         ];
 
-        // Hitung status checklist
-        $completedCount = 0;
-        foreach ($checklist as $item) {
-            if ($item['count'] > 0) {
-                $completedCount++;
-            }
+        // Hitung Progress Checklist
+        $completedTasks = 0;
+        $totalTasks = count($checklist);
+        foreach($checklist as $item) {
+            // Logika selesai: Jika count > 0 (atau khusus wilayah, jika terisi > 0)
+            if($item['count'] > 0) $completedTasks++;
         }
-        $totalRequired = count(array_filter($checklist, fn($item) => $item['required']));
-
-        return view('superadmin.dashboard', compact('totalAdmin', 'totalPayment', 'checklist', 'completedCount', 'totalRequired'));
-    }
-
-    // Menampilkan Daftar Admin (Sesuai Figma "Daftar Admin")
-    public function index()
-    {
-        // Hanya ambil user yang role-nya 'admin'
-        $admins = User::where('peran', 'admin')->orderBy('nama')->get(); 
-        return view('superadmin.users.index', compact('admins'));
-    }
-
-    public function create()
-    {
-        return view('superadmin.users.create');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'peran' => 'required|in:admin', // Superadmin cuma bikin Admin
-        ]);
-
-        User::create([
-            'nama' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'peran' => $request->peran,
-        ]);
-
-        return redirect()->route('superadmin.users.index')->with('success', 'Admin berhasil ditambahkan');
-    }
+        $progressPersen = ($totalTasks > 0) ? round(($completedTasks / $totalTasks) * 100) : 0;
 
 
-    // Menampilkan form untuk mengedit user.
-    public function edit(User $user): View
-    {
-        return view('superadmin.users.edit', [
-            'user' => $user
-        ]);
-    }
+        // --- BAGIAN 3: TIM TERBARU ---
+        $latestAdmins = User::where('peran', 'admin')->latest()->take(5)->get();
 
-    // Memperbarui data user.
-    public function update(Request $request, User $user): RedirectResponse
-    {
-        // Validasi
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users', 'email')->ignore($user->id_user, 'id_user')
-            ],
-            'peran' => ['required', Rule::in(RoleEnum::ADMIN, RoleEnum::CUSTOMER)],
-            'password' => ['nullable', 'sometimes', Password::min(8)],
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $data = $validator->validated();
-
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
-
-        $user->update($data);
-
-        return redirect()->route('superadmin.users.dashboard')
-                         ->with('success', 'Data user berhasil diperbarui.');
-    }
-
-    // Menghapus user.
-    public function destroy(User $user): RedirectResponse
-    {
-        // Safety check: Superadmin tidak boleh menghapus dirinya sendiri
-        if ($user->id_user === Auth::id()) {
-             return back()->with('error', 'Anda tidak bisa menghapus akun Anda sendiri.');
-        }
-
-        $user->delete();
-        
-        return redirect()->route('superadmin.users.dashboard')
-                         ->with('success', 'User berhasil dihapus.');
+        return view('superadmin.dashboard', compact(
+            'totalAdmin', 'totalCustomer', 'totalPendapatan', 'persenLogistik',
+            'checklist', 'completedTasks', 'totalTasks', 'progressPersen',
+            'latestAdmins'
+        ));
     }
 }

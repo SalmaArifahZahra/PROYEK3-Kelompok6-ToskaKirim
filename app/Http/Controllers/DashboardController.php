@@ -9,12 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    // Menampilkan halaman dashboard sesuai peran user.
     public function index(): RedirectResponse
     {
         $user = Auth::user();
 
-        // Debug: Log peran user
         \Log::info('User login - Role: ' . $user->peran->value);
 
         if ($user->peran === RoleEnum::SUPERADMIN) {

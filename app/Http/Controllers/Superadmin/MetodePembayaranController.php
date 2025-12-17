@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\MetodePembayaran; 
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log; // Untuk mencatat error
-use Illuminate\Support\Facades\DB; // Untuk transaksi database
+use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\DB; 
 
 class MetodePembayaranController extends Controller
 {
@@ -29,10 +29,9 @@ class MetodePembayaranController extends Controller
             'nama_bank'      => 'required|string|max:100',
             'jenis'          => 'required|in:Bank Transfer,E-Wallet,QRIS',
             'nomor_rekening' => 'nullable|string|max:50',
-            'atas_nama'      => 'nullable|string|max:100', // Penting untuk transfer
-            'gambar'         => 'required|image|mimes:jpeg,png,jpg,webp|max:2048' // Max 2MB, format spesifik
+            'atas_nama'      => 'nullable|string|max:100', 
+            'gambar'         => 'required|image|mimes:jpeg,png,jpg,webp|max:2048' 
         ], [
-            // Pesan Error Kustom (Bahasa Indonesia)
             'nama_bank.required' => 'Nama Bank/E-Wallet wajib diisi.',
             'jenis.required'     => 'Jenis metode pembayaran wajib dipilih.',
             'gambar.required'    => 'Logo atau gambar QRIS wajib diupload.',
@@ -41,32 +40,27 @@ class MetodePembayaranController extends Controller
         ]);
 
         try {
-            DB::beginTransaction(); // Mulai Transaksi
+            DB::beginTransaction();
 
             $data = $request->only(['nama_bank', 'jenis', 'nomor_rekening', 'atas_nama']);
 
-            // 2. Handle Upload File dengan Error Checking
+            // Handle Upload File dengan Error Checking
             if ($request->hasFile('gambar')) {
-                // Simpan ke folder: storage/app/public/payment_methods
                 $path = $request->file('gambar')->store('payment_methods', 'public');
                 $data['gambar'] = $path;
             }
 
-            // 3. Simpan ke Database
             MetodePembayaran::create($data);
 
-            DB::commit(); // Simpan permanen jika tidak ada error
+            DB::commit(); 
 
             return redirect()->route('superadmin.payments.index')
                              ->with('success', 'Metode pembayaran berhasil ditambahkan.');
-
         } catch (\Exception $e) {
-            DB::rollBack(); // Batalkan semua perubahan jika error
+            DB::rollBack(); 
             
-            // Catat error di storage/logs/laravel.log untuk developer
             Log::error("Error create payment method: " . $e->getMessage());
 
-            // Hapus gambar jika sudah terlanjur ter-upload tapi DB gagal
             if (isset($path)) {
                 Storage::disk('public')->delete($path);
             }
@@ -80,15 +74,12 @@ class MetodePembayaranController extends Controller
         try {
             $payment = MetodePembayaran::findOrFail($id);
             
-            // 1. Hapus Gambar dari Storage
             if ($payment->gambar) {
-                // Gunakan disk 'public' karena saat upload kita pakai disk 'public'
                 if (Storage::disk('public')->exists($payment->gambar)) {
                     Storage::disk('public')->delete($payment->gambar);
                 }
             }
             
-            // 2. Hapus Data dari Database
             $payment->delete();
 
             return redirect()->back()->with('success', 'Metode pembayaran berhasil dihapus.');

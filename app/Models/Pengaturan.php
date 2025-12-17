@@ -10,17 +10,12 @@ class Pengaturan extends Model
     use HasFactory;
 
     protected $table = 'pengaturan';
-    protected $primaryKey = 'id_pengaturan';
+    protected $primaryKey = 'id';
 
-    //tabel ini tidak punya created_at/updated_at
     public $timestamps = false;
 
     protected $fillable = [
-        'tarif_per_km',
-        'foto_qris',
-    ];
-
-    protected $casts = [
-        'tarif_per_km' => 'float',
+        'key',
+        'value',
     ];
 }
