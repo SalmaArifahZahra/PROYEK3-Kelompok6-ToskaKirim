@@ -3,249 +3,170 @@
 @section('title', 'Control Tower')
 
 @section('content')
-<div class="space-y-8">
+<div class="space-y-8 pb-10">
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition">
             <div>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Total Omzet</p>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Omzet</p>
                 <h3 class="text-2xl font-bold text-gray-800 mt-1">
                     Rp {{ number_format($totalPendapatan, 0, ',', '.') }}
                 </h3>
             </div>
-            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl shadow-sm">
+            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl shadow-sm">
                 <i class="fas fa-coins"></i>
             </div>
         </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition">
             <div>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Pelanggan</p>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Pelanggan</p>
                 <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $totalCustomer }}</h3>
             </div>
-            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl shadow-sm">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shadow-sm">
                 <i class="fas fa-users"></i>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition">
             <div>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Tim Admin</p>
-                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $totalAdmin }} <span class="text-sm font-normal text-gray-400">Orang</span></h3>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Tim Admin</p>
+                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $totalAdmin }}</h3>
             </div>
-            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl shadow-sm">
-                <i class="fas fa-user-tie"></i>
+            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl shadow-sm">
+                <i class="fas fa-user-shield"></i>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition">
             <div>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Data Jarak</p>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Coverage Area</p>
                 <div class="flex items-end gap-2">
                     <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $persenLogistik }}%</h3>
-                    <span class="text-xs text-gray-400 mb-1">Tercover</span>
                 </div>
             </div>
-            <div class="w-12 h-12 {{ $persenLogistik < 100 ? 'bg-orange-100 text-orange-600' : 'bg-teal-100 text-teal-600' }} rounded-full flex items-center justify-center text-xl shadow-sm">
+            <div class="w-12 h-12 {{ $persenLogistik < 100 ? 'bg-orange-50 text-orange-500' : 'bg-teal-50 text-[#2A9D8F]' }} rounded-xl flex items-center justify-center text-xl shadow-sm">
                 <i class="fas fa-map-marked-alt"></i>
-    <div class="space-y-6">
-        {{-- Statistik Ringkas --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between border-l-4 border-teal-500">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-700">Total Admin</h3>
-                    <p class="text-3xl font-bold text-teal-600">{{ $totalAdmin }}</p>
-                </div>
-                <a href="{{ route('superadmin.users.index') }}" class="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition">
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between border-l-4 border-orange-500">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-700">Metode Pembayaran</h3>
-                    <p class="text-3xl font-bold text-orange-600">{{ $totalPayment }}</p>
-                </div>
-                <a href="{{ route('superadmin.payments.index') }}" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition">
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between border-l-4 border-blue-500">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-700">Kesiapan Operasional</h3>
-                    <p class="text-3xl font-bold text-blue-600">{{ $completedCount }}/{{ $totalRequired }}</p>
-                </div>
-                <div class="text-4xl text-blue-200">
-                    <i class="fas fa-tasks"></i>
-                </div>
-            </div>
-        </div>
-
-        {{-- Checklist Data Penting --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-4">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-list-check"></i>
-                    Checklist Kesiapan Operasional
-                </h2>
-                <p class="text-teal-100 text-sm mt-1">Pastikan semua data penting sudah terisi agar customer dapat berbelanja dengan lancar</p>
-            </div>
-
-            <div class="divide-y">
-                @foreach ($checklist as $item)
-                    @php
-                        $isComplete = $item['count'] > 0;
-                        $statusColor = $isComplete ? 'bg-green-50 border-l-4 border-green-500' : ($item['required'] ? 'bg-red-50 border-l-4 border-red-500' : 'bg-gray-50 border-l-4 border-gray-300');
-                        $badgeColor = $isComplete ? 'bg-green-100 text-green-700' : ($item['required'] ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700');
-                        $iconColor = $isComplete ? 'text-green-500' : ($item['required'] ? 'text-red-500' : 'text-gray-400');
-                        $checkIcon = $isComplete ? 'fa-check-circle' : 'fa-exclamation-circle';
-                    @endphp
-                    <div class="p-6 {{ $statusColor }} transition-all hover:shadow-md">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4 flex-1">
-                                <div class="text-3xl {{ $iconColor }}">
-                                    <i class="fas {{ $item['icon'] }}"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-3">
-                                        <h3 class="text-lg font-semibold text-gray-800">{{ $item['title'] }}</h3>
-                                        @if ($item['required'])
-                                            <span class="px-2 py-1 text-xs font-bold bg-yellow-100 text-yellow-700 rounded-full">
-                                                WAJIB
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-1">{{ $item['description'] }}</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-4">
-                                <div class="text-center">
-                                    <div class="text-3xl font-bold {{ $isComplete ? 'text-green-600' : 'text-gray-400' }}">
-                                        {{ $item['count'] }}
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        @if ($isComplete)
-                                            <i class="fas {{ $checkIcon }} text-green-500"></i> Lengkap
-                                        @else
-                                            <i class="fas {{ $checkIcon }} text-red-500"></i> 
-                                            {{ $item['required'] ? 'Belum Diisi' : 'Kosong' }}
-                                        @endif
-                                    </p>
-                                </div>
-                                <a href="{{ $item['url'] }}" 
-                                   class="px-4 py-2 rounded font-medium transition {{ $isComplete ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white' }}">
-                                    {{ $isComplete ? 'Lihat' : 'Atur' }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-
-            {{-- Progress Bar --}}
-            <div class="px-6 py-4 bg-gray-50 border-t">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-semibold text-gray-700">Progress Kesiapan</span>
-                    <span class="text-sm font-bold text-gray-800">{{ round(($completedCount / $totalRequired) * 100) }}%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-3">
-                    <div class="bg-gradient-to-r from-green-400 to-teal-500 h-3 rounded-full transition-all duration-300"
-                         style="width: {{ ($completedCount / $totalRequired) * 100 }}%">
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="font-bold text-gray-800 mb-6 flex items-center">
-                <i class="fas fa-rocket text-[#2A9D8F] mr-2"></i> Status Sistem
-            </h3>
-
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full {{ $tokoSiap ? 'bg-green-500' : 'bg-red-500' }}"></div>
-                        <span class="text-sm text-gray-600 font-medium">Identitas Toko</span>
-                    </div>
-                    @if($tokoSiap)
-                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">Siap</span>
-                    @else
-                        <a href="{{ route('superadmin.kontrol_toko.index') }}" class="text-xs text-red-500 hover:underline">Lengkapi</a>
-                    @endif
-                </div>
-
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full {{ $persenLogistik >= 100 ? 'bg-green-500' : 'bg-orange-500' }}"></div>
-                        <span class="text-sm text-gray-600 font-medium">Database Wilayah</span>
-                    </div>
-                    @if($persenLogistik >= 100)
-                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">Lengkap</span>
-                    @else
-                        <a href="{{ route('superadmin.wilayah.index') }}" class="text-xs text-orange-500 hover:underline">Update Jarak</a>
-                    @endif
-                </div>
-
-                <div class="pt-4 grid grid-cols-2 gap-3">
-                    <a href="{{ route('superadmin.users.create') }}" class="flex flex-col items-center justify-center p-3 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#2A9D8F] hover:text-[#2A9D8F] transition">
-                        <i class="fas fa-plus mb-1"></i>
-                        <span class="text-xs">Admin Baru</span>
-                    </a>
-                    <a href="{{ route('superadmin.payments.create') }}" class="flex flex-col items-center justify-center p-3 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#2A9D8F] hover:text-[#2A9D8F] transition">
-                        <i class="fas fa-wallet mb-1"></i>
-                        <span class="text-xs">Payment Baru</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
-                <h3 class="font-bold text-gray-800">Tim Admin Terbaru</h3>
-                <a href="{{ route('superadmin.users.index') }}" class="text-xs font-bold text-[#2A9D8F] hover:text-teal-700">Kelola Semua &rarr;</a>
+        <div class="px-8 py-6 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-server text-[#2A9D8F]"></i> Status Operasional Sistem
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">
+                    Pastikan indikator di bawah berwarna hijau agar toko berjalan optimal.
+                </p>
             </div>
             
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50 text-gray-500 text-[10px] uppercase tracking-wider">
-                        <tr>
-                            <th class="px-6 py-3">Nama</th>
-                            <th class="px-6 py-3">Email</th>
-                            <th class="px-6 py-3 text-right">Bergabung</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 text-sm">
-                        @forelse($latestAdmins as $admin)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-3 font-medium text-gray-800 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-600">
-                                    {{ substr($admin->nama, 0, 1) }}
-                                </div>
-                                {{ $admin->nama }}
-                            </td>
-                            <td class="px-6 py-3 text-gray-500">{{ $admin->email }}</td>
-                            <td class="px-6 py-3 text-right text-gray-400 text-xs">
-                                {{ $admin->created_at->format('d M Y') }}
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="px-6 py-8 text-center text-gray-400 italic">
-                                Belum ada admin lain selain Anda.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="w-full md:w-1/3">
+                <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                    <span>Kesiapan Toko</span>
+                    <span>{{ $progressPersen }}%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2.5">
+                    <div class="bg-gradient-to-r from-[#2A9D8F] to-teal-400 h-2.5 rounded-full transition-all duration-500" style="width: {{ $progressPersen }}%"></div>
+                </div>
             </div>
         </div>
 
+        <div class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            @foreach($checklist as $item)
+                @php
+                    $isComplete = $item['count'] > 0;
+                    // Mapping warna class Tailwind
+                    $colors = [
+                        'teal' => ['bg' => 'bg-teal-50', 'text' => 'text-teal-600', 'border' => 'border-teal-200'],
+                        'blue' => ['bg' => 'bg-blue-50', 'text' => 'text-blue-600', 'border' => 'border-blue-200'],
+                        'indigo' => ['bg' => 'bg-indigo-50', 'text' => 'text-indigo-600', 'border' => 'border-indigo-200'],
+                        'orange' => ['bg' => 'bg-orange-50', 'text' => 'text-orange-600', 'border' => 'border-orange-200'],
+                        'rose' => ['bg' => 'bg-rose-50', 'text' => 'text-rose-600', 'border' => 'border-rose-200'],
+                    ];
+                    $theme = $colors[$item['color']] ?? $colors['teal'];
+                    
+                    // Jika belum lengkap, ubah jadi abu-abu/merah
+                    if(!$isComplete) {
+                         $theme = ['bg' => 'bg-red-50', 'text' => 'text-red-500', 'border' => 'border-red-200'];
+                    }
+                @endphp
+
+                <a href="{{ $item['url'] }}" class="group block relative p-5 rounded-xl border {{ $isComplete ? 'border-gray-100 hover:border-[#2A9D8F]' : 'border-red-200 hover:border-red-400' }} transition-all hover:shadow-md bg-white">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-10 h-10 rounded-lg {{ $theme['bg'] }} {{ $theme['text'] }} flex items-center justify-center text-lg">
+                            <i class="fas {{ $item['icon'] }}"></i>
+                        </div>
+                        @if($isComplete)
+                            <i class="fas fa-check-circle text-green-500 text-lg"></i>
+                        @else
+                            <i class="fas fa-exclamation-circle text-red-500 text-lg animate-pulse"></i>
+                        @endif
+                    </div>
+                    
+                    <h3 class="font-bold text-gray-700 text-sm group-hover:text-[#2A9D8F] transition-colors">
+                        {{ $item['title'] }}
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1 mb-3">
+                        {{ $item['desc'] }}
+                    </p>
+
+                    <div class="text-xs font-bold {{ $isComplete ? 'text-gray-800' : 'text-red-500' }}">
+                        Data: {{ $item['count'] }}
+                        @if(isset($item['target']))
+                            <span class="text-gray-400 font-normal">/ {{ $item['target'] }}</span>
+                        @endif
+                    </div>
+                </a>
+            @endforeach
+        </div>
     </div>
+
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-8 py-6 border-b border-gray-50 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800">Tim Admin Terbaru</h3>
+            <a href="{{ route('superadmin.users.index') }}" class="text-sm font-bold text-[#2A9D8F] hover:underline">Kelola Semua &rarr;</a>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="px-8 py-4">Nama</th>
+                        <th class="px-8 py-4">Email</th>
+                        <th class="px-8 py-4 text-right">Bergabung</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    @forelse($latestAdmins as $admin)
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-8 py-4 font-medium text-gray-800 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                                {{ substr($admin->nama, 0, 1) }}
+                            </div>
+                            {{ $admin->nama }}
+                        </td>
+                        <td class="px-8 py-4 text-gray-500">{{ $admin->email }}</td>
+                        <td class="px-8 py-4 text-right text-gray-400 text-xs">
+                            {{ $admin->created_at->format('d M Y') }}
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3" class="px-8 py-8 text-center text-gray-400 italic">
+                            Belum ada admin lain selain Anda.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 @endsection
