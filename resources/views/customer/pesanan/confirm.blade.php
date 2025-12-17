@@ -251,9 +251,34 @@
             console.log("Script Loaded - All Systems Go");
 
             document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                const metodeSelected = document.querySelector('input[name="metode_pembayaran"]:checked');
+                const layananSelected = document.querySelector('input[name="id_layanan_pengiriman_radio"]:checked');
+                
+                if (!metodeSelected) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Metode Pembayaran',
+                        text: 'Silakan pilih metode pembayaran terlebih dahulu.',
+                        confirmButtonText: 'Baik'
+                    });
+                    return false;
+                }
+                
+                if (!layananSelected) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Layanan Pengiriman',
+                        text: 'Hubungi admin untuk menambahkan layanan pengiriman.',
+                        confirmButtonText: 'Baik'
+                    });
+                    return false;
+                }
+                
                 console.log('Form submitted');
-                console.log('Metode Pembayaran:', document.querySelector(
-                    'input[name="metode_pembayaran"]:checked')?.value);
+                console.log('Metode Pembayaran:', metodeSelected?.value);
+                console.log('Layanan Pengiriman:', layananSelected?.value);
                 console.log('Items:', document.getElementById('itemsInput').value);
             });
 
@@ -274,7 +299,14 @@
 
             const selectedLayananRadio = document.querySelector(
                 'input[name="id_layanan_pengiriman_radio"]:checked');
-            if (selectedLayananRadio) calculateAndUpdateOngkir(selectedLayananRadio.value);
+            if (selectedLayananRadio) {
+                calculateAndUpdateOngkir(selectedLayananRadio.value);
+            } else {
+                // Jika tidak ada layanan yang dipilih, reset ongkir display ke '-'
+                if (document.getElementById('distanceDisplay')) document.getElementById('distanceDisplay').textContent = '-';
+                if (document.getElementById('tarifDisplay')) document.getElementById('tarifDisplay').textContent = '-';
+                if (document.getElementById('ongkirDisplay')) document.getElementById('ongkirDisplay').textContent = '-';
+            }
 
             document.querySelectorAll('input[name="id_layanan_pengiriman_radio"]').forEach(radio => {
                 radio.addEventListener('change', function() {

@@ -87,10 +87,14 @@ class PesananController extends Controller
     {
         $request->validate([
             'items' => 'required|json',
-            'metode_pembayaran' => 'required',
-            'id_layanan_pengiriman' => 'nullable|exists:layanan_pengiriman,id',
+            'metode_pembayaran' => 'required|string',
+            'id_layanan_pengiriman' => 'required|exists:layanan_pengiriman,id',
             'id_alamat' => 'nullable|exists:alamat_user,id_alamat',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'id_layanan_pengiriman.required' => 'Pilih layanan pengiriman terlebih dahulu.',
+            'id_layanan_pengiriman.exists' => 'Layanan pengiriman yang dipilih tidak valid.',
+            'metode_pembayaran.required' => 'Pilih metode pembayaran terlebih dahulu.',
         ]);
 
         $user = Auth::user();
