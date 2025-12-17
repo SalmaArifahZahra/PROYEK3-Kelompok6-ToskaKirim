@@ -39,7 +39,7 @@ class DashboardController extends Controller
                 'description' => 'Minimal 1 layanan pengiriman diperlukan agar customer dapat checkout',
                 'count' => $totalLayananPengiriman,
                 'icon' => 'fa-truck',
-                'url' => '#',
+                'url' => route('superadmin.layanan.index'),
                 'required' => true,
                 'managed_by' => 'admin'
             ],
