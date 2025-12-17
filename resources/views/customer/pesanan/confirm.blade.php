@@ -119,20 +119,10 @@
                             {{-- Metode Pembayaran --}}
                             <div class="border border-slate-200 rounded-lg p-5 mb-6">
                                 <h3 class="font-semibold text-slate-700 mb-4">Pilih Metode Pembayaran</h3>
+                                @if ($paymentMethods->isEmpty())
+                                    <div class="text-center py-6 text-slate-500 text-sm">Tidak ada metode pembayaran tersedia.</div>
+                                @else
                                 <div class="space-y-4">
-                                    <label
-                                        class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
-                                        <input type="radio" name="metode_pembayaran" value="COD"
-                                            class="h-4 w-4 text-teal-600 focus:ring-teal-500" required>
-                                        <div class="flex items-center gap-3">
-                                            <i class="fas fa-money-bill-wave text-teal-600 text-xl"></i>
-                                            <span class="font-medium text-slate-700">Cash on Delivery (COD)</span>
-                                        </div>
-                                    </label>
-
-                                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider mt-4">Transfer Bank
-                                        / E-Wallet</p>
-
                                     @foreach ($paymentMethods as $method)
                                         <label
                                             class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition border-slate-200 has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
@@ -141,13 +131,19 @@
                                                 data-bank="{{ $method->nama_bank }}"
                                                 data-rek="{{ $method->nomor_rekening }}"
                                                 data-name="{{ $method->atas_nama }}"
-                                                data-img="{{ $method->gambar ? asset('storage/' . $method->gambar) : '' }}">
+                                                data-img="{{ $method->gambar ? asset('storage/' . $method->gambar) : '' }}"
+                                                required
+                                                @if ($loop->first) checked @endif>
                                             <div class="flex items-center gap-3 w-full">
                                                 @if ($method->gambar)
                                                     <img src="{{ asset('storage/' . $method->gambar) }}"
                                                         class="h-8 w-auto object-contain">
                                                 @else
-                                                    <i class="fas fa-university text-slate-400 text-xl"></i>
+                                                    @if (strtoupper($method->nama_bank) === 'COD')
+                                                        <i class="fas fa-money-bill-wave text-teal-600 text-xl"></i>
+                                                    @else
+                                                        <i class="fas fa-university text-slate-400 text-xl"></i>
+                                                    @endif
                                                 @endif
                                                 <span class="font-medium text-slate-700">{{ $method->nama_bank }}</span>
                                             </div>
@@ -186,6 +182,7 @@
                                         <p class="text-xs text-slate-500 mt-1">* Kosongkan jika ingin membayar nanti.</p>
                                     </div>
                                 </div>
+                                @endif
                             </div>
                         </div>
 
@@ -251,9 +248,34 @@
             console.log("Script Loaded - All Systems Go");
 
             document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                const metodeSelected = document.querySelector('input[name="metode_pembayaran"]:checked');
+                const layananSelected = document.querySelector('input[name="id_layanan_pengiriman_radio"]:checked');
+                
+                if (!metodeSelected) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Metode Pembayaran',
+                        text: 'Hubungi admin untuk menambahkan metode pembayaran.',
+                        confirmButtonText: 'Baik'
+                    });
+                    return false;
+                }
+                
+                if (!layananSelected) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Layanan Pengiriman',
+                        text: 'Hubungi admin untuk menambahkan layanan pengiriman.',
+                        confirmButtonText: 'Baik'
+                    });
+                    return false;
+                }
+                
                 console.log('Form submitted');
-                console.log('Metode Pembayaran:', document.querySelector(
-                    'input[name="metode_pembayaran"]:checked')?.value);
+                console.log('Metode Pembayaran:', metodeSelected?.value);
+                console.log('Layanan Pengiriman:', layananSelected?.value);
                 console.log('Items:', document.getElementById('itemsInput').value);
             });
 
@@ -274,7 +296,14 @@
 
             const selectedLayananRadio = document.querySelector(
                 'input[name="id_layanan_pengiriman_radio"]:checked');
-            if (selectedLayananRadio) calculateAndUpdateOngkir(selectedLayananRadio.value);
+            if (selectedLayananRadio) {
+                calculateAndUpdateOngkir(selectedLayananRadio.value);
+            } else {
+                // Jika tidak ada layanan yang dipilih, reset ongkir display ke '-'
+                if (document.getElementById('distanceDisplay')) document.getElementById('distanceDisplay').textContent = '-';
+                if (document.getElementById('tarifDisplay')) document.getElementById('tarifDisplay').textContent = '-';
+                if (document.getElementById('ongkirDisplay')) document.getElementById('ongkirDisplay').textContent = '-';
+            }
 
             document.querySelectorAll('input[name="id_layanan_pengiriman_radio"]').forEach(radio => {
                 radio.addEventListener('change', function() {
@@ -339,9 +368,21 @@
             const btnSubmit = document.getElementById('btn-submit');
             const transferInfo = document.getElementById('transfer-info');
 
+            // Check jika tidak ada payment methods atau layanan pengiriman
+            const hasPaymentMethods = document.querySelectorAll('input[name="metode_pembayaran"]').length > 0;
+            const hasShippingServices = document.querySelectorAll('input[name="id_layanan_pengiriman_radio"]').length > 0;
+
+            if (!hasPaymentMethods || !hasShippingServices) {
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnSubmit.textContent = 'Belum Bisa Checkout';
+                }
+            }
+
             document.querySelectorAll('input[name="metode_pembayaran"]').forEach(radio => {
                 radio.addEventListener('change', function() {
-                    if (this.value === 'COD') {
+                    if (strtoupper(this.dataset.bank) === 'COD' || this.dataset.bank === 'COD') {
                         if (transferInfo) transferInfo.classList.add('hidden');
                         if (btnSubmit) {
                             btnSubmit.textContent = 'Buat Pesanan (COD)';
