@@ -6,7 +6,6 @@
         $user = Auth::user();
         $isSuperadmin = $user->peran === \App\Enums\RoleEnum::SUPERADMIN;
         
-        // Helper kecil untuk class active agar kodingan tidak terlalu panjang di bawah
         $activeClass = 'bg-[#5BC6BC] text-white';
         $inactiveClass = 'text-gray-700 hover:bg-gray-100';
     @endphp
@@ -15,7 +14,7 @@
         
         <div class="px-4 space-y-2">
             
-            {{-- 1. DASHBOARD --}}
+            {{-- 1. DASHBOARD (SHARED) --}}
             <a href="{{ $isSuperadmin ? route('superadmin.dashboard') : route('admin.dashboard') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                       {{ request()->routeIs('*.dashboard') ? $activeClass : $inactiveClass }}">
@@ -23,10 +22,9 @@
                 <span class="font-medium">Dashboard</span>
             </a>
 
-            {{-- 2. MENU KHUSUS SUPERADMIN --}}
+            {{-- 2. MENU KHUSUS SUPERADMIN (Hanya Master Data & Kontrol) --}}
             @if($isSuperadmin)
                 
-                {{-- GROUP: MASTER DATA --}}
                 <div class="pt-4 pb-2">
                     <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                         Master Data & Kontrol
@@ -54,44 +52,42 @@
                     <span class="font-medium">Kontrol Toko</span>
                 </a>
 
-                {{-- GROUP: LOGISTIK --}}
-                <div class="pt-4 pb-2">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        Logistik & Tarif
-                    </p>
-                </div>
-
-                <a href="{{ route('superadmin.layanan.index') }}" 
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                         {{ request()->routeIs('superadmin.layanan.*') ? $activeClass : $inactiveClass }}">
-                    <i class="fas fa-truck text-lg w-6 text-center"></i>
-                    <span class="font-medium">Layanan Kirim</span>
-                </a>
-
-                <a href="{{ route('superadmin.promo.index') }}" 
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                         {{ request()->routeIs('superadmin.promo.*') ? $activeClass : $inactiveClass }}">
-                    <i class="fas fa-tags text-lg w-6 text-center"></i>
-                    <span class="font-medium">Promo Ongkir</span>
-                </a>
-
-                <a href="{{ route('superadmin.wilayah.index') }}" 
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                         {{ request()->routeIs('superadmin.wilayah.*') ? $activeClass : $inactiveClass }}">
-                    <i class="fas fa-map-marked-alt text-lg w-6 text-center"></i>
-                    <span class="font-medium">Database Wilayah</span>
-                </a>
-
-                {{-- Header Pemisah untuk Operasional (Khusus tampilan Superadmin) --}}
-                <div class="pt-4 pb-2">
-                    <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        Operasional Toko
-                    </p>
-                </div>
-
             @endif
 
-            {{-- 3. MENU OPERASIONAL (SHARED ADMIN & SUPERADMIN) --}}
+            {{-- 3. LOGISTIK & TARIF (SEKARANG SHARED: SUPERADMIN & ADMIN) --}}
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Logistik & Tarif
+                </p>
+            </div>
+
+            <a href="{{ route('superadmin.layanan.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                     {{ request()->routeIs('superadmin.layanan.*') ? $activeClass : $inactiveClass }}">
+                <i class="fas fa-truck text-lg w-6 text-center"></i>
+                <span class="font-medium">Layanan Kirim</span>
+            </a>
+
+            <a href="{{ route('superadmin.promo.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                     {{ request()->routeIs('superadmin.promo.*') ? $activeClass : $inactiveClass }}">
+                <i class="fas fa-tags text-lg w-6 text-center"></i>
+                <span class="font-medium">Promo Ongkir</span>
+            </a>
+
+            <a href="{{ route('superadmin.wilayah.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                     {{ request()->routeIs('superadmin.wilayah.*') ? $activeClass : $inactiveClass }}">
+                <i class="fas fa-map-marked-alt text-lg w-6 text-center"></i>
+                <span class="font-medium">Database Wilayah</span>
+            </a>
+
+            {{-- 4. MENU OPERASIONAL (SHARED) --}}
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Operasional Toko
+                </p>
+            </div>
             
             <a href="{{ route('admin.produk.index') }}"
                class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
@@ -130,15 +126,9 @@
 
         </div>
 
-        {{-- 4. FOOTER MENU --}}
+        {{-- 5. FOOTER MENU (PENGATURAN DIHAPUS) --}}
         <div class="px-4 space-y-2 border-t border-gray-200 pt-4">
             
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                  {{ request()->is('admin/pengaturan*') ? $activeClass : $inactiveClass }}">
-                <i class="fas fa-cog text-lg w-6 text-center"></i>
-                <span class="font-medium">Pengaturan</span>
-            </a>
-
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit"
