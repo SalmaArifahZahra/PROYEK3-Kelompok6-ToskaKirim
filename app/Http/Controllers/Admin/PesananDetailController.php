@@ -122,10 +122,14 @@ class PesananDetailController extends Controller
         $pdf = Pdf::loadView('admin.pesanan_detail.struk_pdf', [
             'pesanan' => $pesanan
         ]);
-        
-        $pdf->setPaper('a4', 'portrait');
 
-        // Format nama file: Struk-TK-00001-23Des2025.pdf
+        $widthPt = 226.77;
+        $items = $pesanan->detail ? $pesanan->detail->count() : 1;
+        $estimatedHeight = 360 + ($items * 48) + 220;
+        $heightPt = max($estimatedHeight, 700);
+
+        $pdf->setPaper([0, 0, $widthPt, $heightPt], 'portrait');
+
         $nomorPesanan = str_pad($pesanan->id_pesanan, 5, '0', STR_PAD_LEFT);
         $tanggal = $pesanan->waktu_pesanan->format('dMY');
         $filename = "Struk-TK-{$nomorPesanan}-{$tanggal}.pdf";
