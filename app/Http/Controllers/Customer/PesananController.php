@@ -69,7 +69,6 @@ class PesananController extends Controller
             $ongkirResult = $ongkirService->hitungOngkir($selectedLayanan->id, $alamatUtama->id_alamat);
             $ongkir = $ongkirResult['total_ongkir'] ?? 0;
         }
-
         return view('customer.pesanan.confirm', [
             'selectedItems' => $summary['items'],
             'subtotal' => $summary['subtotal'],
@@ -87,7 +86,7 @@ class PesananController extends Controller
     {
         $request->validate([
             'items' => 'required|json',
-            'metode_pembayaran' => 'required|string',
+            'metode_pembayaran' => 'required|exists:payment_methods,id',
             'id_layanan_pengiriman' => 'required|exists:layanan_pengiriman,id',
             'id_alamat' => 'nullable|exists:alamat_user,id_alamat',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -95,6 +94,7 @@ class PesananController extends Controller
             'id_layanan_pengiriman.required' => 'Pilih layanan pengiriman terlebih dahulu.',
             'id_layanan_pengiriman.exists' => 'Layanan pengiriman yang dipilih tidak valid.',
             'metode_pembayaran.required' => 'Pilih metode pembayaran terlebih dahulu.',
+            'metode_pembayaran.exists' => 'Metode pembayaran tidak valid atau tidak aktif.',
         ]);
 
         $user = Auth::user();
@@ -121,6 +121,10 @@ class PesananController extends Controller
         $idLayanan = $request->id_layanan_pengiriman ?? LayananPengiriman::where('is_active', 1)->value('id');
         if (!$idLayanan) return back()->with('error', 'Layanan pengiriman tidak tersedia.');
 
+        $selectedPayment = MetodePembayaran::where('is_active', 1)->findOrFail($request->metode_pembayaran);
+        $metodeJenis = strtoupper($selectedPayment->jenis);
+        $isCOD = $metodeJenis === 'COD';
+
         DB::beginTransaction();
         try {
             $ongkirService = new OngkirService();
@@ -136,7 +140,7 @@ class PesananController extends Controller
                 'total_ongkir' => $ongkirData['total_ongkir']
             ]);
 
-            $statusPesanan = $this->determineOrderStatus($request);
+            $statusPesanan = $this->determineOrderStatus($isCOD, $request);
 
             $pesanan = Pesanan::create([
                 'id_user' => $user->id_user,
@@ -144,7 +148,7 @@ class PesananController extends Controller
                 'id_layanan_pengiriman' => $idLayanan,
                 'waktu_pesanan' => now(),
                 'status_pesanan' => $statusPesanan,
-                'metode_pembayaran' => $request->metode_pembayaran,
+                'metode_pembayaran' => $selectedPayment->jenis,
                 'penerima_nama' => $alamat->nama_penerima,
                 'penerima_telepon' => $alamat->telepon_penerima,
                 'alamat_lengkap' => "{$alamat->jalan_patokan}, {$alamat->kelurahan}, {$alamat->kecamatan}, {$alamat->kota_kabupaten}",
@@ -162,7 +166,7 @@ class PesananController extends Controller
                 ]);
             }
             if (
-                $request->metode_pembayaran !== 'COD' &&
+                !$isCOD &&
                 $request->hasFile('bukti_bayar') &&
                 $request->file('bukti_bayar')->isValid()
             ) {
@@ -175,8 +179,9 @@ class PesananController extends Controller
                 ->delete();
 
             DB::commit();
+            $hasValidProof = !$isCOD && $request->hasFile('bukti_bayar') && $request->file('bukti_bayar')->isValid();
 
-            return $this->redirectAfterOrder($request, $pesanan);
+            return $this->redirectAfterOrder($isCOD, $hasValidProof, $pesanan);
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('customer.keranjang.index')
@@ -196,13 +201,15 @@ class PesananController extends Controller
         $deadline = Carbon::parse($pesanan->waktu_pesanan)->addHours(24);
         $deadlineTimestamp = $deadline->timestamp * 1000;
         $isExpired = now()->greaterThan($deadline);
+        $isCOD = strtoupper($pesanan->metode_pembayaran ?? '') === 'COD';
 
         return view('customer.pesanan.show', compact(
             'pesanan',
             'deadline',
             'deadlineTimestamp',
             'paymentMethods',
-            'isExpired'
+            'isExpired',
+            'isCOD'
         ));
     }
 
@@ -318,14 +325,16 @@ class PesananController extends Controller
         return ['items' => $selectedItems, 'subtotal' => $subtotal];
     }
 
-    private function determineOrderStatus(Request $request)
+    private function determineOrderStatus(bool $isCOD, Request $request)
     {
-        if ($request->metode_pembayaran === 'COD') {
+        if ($isCOD) {
             return StatusPesananEnum::MENUNGGU_VERIFIKASI;
         }
+
         if ($request->hasFile('bukti_bayar')) {
             return StatusPesananEnum::MENUNGGU_VERIFIKASI;
         }
+
         return StatusPesananEnum::MENUNGGU_PEMBAYARAN;
     }
 
@@ -344,14 +353,14 @@ class PesananController extends Controller
         );
     }
 
-    private function redirectAfterOrder(Request $request, Pesanan $pesanan)
+    private function redirectAfterOrder(bool $isCOD, bool $hasValidProof, Pesanan $pesanan)
     {
-        if ($request->metode_pembayaran === 'COD') {
+        if ($isCOD) {
             return redirect()->route('customer.pesanan.index')
                 ->with('success', 'Pesanan COD berhasil dibuat!');
         }
 
-        if ($request->hasFile('bukti_bayar') && $request->file('bukti_bayar')->isValid()) {
+        if ($hasValidProof) {
             return redirect()->route('customer.pesanan.index')
                 ->with('success', 'Pesanan dibuat & bukti pembayaran terkirim!');
         }

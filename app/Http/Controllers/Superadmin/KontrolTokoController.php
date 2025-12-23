@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Superadmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Pengaturan; // Model tetap Pengaturan (karena tabelnya 'pengaturan')
+use App\Models\Pengaturan; 
 
 class KontrolTokoController extends Controller
 {
@@ -13,7 +13,6 @@ class KontrolTokoController extends Controller
         $wa = Pengaturan::where('key', 'nomor_wa')->value('value') ?? '';
         $alamat = Pengaturan::where('key', 'alamat_toko')->value('value') ?? '';
         
-        // Perhatikan: Folder view berubah jadi 'kontrol_toko'
         return view('superadmin.kontrol_toko.index', compact('wa', 'alamat'));
     }
 

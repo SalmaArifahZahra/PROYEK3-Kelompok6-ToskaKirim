@@ -44,6 +44,7 @@
                         <th class="py-4 px-6 font-semibold">Jenis</th>
                         <th class="py-4 px-6 font-semibold">Nomor Rekening</th>
                         <th class="py-4 px-6 font-semibold">Logo</th>
+                        <th class="py-4 px-6 font-semibold text-center">Status</th>
                         <th class="py-4 px-6 text-center font-semibold">Aksi</th>
                     </tr>
                 </thead>
@@ -65,6 +66,16 @@
                                 @else
                                     <span class="text-gray-400 text-xs italic">No Image</span>
                                 @endif
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                <form action="{{ route('superadmin.payments.toggle', $payment->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="is_active" value="{{ $payment->is_active ? 0 : 1 }}">
+                                    <button type="submit" class="px-3 py-1 text-xs font-semibold rounded-full border transition {{ $payment->is_active ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200' }}">
+                                        {{ $payment->is_active ? 'Aktif' : 'Non-Aktif' }}
+                                    </button>
+                                </form>
                             </td>
                             <td class="py-4 px-6 text-center">
                                 <form action="{{ route('superadmin.payments.destroy', $payment->id) }}" method="POST" onsubmit="return confirm('Hapus metode ini?');">

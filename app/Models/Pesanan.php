@@ -26,6 +26,7 @@ class Pesanan extends Model
         'subtotal_produk',
         'grand_total',
         'status_pesanan',
+        'metode_pembayaran',
         'penerima_nama',
         'penerima_telepon',
         'alamat_lengkap',

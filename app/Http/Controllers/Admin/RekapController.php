@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RekapExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -95,9 +94,12 @@ class RekapController extends Controller
 
         $result = $this->getData($startDate, $endDate, $jenisLaporan);
 
-        return Excel::download(
-            new RekapExport($result['data'], $result['totalOmset'], $jenisLaporan, $startDate, $endDate), 
-            "Rekap-{$jenisLaporan}.xlsx"
-        );
+        $filename = "Rekap-{$jenisLaporan}-{$startDate}-sd-{$endDate}.xlsx";
+        $filePath = storage_path("app/public/{$filename}");
+        
+        $exporter = new RekapExport($result['data'], $result['totalOmset'], $jenisLaporan, $startDate, $endDate);
+        $exporter->export($filePath);
+        
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
 }

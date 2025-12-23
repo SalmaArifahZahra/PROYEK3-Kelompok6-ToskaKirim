@@ -155,9 +155,9 @@
 </div>
 
 <script>
-    // Auto-submit search on page load if search parameter exists
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchInput');
+    document.getElementById('searchBox').addEventListener('keyup', function() {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#tableContent tr");
         
         // Focus input jika ada search sebelumnya
         if (searchInput && searchInput.value) {

@@ -2,94 +2,108 @@
 
 namespace App\Http\Controllers\Superadmin;
 
-use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\WilayahPengiriman;
+use App\Models\Pengaturan;
+use App\Models\Pesanan;
 use App\Models\MetodePembayaran;
 use App\Models\LayananPengiriman;
 use App\Models\Kategori;
 use App\Models\Produk;
-use App\Models\Pengaturan;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
-    // Menampilkan Dashboard Superadmin (Sesuai Figma)
     public function dashboard()
     {
-        // Data statistik
+        // --- BAGIAN 1: STATISTIK UTAMA (METRIK BISNIS) ---
         $totalAdmin = User::where('peran', 'admin')->count();
-        $totalPayment = MetodePembayaran::count();
+        $totalCustomer = User::where('peran', 'customer')->count();
+        
+        // Hitung Pendapatan (Safe Mode)
+        $totalPendapatan = 0;
+        if (Schema::hasTable('pesanan')) {
+            try {
+                $totalPendapatan = Pesanan::where('status_pesanan', 'selesai')->sum('grand_total'); 
+            } catch (\Exception $e) { $totalPendapatan = 0; }
+        }
 
-        // Checklist data penting untuk operasional toko
+        // Hitung Logistik (Cakupan Wilayah)
+        $totalWilayah = WilayahPengiriman::count();
+        $wilayahTerisi = WilayahPengiriman::where('jarak_km', '>', 0)->count();
+        $persenLogistik = $totalWilayah > 0 ? round(($wilayahTerisi / $totalWilayah) * 100, 1) : 0;
+
+
+        // --- BAGIAN 2: CHECKLIST KESIAPAN SISTEM (DARI VERSI 1) ---
         $checklist = [
             [
-                'id' => 'metode_pembayaran',
+                'title' => 'Identitas Toko',
+                'desc' => 'WA & Alamat Toko',
+                'count' => Pengaturan::whereIn('key', ['nomor_wa', 'alamat_toko'])->count() >= 2 ? 1 : 0,
+                'required' => true,
+                'url' => route('superadmin.kontrol_toko.index'),
+                'icon' => 'fa-store',
+                'color' => 'teal'
+            ],
+            [
                 'title' => 'Metode Pembayaran',
-                'description' => 'Atur metode pembayaran (COD, Transfer Bank, E-Wallet)',
+                'desc' => 'Bank / E-Wallet',
                 'count' => MetodePembayaran::count(),
                 'required' => true,
                 'url' => route('superadmin.payments.index'),
-                'icon' => 'fa-credit-card'
+                'icon' => 'fa-credit-card',
+                'color' => 'blue'
             ],
             [
-                'id' => 'layanan_pengiriman',
-                'title' => 'Layanan Pengiriman',
-                'description' => 'Atur layanan pengiriman dan tarif per km',
+                'title' => 'Layanan Kirim',
+                'desc' => 'Reguler / Express',
                 'count' => LayananPengiriman::count(),
                 'required' => true,
                 'url' => route('superadmin.layanan.index'),
-                'icon' => 'fa-truck'
+                'icon' => 'fa-truck',
+                'color' => 'indigo'
             ],
             [
-                'id' => 'kategori_produk',
                 'title' => 'Kategori Produk',
-                'description' => 'Buat kategori produk utama',
-                'count' => Kategori::whereNull('parent_id')->count(),
+                'desc' => 'Kategori Utama',
+                'count' => Kategori::count(),
                 'required' => true,
-                'url' => route('admin.kategori.index'),
-                'icon' => 'fa-folder'
+                'url' => route('admin.kategori.index'), 
+                'icon' => 'fa-tags',
+                'color' => 'orange'
             ],
             [
-                'id' => 'produk',
-                'title' => 'Produk',
-                'description' => 'Tambahkan produk dan varian ke katalog',
-                'count' => Produk::count(),
-                'required' => false,
-                'url' => route('admin.produk.selectKategori'),
-                'icon' => 'fa-box'
-            ],
-            [
-                'id' => 'pengaturan_toko',
-                'title' => 'Pengaturan Toko',
-                'description' => 'Atur informasi dan kebijakan toko',
-                'count' => Pengaturan::count(),
-                'required' => false,
-                'url' => route('superadmin.kontrol_toko.index'),
-                'icon' => 'fa-cog'
+                'title' => 'Database Wilayah',
+                'desc' => 'Jarak Terhitung',
+                'count' => $wilayahTerisi, 
+                'target' => $totalWilayah, 
+                'required' => true,
+                'url' => route('superadmin.wilayah.index'),
+                'icon' => 'fa-map-location-dot',
+                'color' => 'rose'
             ]
         ];
 
-        // Hitung status checklist
-        $completedCount = 0;
-        foreach ($checklist as $item) {
-            if ($item['count'] > 0) {
-                $completedCount++;
-            }
+        // Hitung Progress Checklist
+        $completedTasks = 0;
+        $totalTasks = count($checklist);
+        foreach($checklist as $item) {
+            if($item['count'] > 0) $completedTasks++;
         }
-        $totalRequired = count(array_filter($checklist, fn($item) => $item['required']));
+        $progressPersen = ($totalTasks > 0) ? round(($completedTasks / $totalTasks) * 100) : 0;
 
-        return view('superadmin.dashboard', compact('totalAdmin', 'totalPayment', 'checklist', 'completedCount', 'totalRequired'));
+
+        // --- BAGIAN 3: TIM TERBARU ---
+        $latestAdmins = User::where('peran', 'admin')->latest()->take(5)->get();
+
+        return view('superadmin.dashboard', compact(
+            'totalAdmin', 'totalCustomer', 'totalPendapatan', 'persenLogistik',
+            'checklist', 'completedTasks', 'totalTasks', 'progressPersen',
+            'latestAdmins'
+        ));
+
     }
-
-    // Menampilkan Daftar Admin (Sesuai Figma "Daftar Admin")
     public function index()
     {
         // Hanya ambil user yang role-nya 'admin'

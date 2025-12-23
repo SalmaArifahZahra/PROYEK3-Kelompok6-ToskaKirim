@@ -8,7 +8,6 @@ class PromoOngkirController extends Controller
 {
     public function index() {
         $promos = PromoOngkir::all();
-        // Kamu perlu buat view: admin.promo.index
         return view('superadmin.promo.index', compact('promos'));
     }
 

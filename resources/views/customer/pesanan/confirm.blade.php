@@ -129,6 +129,7 @@
                                             <input type="radio" name="metode_pembayaran" value="{{ $method->id }}"
                                                 class="h-4 w-4 text-teal-600 focus:ring-teal-500 payment-radio"
                                                 data-bank="{{ $method->nama_bank }}"
+                                                data-jenis="{{ $method->jenis }}"
                                                 data-rek="{{ $method->nomor_rekening }}"
                                                 data-name="{{ $method->atas_nama }}"
                                                 data-img="{{ $method->gambar ? asset('storage/' . $method->gambar) : '' }}"
@@ -139,7 +140,7 @@
                                                     <img src="{{ asset('storage/' . $method->gambar) }}"
                                                         class="h-8 w-auto object-contain">
                                                 @else
-                                                    @if (strtoupper($method->nama_bank) === 'COD')
+                                                    @if (strtoupper($method->jenis) === 'COD')
                                                         <i class="fas fa-money-bill-wave text-teal-600 text-xl"></i>
                                                     @else
                                                         <i class="fas fa-university text-slate-400 text-xl"></i>
@@ -170,13 +171,14 @@
 
                                         <div class="relative border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:bg-slate-50 transition cursor-pointer"
                                             id="drop-area">
-                                            <input type="file" name="bukti_bayar" id="bukti_bayar_input"
+                                            <input type="file" name="bukti_bayar" id="bukti_bayar_input" accept="image/*"
                                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled>
                                             <div id="preview-container">
                                                 <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
                                                 <p class="text-xs text-slate-500">Klik atau tarik foto ke sini</p>
                                                 <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG (Max 2MB)</p>
                                             </div>
+                                            <img id="transfer-img-preview" class="hidden max-h-40 mx-auto rounded shadow-sm mt-2" alt="Preview Bukti Transfer">
                                         </div>
 
                                         <p class="text-xs text-slate-500 mt-1">* Kosongkan jika ingin membayar nanti.</p>
@@ -247,6 +249,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log("Script Loaded - All Systems Go");
 
+            // Ensure SweetAlert2 appears above the address modal by increasing its z-index
+            (function(){
+                const s = document.createElement('style');
+                s.innerHTML = `
+                    .swal2-container, .swal2-backdrop {
+                        z-index: 20000 !important;
+                    }
+                `;
+                document.head.appendChild(s);
+            })();
+
             document.getElementById('checkoutForm').addEventListener('submit', function(e) {
                 const metodeSelected = document.querySelector('input[name="metode_pembayaran"]:checked');
                 const layananSelected = document.querySelector('input[name="id_layanan_pengiriman_radio"]:checked');
@@ -256,7 +269,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Metode Pembayaran',
-                        text: 'Hubungi admin untuk menambahkan metode pembayaran.',
+                        text: 'Silakan pilih metode pembayaran terlebih dahulu.',
                         confirmButtonText: 'Baik'
                     });
                     return false;
@@ -267,7 +280,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Layanan Pengiriman',
-                        text: 'Hubungi admin untuk menambahkan layanan pengiriman.',
+                        text: 'Silakan pilih layanan pengiriman terlebih dahulu.',
                         confirmButtonText: 'Baik'
                     });
                     return false;
@@ -367,38 +380,34 @@
             const fileInput = document.querySelector('input[name="bukti_bayar"]');
             const btnSubmit = document.getElementById('btn-submit');
             const transferInfo = document.getElementById('transfer-info');
-
-            // Check jika tidak ada payment methods atau layanan pengiriman
-            const hasPaymentMethods = document.querySelectorAll('input[name="metode_pembayaran"]').length > 0;
-            const hasShippingServices = document.querySelectorAll('input[name="id_layanan_pengiriman_radio"]').length > 0;
-
-            if (!hasPaymentMethods || !hasShippingServices) {
-                if (btnSubmit) {
-                    btnSubmit.disabled = true;
-                    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
-                    btnSubmit.textContent = 'Belum Bisa Checkout';
-                }
-            }
+            const previewContainerEl = document.getElementById('preview-container');
+            const previewImgEl = document.getElementById('transfer-img-preview');
 
             document.querySelectorAll('input[name="metode_pembayaran"]').forEach(radio => {
                 radio.addEventListener('change', function() {
-                    if (strtoupper(this.dataset.bank) === 'COD' || this.dataset.bank === 'COD') {
+                    const jenis = this.dataset.jenis ? this.dataset.jenis.toUpperCase() : '';
+                    if (jenis === 'COD') {
                         if (transferInfo) transferInfo.classList.add('hidden');
                         if (btnSubmit) {
                             btnSubmit.textContent = 'Buat Pesanan (COD)';
                             btnSubmit.className =
                                 'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
                         }
-                        if (fileInput) fileInput.value = '';
+                        if (fileInput) {
+                            fileInput.value = '';
+                            fileInput.disabled = true;
+                        }
+                        if (previewImgEl) previewImgEl.classList.add('hidden');
+                        if (previewContainerEl) previewContainerEl.classList.remove('hidden');
                     } else {
                         if (transferInfo) transferInfo.classList.remove('hidden');
 
-                        const bankName = document.getElementById('bank-name');
+                        const bankNameEl = document.getElementById('bank-name');
                         const bankRek = document.getElementById('bank-rek');
                         const bankOwner = document.getElementById('bank-owner');
                         const imgEl = document.getElementById('bank-img');
 
-                        if (bankName) bankName.textContent = this.dataset.bank;
+                        if (bankNameEl) bankNameEl.textContent = this.dataset.bank;
                         if (bankRek) bankRek.textContent = this.dataset.rek;
                         if (bankOwner) bankOwner.textContent = this.dataset.name;
 
@@ -410,24 +419,57 @@
                                 imgEl.classList.add('hidden');
                             }
                         }
+                        if (fileInput) fileInput.disabled = false;
                         updateTransferButtonText();
                     }
                 });
             });
 
-            if (fileInput) fileInput.addEventListener('change', updateTransferButtonText);
+            // Initialize payment UI on page load based on currently selected method
+            const initialPayment = document.querySelector('input[name="metode_pembayaran"]:checked');
+            if (initialPayment) {
+                initialPayment.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            if (fileInput) fileInput.addEventListener('change', function(e) {
+                const file = e.target.files && e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        if (previewImgEl) {
+                            previewImgEl.src = ev.target.result;
+                            previewImgEl.classList.remove('hidden');
+                        }
+                        if (previewContainerEl) previewContainerEl.classList.add('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    if (previewImgEl) previewImgEl.classList.add('hidden');
+                    if (previewContainerEl) previewContainerEl.classList.remove('hidden');
+                }
+                updateTransferButtonText();
+            });
 
             function updateTransferButtonText() {
                 const selected = document.querySelector('input[name="metode_pembayaran"]:checked');
-                if (selected && selected.value !== 'COD' && btnSubmit) {
-                    if (fileInput && fileInput.files.length > 0) {
-                        btnSubmit.textContent = 'Bayar & Buat Pesanan';
-                        btnSubmit.className =
-                            'w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow transition-colors';
-                    } else {
-                        btnSubmit.textContent = 'Bayar Nanti (Buat Pesanan)';
+                if (selected && btnSubmit) {
+                    const jenis = selected.dataset.jenis ? selected.dataset.jenis.toUpperCase() : '';
+                    if (jenis === 'COD') {
+                        // Jika COD, tidak perlu upload bukti
+                        btnSubmit.textContent = 'Buat Pesanan (COD)';
                         btnSubmit.className =
                             'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                    } else {
+                        // Jika transfer bank, cek bukti upload
+                        if (fileInput && fileInput.files.length > 0) {
+                            btnSubmit.textContent = 'Bayar & Buat Pesanan';
+                            btnSubmit.className =
+                                'w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                        } else {
+                            btnSubmit.textContent = 'Bayar Nanti (Buat Pesanan)';
+                            btnSubmit.className =
+                                'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                        }
                     }
                 }
             }
@@ -715,6 +757,25 @@
             }
 
             if (btnSubmitModal) {
+                // Update button state ketika alamat dipilih
+                document.addEventListener('change', function(e) {
+                    if (e.target.name === 'selectedAddressModal') {
+                        const selectedRadio = e.target;
+                        const selectedItem = selectedRadio.closest('[class*="border rounded-lg"]');
+                        const isUtama = selectedItem && selectedItem.classList.contains('border-teal-500');
+                        
+                        if (isUtama) {
+                            btnSubmitModal.disabled = true;
+                            btnSubmitModal.textContent = 'Alamat Ini Sudah Dipilih';
+                            btnSubmitModal.classList.add('opacity-50', 'cursor-not-allowed');
+                        } else {
+                            btnSubmitModal.disabled = false;
+                            btnSubmitModal.textContent = 'Pilih Alamat Ini';
+                            btnSubmitModal.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    }
+                }, true);
+
                 btnSubmitModal.addEventListener('click', () => {
                     const selected = document.querySelector('input[name="selectedAddressModal"]:checked');
                     if (!selected) return Swal.fire('Info', 'Pilih salah satu alamat dulu.', 'info');
