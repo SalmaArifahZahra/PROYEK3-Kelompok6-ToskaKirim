@@ -7,36 +7,45 @@ use Illuminate\Support\Facades\DB;
 
 class WilayahPengirimanSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-
         $path = database_path('csv/wilayah_pengiriman.csv');
 
         if (!file_exists($path)) {
             $this->command->error("File CSV tidak ditemukan di: $path");
-            $this->command->info("Pastikan kamu sudah membuat folder 'database/csv' dan menaruh file di sana.");
             return;
         }
 
+        // 1. DETEKSI OTOMATIS DELIMITER 
         $handle = fopen($path, 'r');
+        $firstLine = fgets($handle); 
         
-        fgetcsv($handle); 
+        $delimiter = strpos($firstLine, ';') !== false ? ';' : ',';
+
+        rewind($handle); 
+        
+        fgetcsv($handle, 0, $delimiter); 
+
+        $this->command->info("Terdeteksi format CSV menggunakan pemisah: '$delimiter'");
 
         $chunkSize = 1000; 
         $data = [];
 
-        $this->command->info('Mulai membaca CSV...');
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+            
+            // Safety Check: Pastikan kolom cukup
+            if (count($row) < 4) continue;
 
-        while (($row = fgetcsv($handle)) !== false) {
+            // 2. BERSIHKAN ANGKA JARAK (Auto-Convert)
+            $jarakRaw = $row[4] ?? 0;
+            $jarakClean = str_replace(',', '.', $jarakRaw); // Ubah koma jadi titik
+
             $data[] = [
                 'id' => $row[0], 
                 'kota_kabupaten' => $row[1],
                 'kecamatan' => $row[2],
                 'kelurahan' => $row[3],
-                'jarak_km' => isset($row[4]) && $row[4] !== '' ? (float) $row[4] : 0, 
+                'jarak_km' => (float) $jarakClean, 
                 'created_at' => now(), 
                 'updated_at' => now(),
             ];

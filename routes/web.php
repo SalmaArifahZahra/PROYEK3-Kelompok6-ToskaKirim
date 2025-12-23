@@ -173,11 +173,25 @@ Route::middleware(['auth'])->group(function () {
     // --- Rute Logistik & Tarif (SHARED: Admin & Superadmin) ---
     Route::middleware(['auth', 'role:admin,superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
         
+        // --- 1. LAYANAN & PROMO ---
         Route::resource('layanan', LayananPengirimanController::class)->except(['create', 'show', 'edit']);
         Route::resource('promo', PromoOngkirController::class)->except(['create', 'show', 'edit']);
-        Route::get('wilayah', [WilayahPengirimanController::class, 'index'])->name('wilayah.index');
-        Route::put('wilayah/{id}', [WilayahPengirimanController::class, 'update'])->name('wilayah.update');
-        Route::post('wilayah/auto-calculate', [WilayahPengirimanController::class, 'hitungJarakOtomatis'])->name('wilayah.auto');
+
+        // --- 2. WILAYAH PENGIRIMAN ---
+        
+        // A. Route Khusus (Harus didefinisikan SEBELUM resource)
+        Route::prefix('wilayah')->name('wilayah.')->group(function () {
+            // Fitur Hitung Jarak
+            Route::post('/auto-calculate', [WilayahPengirimanController::class, 'hitungJarakOtomatis'])->name('auto');
+            
+            // Fitur Import & Export
+            Route::get('/export', [WilayahPengirimanController::class, 'export'])->name('export');
+            Route::post('/import', [WilayahPengirimanController::class, 'import'])->name('import');
+        });
+
+        // B. Route Resource (Menghandle Index, Create, Store, Edit, Update, Destroy sekaligus)
+        Route::resource('wilayah', WilayahPengirimanController::class);
+
     });
 
     Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
@@ -187,5 +201,6 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('payments/{payment}/toggle', [MetodePembayaranController::class, 'toggleActive'])->name('payments.toggle');
         Route::get('/kontrol-toko', [KontrolTokoController::class, 'index'])->name('kontrol_toko.index');
         Route::post('/kontrol-toko', [KontrolTokoController::class, 'update'])->name('kontrol_toko.update');
+
     });
 });
