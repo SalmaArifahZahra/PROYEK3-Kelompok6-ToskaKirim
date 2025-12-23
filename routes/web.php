@@ -159,6 +159,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/process', [AdminPesananDetailController::class, 'process'])->name('process');
             Route::post('/complete', [AdminPesananDetailController::class, 'complete'])->name('complete');
             Route::post('/cancel', [AdminPesananDetailController::class, 'cancel'])->name('cancel');
+            Route::get('/cetak-struk', [AdminPesananDetailController::class, 'cetakStruk'])->name('cetak_struk');
         });
 
         // Rute Rekap Laporan

@@ -205,6 +205,13 @@
                 <h2 class="text-xl font-semibold text-gray-800 mb-6">Aksi</h2>
                 
                 <div class="space-y-3">
+                    {{-- Tombol Cetak Struk --}}
+                    <a href="{{ route('admin.pesanan_detail.cetak_struk', $pesanan->id_pesanan) }}" 
+                       class="block w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-center">
+                        <i class="fas fa-print mr-2"></i>
+                        Cetak Struk PDF
+                    </a>
+
                     @if($pesanan->status_pesanan->value === 'menunggu_verifikasi')
                     <form action="{{ route('admin.pesanan_detail.verify', $pesanan->id_pesanan) }}" method="POST">
                         @csrf

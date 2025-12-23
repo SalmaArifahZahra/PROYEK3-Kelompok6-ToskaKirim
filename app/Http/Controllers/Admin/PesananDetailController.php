@@ -8,6 +8,7 @@ use App\Enums\StatusPesananEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PesananDetailController extends Controller
 {
@@ -104,5 +105,31 @@ class PesananDetailController extends Controller
         ]);
 
         return back()->with('success', 'Pesanan berhasil dibatalkan.');
+    }
+
+    // Cetak struk PDF untuk pesanan
+    public function cetakStruk(Pesanan $pesanan)
+    {
+        // Load relasi yang dibutuhkan
+        $pesanan->load([
+            'user',
+            'ongkir',
+            'detail.produkDetail.produk',
+            'pembayaran'
+        ]);
+
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.pesanan_detail.struk_pdf', [
+            'pesanan' => $pesanan
+        ]);
+        
+        $pdf->setPaper('a4', 'portrait');
+
+        // Format nama file: Struk-TK-00001-23Des2025.pdf
+        $nomorPesanan = str_pad($pesanan->id_pesanan, 5, '0', STR_PAD_LEFT);
+        $tanggal = $pesanan->waktu_pesanan->format('dMY');
+        $filename = "Struk-TK-{$nomorPesanan}-{$tanggal}.pdf";
+
+        return $pdf->download($filename);
     }
 }
