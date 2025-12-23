@@ -256,7 +256,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Metode Pembayaran',
-                        text: 'Hubungi admin untuk menambahkan metode pembayaran.',
+                        text: 'Silakan pilih metode pembayaran terlebih dahulu.',
                         confirmButtonText: 'Baik'
                     });
                     return false;
@@ -267,7 +267,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Layanan Pengiriman',
-                        text: 'Hubungi admin untuk menambahkan layanan pengiriman.',
+                        text: 'Silakan pilih layanan pengiriman terlebih dahulu.',
                         confirmButtonText: 'Baik'
                     });
                     return false;
@@ -368,21 +368,10 @@
             const btnSubmit = document.getElementById('btn-submit');
             const transferInfo = document.getElementById('transfer-info');
 
-            // Check jika tidak ada payment methods atau layanan pengiriman
-            const hasPaymentMethods = document.querySelectorAll('input[name="metode_pembayaran"]').length > 0;
-            const hasShippingServices = document.querySelectorAll('input[name="id_layanan_pengiriman_radio"]').length > 0;
-
-            if (!hasPaymentMethods || !hasShippingServices) {
-                if (btnSubmit) {
-                    btnSubmit.disabled = true;
-                    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
-                    btnSubmit.textContent = 'Belum Bisa Checkout';
-                }
-            }
-
             document.querySelectorAll('input[name="metode_pembayaran"]').forEach(radio => {
                 radio.addEventListener('change', function() {
-                    if (strtoupper(this.dataset.bank) === 'COD' || this.dataset.bank === 'COD') {
+                    const bankName = this.dataset.bank ? this.dataset.bank.toUpperCase() : '';
+                    if (bankName === 'COD') {
                         if (transferInfo) transferInfo.classList.add('hidden');
                         if (btnSubmit) {
                             btnSubmit.textContent = 'Buat Pesanan (COD)';
@@ -393,12 +382,12 @@
                     } else {
                         if (transferInfo) transferInfo.classList.remove('hidden');
 
-                        const bankName = document.getElementById('bank-name');
+                        const bankNameEl = document.getElementById('bank-name');
                         const bankRek = document.getElementById('bank-rek');
                         const bankOwner = document.getElementById('bank-owner');
                         const imgEl = document.getElementById('bank-img');
 
-                        if (bankName) bankName.textContent = this.dataset.bank;
+                        if (bankNameEl) bankNameEl.textContent = this.dataset.bank;
                         if (bankRek) bankRek.textContent = this.dataset.rek;
                         if (bankOwner) bankOwner.textContent = this.dataset.name;
 
@@ -419,15 +408,24 @@
 
             function updateTransferButtonText() {
                 const selected = document.querySelector('input[name="metode_pembayaran"]:checked');
-                if (selected && selected.value !== 'COD' && btnSubmit) {
-                    if (fileInput && fileInput.files.length > 0) {
-                        btnSubmit.textContent = 'Bayar & Buat Pesanan';
-                        btnSubmit.className =
-                            'w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow transition-colors';
-                    } else {
-                        btnSubmit.textContent = 'Bayar Nanti (Buat Pesanan)';
+                if (selected && btnSubmit) {
+                    const bankName = selected.dataset.bank ? selected.dataset.bank.toUpperCase() : '';
+                    if (bankName === 'COD') {
+                        // Jika COD, tidak perlu upload bukti
+                        btnSubmit.textContent = 'Buat Pesanan (COD)';
                         btnSubmit.className =
                             'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                    } else {
+                        // Jika transfer bank, cek bukti upload
+                        if (fileInput && fileInput.files.length > 0) {
+                            btnSubmit.textContent = 'Bayar & Buat Pesanan';
+                            btnSubmit.className =
+                                'w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                        } else {
+                            btnSubmit.textContent = 'Bayar Nanti (Buat Pesanan)';
+                            btnSubmit.className =
+                                'w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow transition-colors';
+                        }
                     }
                 }
             }
