@@ -175,7 +175,7 @@ Route::middleware(['auth'])->group(function () {
         
         // --- 1. LAYANAN & PROMO ---
         Route::resource('layanan', LayananPengirimanController::class)->except(['create', 'show', 'edit']);
-        Route::resource('promo', PromoOngkirController::class)->except(['create', 'show', 'edit']);
+        Route::resource('promo', PromoOngkirController::class);
 
         // --- 2. WILAYAH PENGIRIMAN ---
         
