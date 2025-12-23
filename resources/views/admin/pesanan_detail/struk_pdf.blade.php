@@ -12,7 +12,7 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.6;
             color: #333;
             padding: 20px;
@@ -49,7 +49,7 @@
         }
         
         .section-title {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: bold;
             color: #333;
             margin-bottom: 10px;
@@ -67,20 +67,21 @@
             display: table-cell;
             width: 35%;
             color: #666;
-            font-size: 11px;
+            font-size: 13px;
         }
         
         .info-value {
             display: table-cell;
             font-weight: bold;
             color: #333;
+            font-size: 14px;
         }
         
         .status-badge {
             display: inline-block;
             padding: 4px 12px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
         }
         
@@ -105,7 +106,7 @@
             background-color: #f3f4f6;
             padding: 10px 8px;
             text-align: left;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: bold;
             color: #374151;
             border-bottom: 2px solid #d1d5db;
@@ -114,7 +115,7 @@
         table td {
             padding: 10px 8px;
             border-bottom: 1px solid #e5e7eb;
-            font-size: 11px;
+            font-size: 13px;
         }
         
         table tbody tr:last-child td {
@@ -155,7 +156,7 @@
         }
         
         .grand-total {
-            font-size: 16px !important;
+            font-size: 18px !important;
             color: #5BC6BC !important;
             padding-top: 10px !important;
         }
@@ -165,7 +166,7 @@
             text-align: center;
             border-top: 3px double #333;
             padding-top: 15px;
-            font-size: 11px;
+            font-size: 12px;
             color: #666;
         }
         
@@ -174,7 +175,7 @@
             border-left: 4px solid #F59E0B;
             padding: 10px;
             margin-top: 15px;
-            font-size: 11px;
+            font-size: 13px;
         }
         
         .notes strong {
