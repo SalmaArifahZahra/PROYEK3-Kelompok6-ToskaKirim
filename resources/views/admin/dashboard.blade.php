@@ -59,7 +59,7 @@
     {{-- Checklist Data Penting --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="bg-gradient-to-r from-[#5BC6BC] to-[#4aa89e] px-6 py-4">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <h2 class="text-xl font-bold text-black flex items-center gap-2">
                 <i class="fas fa-list-check"></i>
                 Checklist Kesiapan Operasional Toko
             </h2>
