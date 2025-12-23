@@ -1,5 +1,4 @@
 @extends('layouts.layout_customer')
-
 @section('title', $produk->nama)
 
 @push('styles')
@@ -48,7 +47,7 @@
                     <div
                         class="relative w-full aspect-square md:aspect-[4/3] rounded-xl overflow-hidden bg-slate-50 border border-slate-100 mb-4 group">
                         <img id="mainImage" src="{{ asset($produk->foto_url) }}"
-                            class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                            class="w-full h-full object-contain transition-all duration-300 group-hover:scale-105"
                             alt="{{ $produk->nama }}">
                     </div>
                     @if ($produk->detail->count() > 0)
@@ -83,8 +82,9 @@
                     @endif
 
                     <div class="flex items-baseline gap-2 mb-6 border-b border-slate-100 pb-6">
-                        <span class="text-3xl font-bold text-teal-600">Rp
-                            {{ number_format($produk->harga, 0, ',', '.') }}</span>
+                        <span id="priceDisplay" class="text-3xl font-bold text-teal-600">
+                            Rp {{ number_format($produk->harga, 0, ',', '.') }}
+                        </span>
                     </div>
 
                     <div class="mb-6 prose prose-sm text-slate-600">
@@ -97,10 +97,11 @@
                             @foreach ($produk->detail as $d)
                                 <button type="button"
                                     class="btn-var px-4 py-2 text-sm bg-white border border-slate-300 text-slate-600 rounded-lg
-                       hover:border-teal-500 hover:text-teal-600 transition-all duration-200
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                                    hover:border-teal-500 hover:text-teal-600 transition-all duration-200
+                                    focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                                     data-id="{{ $d->id_produk_detail }}" data-stok="{{ $d->stok }}"
-                                    data-price="{{ $d->harga_jual ?? $produk->harga }}">
+                                    data-price="{{ $d->harga_jual ?? $produk->harga }}" {{-- Mengambil foto varian, jika null pakai foto produk utama --}}
+                                    data-foto="{{ $d->foto ? asset($d->foto) : asset($produk->foto_url) }}">
                                     {{ $d->nama_varian }}
                                 </button>
                             @endforeach
@@ -154,7 +155,6 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 @foreach ($produkLainnya as $item)
                     @php
-                        // Ambil foto varian pertama atau foto default produk
                         $foto = $item->foto_url;
                         if (!$foto && $item->detail->isNotEmpty()) {
                             $foto = $item->detail->first()->foto
@@ -204,17 +204,21 @@
             thumbs.forEach(thumb => {
                 thumb.addEventListener('click', function() {
                     const newSrc = this.dataset.src;
-                    mainImage.style.opacity = '0.5';
-                    setTimeout(() => {
-                        mainImage.src = newSrc;
-                        mainImage.style.opacity = '1';
-                    }, 200);
+                    changeMainImage(newSrc);
 
                     thumbs.forEach(t => t.classList.remove('thumb-selected'));
                     this.classList.add('thumb-selected');
                 });
             });
 
+            function changeMainImage(src) {
+                if (!mainImage) return;
+                mainImage.style.opacity = '0.5';
+                setTimeout(() => {
+                    mainImage.src = src;
+                    mainImage.style.opacity = '1';
+                }, 200);
+            }
 
             let selectedVarianId = null;
             let maxStok = 0;
@@ -223,6 +227,7 @@
             const btnAddCart = document.getElementById('btnAddCart');
             const btnBuyNow = document.getElementById('btnBuyNow');
             const qtyInput = document.getElementById('qtyInput');
+            const priceDisplay = document.getElementById('priceDisplay');
 
             btnVarians.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -231,6 +236,16 @@
 
                     selectedVarianId = this.dataset.id;
                     maxStok = parseInt(this.dataset.stok) || 0;
+                    const price = parseFloat(this.dataset.price);
+                    const fotoUrl = this.dataset.foto;
+
+                    if (price && priceDisplay) {
+                        priceDisplay.innerText = 'Rp ' + price.toLocaleString('id-ID');
+                    }
+
+                    if (fotoUrl) {
+                        changeMainImage(fotoUrl);
+                    }
 
                     if (maxStok === 0) {
                         qtyInput.value = 0;
@@ -241,6 +256,7 @@
                     updateButtonState();
                 });
             });
+
             const minusBtn = document.getElementById('minusBtn');
             const plusBtn = document.getElementById('plusBtn');
 
@@ -264,7 +280,7 @@
                 } else {
                     Swal.fire({
                         icon: 'warning',
-                        text: 'Mencapai batas stok'
+                        text: 'Mencapai batas stok (' + maxStok + ')'
                     });
                 }
             });
@@ -308,6 +324,9 @@
                     return;
                 }
 
+                const originalBtnText = btnAddCart.innerHTML;
+                if (!redirect) btnAddCart.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
                 fetch("{{ route('customer.keranjang.add') }}", {
                         method: 'POST',
                         headers: {
@@ -322,15 +341,17 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            redirect
-                                ?
-                                window.location.href = "{{ route('customer.keranjang.index') }}" :
+                            if (redirect) {
+                                window.location.href = "{{ route('customer.keranjang.index') }}";
+                            } else {
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',
+                                    text: 'Produk berhasil ditambahkan ke keranjang',
                                     timer: 1500,
                                     showConfirmButton: false
                                 });
+                            }
                         } else {
                             throw new Error(data.message);
                         }
@@ -339,11 +360,13 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
-                            text: err.message
+                            text: err.message || 'Terjadi kesalahan pada server'
                         });
+                    })
+                    .finally(() => {
+                        if (!redirect) btnAddCart.innerHTML = originalBtnText;
                     });
             }
         });
     </script>
-    z
 @endpush

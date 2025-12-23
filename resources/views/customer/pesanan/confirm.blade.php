@@ -46,6 +46,7 @@
                     @endif
                 </div>
             </div>
+            @include('customer.components.address_modal')
 
             <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                 <div class="p-6">
@@ -443,7 +444,7 @@
             const formContainer = document.getElementById('addressFormContainer');
             const addBtnContainer = document.getElementById('addAddressButtonContainer');
             const form = document.getElementById('addressForm');
-     
+
             const addressIdInput = document.getElementById('addressId');
             const provinsiSelect = document.getElementById('provinsi');
             const kotaSelect = document.getElementById('kota_kabupaten_select');
@@ -532,7 +533,7 @@
                             <input type="radio" name="selectedAddressModal" value="${addr.id_alamat}" class="mt-1 w-4 h-4 text-teal-600 pointer-events-auto" ${isUtama ? 'checked' : ''}>
                             <div class="flex-1">
                                 <div class="font-bold text-gray-800 text-sm">
-                                    ${addr.label_alamat} 
+                                    ${addr.label_alamat}
                                     ${isUtama ? '<span class="ml-2 text-xs bg-teal-600 text-white px-2 py-0.5 rounded">Utama</span>' : ''}
                                 </div>
                                 <div class="text-sm text-gray-600 mt-1">${addr.nama_penerima} (${addr.telepon_penerima})</div>

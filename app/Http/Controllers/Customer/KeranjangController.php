@@ -39,15 +39,21 @@ class KeranjangController extends Controller
 
         $userId = Auth::id();
 
-        $keranjang = Keranjang::updateOrCreate(
-            [
+        $existingItem = Keranjang::where('id_user', $userId)
+            ->where('id_produk_detail', $request->id_produk_detail)
+            ->first();
+
+        if ($existingItem) {
+            $existingItem->quantity += $request->quantity;
+
+            $existingItem->save();
+        } else {
+            Keranjang::create([
                 'id_user' => $userId,
                 'id_produk_detail' => $request->id_produk_detail,
-            ],
-            [
                 'quantity' => $request->quantity
-            ]
-        );
+            ]);
+        }
 
         return response()->json([
             'success' => true,

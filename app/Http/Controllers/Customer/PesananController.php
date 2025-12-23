@@ -69,7 +69,6 @@ class PesananController extends Controller
             $ongkirResult = $ongkirService->hitungOngkir($selectedLayanan->id, $alamatUtama->id_alamat);
             $ongkir = $ongkirResult['total_ongkir'] ?? 0;
         }
-
         return view('customer.pesanan.confirm', [
             'selectedItems' => $summary['items'],
             'subtotal' => $summary['subtotal'],
