@@ -184,7 +184,7 @@
                     <div>
                         @if($pesanan->pembayaran->bukti_bayar)
                         <button type="button"
-                                onclick="showBuktiPembayaran('{{ asset($pesanan->pembayaran->bukti_bayar) }}')"
+                                onclick="showBuktiPembayaran('{{ asset('storage/'.$pesanan->pembayaran->bukti_bayar) }}')"
                                 class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
                             <i class="fas fa-receipt mr-2"></i>
                             Lihat Bukti Pembayaran

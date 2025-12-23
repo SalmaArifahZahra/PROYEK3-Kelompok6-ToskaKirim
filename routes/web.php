@@ -184,6 +184,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [SuperAdminUserController::class, 'dashboard'])->name('dashboard');
         Route::resource('users', SuperAdminUserController::class);
         Route::resource('payments', MetodePembayaranController::class);
+        Route::patch('payments/{payment}/toggle', [MetodePembayaranController::class, 'toggleActive'])->name('payments.toggle');
         Route::get('/kontrol-toko', [KontrolTokoController::class, 'index'])->name('kontrol_toko.index');
         Route::post('/kontrol-toko', [KontrolTokoController::class, 'update'])->name('kontrol_toko.update');
     });

@@ -58,6 +58,7 @@
                         </label>
                         <div class="relative">
                             <select name="jenis" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5BC6BC] focus:border-[#5BC6BC] outline-none appearance-none bg-white transition-colors">
+                                <option value="COD" {{ old('jenis') == 'COD' ? 'selected' : '' }}>COD</option>
                                 <option value="Bank Transfer" {{ old('jenis') == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
                                 <option value="E-Wallet" {{ old('jenis') == 'E-Wallet' ? 'selected' : '' }}>E-Wallet</option>
                                 <option value="QRIS" {{ old('jenis') == 'QRIS' ? 'selected' : '' }}>QRIS</option>
@@ -68,9 +69,9 @@
                         </div>
                     </div>
 
-                    <div>
+                    <div id="rekening-field">
                         <label class="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wide">
-                            Nomor Rekening
+                            Nomor Rekening <span class="text-red-500 required-mark">*</span>
                         </label>
                         <input type="number" name="nomor_rekening" value="{{ old('nomor_rekening') }}" 
                                placeholder="Contoh: 1234567890" 
@@ -78,9 +79,9 @@
                         <p class="text-[10px] text-gray-400 mt-1">* Kosongkan jika QRIS</p>
                     </div>
 
-                    <div class="col-span-2">
+                    <div class="col-span-2" id="atas-nama-field">
                         <label class="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wide">
-                            Atas Nama (Pemilik Rekening)
+                            Atas Nama (Pemilik Rekening) <span class="text-red-500 required-mark">*</span>
                         </label>
                         <input type="text" name="atas_nama" value="{{ old('atas_nama') }}" 
                                placeholder="Nama pemilik rekening sesuai buku tabungan" 
@@ -88,9 +89,9 @@
                     </div>
                 </div>
 
-                <div class="mb-8">
+                <div class="mb-8" id="gambar-field">
                     <label class="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wide">
-                        Logo Bank / Gambar QRIS <span class="text-red-500">*</span>
+                        Logo Bank / Gambar QRIS <span class="text-red-500 required-mark">*</span>
                     </label>
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 hover:border-[#5BC6BC] transition-colors relative group">
                         <div class="space-y-1 text-center">
@@ -144,5 +145,34 @@
             reader.readAsDataURL(event.target.files[0]);
         }
     }
+
+    // Toggle fields based on payment method
+    document.addEventListener('DOMContentLoaded', function() {
+        const jenisSelect = document.querySelector('select[name="jenis"]');
+        const rekeningField = document.getElementById('rekening-field');
+        const atasNamaField = document.getElementById('atas-nama-field');
+        const gambarField = document.getElementById('gambar-field');
+        const requiredMarks = document.querySelectorAll('.required-mark');
+
+        function toggleFields() {
+            const isCOD = jenisSelect.value.toUpperCase() === 'COD';
+            
+            if (isCOD) {
+                rekeningField.style.display = 'none';
+                atasNamaField.style.display = 'none';
+                gambarField.style.display = 'none';
+                document.querySelector('input[name="nomor_rekening"]').removeAttribute('required');
+                document.querySelector('input[name="atas_nama"]').removeAttribute('required');
+                document.querySelector('input[name="gambar"]').removeAttribute('required');
+            } else {
+                rekeningField.style.display = 'block';
+                atasNamaField.style.display = 'block';
+                gambarField.style.display = 'block';
+            }
+        }
+
+        jenisSelect.addEventListener('change', toggleFields);
+        toggleFields(); // Run on page load
+    });
 </script>
 @endsection

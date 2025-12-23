@@ -139,58 +139,85 @@
                     <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                         <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
                             <h3 class="font-bold text-slate-700">Pembayaran</h3>
-                            <p class="text-xs text-slate-500 mt-1">Silakan transfer ke rekening di bawah:</p>
+                            @if($isCOD)
+                                <p class="text-xs text-slate-500 mt-1">Metode pembayaran COD, bayarkan kepada kurir saat pesanan tiba.</p>
+                            @else
+                                <p class="text-xs text-slate-500 mt-1">Silakan transfer ke rekening di bawah:</p>
+                            @endif
                         </div>
 
                         <div class="p-6">
-                            <div class="space-y-4 mb-6">
-                                @foreach($paymentMethods as $bank)
-                                    <div class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg bg-white hover:border-slate-300 transition-colors">
-                                        @if($bank->gambar)
-                                            <img src="{{ asset('storage/' . $bank->gambar) }}" class="h-8 w-auto object-contain">
-                                        @else
-                                            <div class="h-8 w-12 bg-slate-100 rounded flex items-center justify-center text-xs font-bold text-slate-400">BANK</div>
-                                        @endif
-                                        <div class="overflow-hidden flex-1">
-                                            <p class="font-bold text-slate-700 text-sm truncate">{{ $bank->nama_bank }}</p>
-                                            <p class="font-mono text-slate-600 text-sm truncate">{{ $bank->nomor_rekening }}</p>
-                                        </div>
-                                        <button onclick="navigator.clipboard.writeText('{{ $bank->nomor_rekening }}'); alert('No Rekening Disalin!')" 
-                                                class="text-teal-600 hover:text-teal-800 text-xs font-bold shrink-0">
-                                            SALIN
-                                        </button>
+                            @if($isCOD)
+                                <div class="flex items-center gap-3 p-4 border border-teal-100 bg-teal-50 rounded-lg">
+                                    <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center text-teal-600 shadow-inner">
+                                        <i class="fas fa-money-bill-wave text-lg"></i>
                                     </div>
-                                @endforeach
-                            </div>
-
-                            <form action="{{ route('customer.pesanan.upload', $pesanan->id_pesanan) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Upload Bukti Transfer</label>
-                                <div class="relative border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition cursor-pointer group" id="drop-area">
-                                    <input type="file" name="bukti_bayar" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
-                                    <div id="preview-container" class="group-hover:scale-105 transition-transform">
-                                        <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
-                                        <p class="text-xs text-slate-500">Klik atau tarik foto ke sini</p>
-                                        <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG (Max 2MB)</p>
+                                    <div>
+                                        <p class="font-bold text-teal-700 text-sm">Metode Pembayaran: COD</p>
+                                        <p class="text-xs text-teal-600">Bayar langsung ke kurir saat pesanan tiba.</p>
                                     </div>
-                                    <img id="img-preview" class="hidden max-h-40 mx-auto rounded shadow-sm mt-2">
                                 </div>
-                                
-                                <input type="hidden" name="jumlah_bayar" value="{{ $pesanan->grand_total }}">
 
-                                <button type="submit" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-500/30 transition-transform active:scale-95">
-                                    Kirim Bukti Pembayaran
-                                </button>
-                            </form>
-                            
-                            <div class="mt-4 pt-4 border-t border-slate-100">
-                                <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?');">
+                                <div class="mt-4 pt-4 border-t border-slate-100">
+                                    <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" class="form-cancel">
+                                        @csrf
+                                        <button type="submit" class="w-full py-2.5 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all">
+                                            Batalkan Pesanan
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                @php $transferMethods = $paymentMethods->where('jenis', '!=', 'COD'); @endphp
+                                <div class="space-y-4 mb-6">
+                                    @forelse($transferMethods as $bank)
+                                        <div class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg bg-white hover:border-slate-300 transition-colors">
+                                            @if($bank->gambar)
+                                                <img src="{{ asset('storage/' . $bank->gambar) }}" class="h-8 w-auto object-contain">
+                                            @else
+                                                <div class="h-8 w-12 bg-slate-100 rounded flex items-center justify-center text-xs font-bold text-slate-400">BANK</div>
+                                            @endif
+                                            <div class="overflow-hidden flex-1">
+                                                <p class="font-bold text-slate-700 text-sm truncate">{{ $bank->nama_bank }}</p>
+                                                <p class="font-mono text-slate-600 text-sm truncate">{{ $bank->nomor_rekening }}</p>
+                                            </div>
+                                            <button type="button" class="copy-rek text-teal-600 hover:text-teal-800 text-xs font-bold shrink-0" data-rek="{{ $bank->nomor_rekening }}">
+                                                SALIN
+                                            </button>
+                                        </div>
+                                    @empty
+                                        <p class="text-center text-slate-500 text-sm">Belum ada rekening transfer tersedia.</p>
+                                    @endforelse
+                                </div>
+
+                                <form action="{{ route('customer.pesanan.upload', $pesanan->id_pesanan) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
-                                    <button type="submit" class="w-full py-2.5 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all">
-                                        Batalkan Pesanan
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Upload Bukti Transfer</label>
+                                    <div class="relative border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition cursor-pointer group" id="drop-area">
+                                        <input type="file" name="bukti_bayar" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                                        <div id="preview-container" class="group-hover:scale-105 transition-transform">
+                                            <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
+                                            <p class="text-xs text-slate-500">Klik atau tarik foto ke sini</p>
+                                            <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG (Max 2MB)</p>
+                                        </div>
+                                        <img id="img-preview" class="hidden max-h-40 mx-auto rounded shadow-sm mt-2">
+                                    </div>
+                                    
+                                    <input type="hidden" name="jumlah_bayar" value="{{ $pesanan->grand_total }}">
+
+                                    <button type="submit" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-500/30 transition-transform active:scale-95">
+                                        Kirim Bukti Pembayaran
                                     </button>
                                 </form>
-                            </div>
+                                
+                                <div class="mt-4 pt-4 border-t border-slate-100">
+                                    <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" class="form-cancel">
+                                        @csrf
+                                        <button type="submit" class="w-full py-2.5 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all">
+                                            Batalkan Pesanan
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -209,13 +236,13 @@
                             @if($pesanan->pembayaran)
                                 <div class="border rounded p-2 inline-block">
                                     <p class="text-[10px] text-slate-400 mb-1 text-left">Bukti Anda:</p>
-                                    <a href="{{ asset('storage/'.$pesanan->pembayaran->bukti_bayar) }}" target="_blank">
+                                    <button type="button" class="proof-preview" data-src="{{ asset('storage/'.$pesanan->pembayaran->bukti_bayar) }}" title="Lihat bukti pembayaran">
                                         <img src="{{ asset('storage/'.$pesanan->pembayaran->bukti_bayar) }}" class="h-16 rounded object-cover">
-                                    </a>
+                                    </button>
                                 </div>
                             @endif
                             <div class="mt-4 pt-4 border-t border-slate-100">
-                                <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?');">
+                                <form action="{{ route('customer.pesanan.cancel', $pesanan->id_pesanan) }}" method="POST" class="form-cancel">
                                     @csrf
                                     <button type="submit" class="w-full py-2.5 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all">
                                         Batalkan Pesanan
@@ -243,7 +270,7 @@
                                 <div class="mt-6 pt-6 border-t border-slate-100">
                                     <p class="text-sm text-slate-600 mb-3">Sudah menerima paket?</p>
                                     
-                                    <form action="{{ route('customer.pesanan.selesai', $pesanan->id_pesanan) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin paket sudah diterima dengan baik? Status akan menjadi Selesai.');">
+                                    <form action="{{ route('customer.pesanan.selesai', $pesanan->id_pesanan) }}" method="POST" class="form-selesai">
                                         @csrf
                                         <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-lg font-bold shadow-lg shadow-teal-500/30 hover:bg-teal-700 transition-transform active:scale-95">
                                             <i class="fas fa-check-circle mr-2"></i> Pesanan Diterima
@@ -270,6 +297,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {        
         const timerEl = document.getElementById('countdown-timer');
@@ -318,6 +346,82 @@
                 }
             });
         }
+
+        // SweetAlert helpers
+        function confirmAction({title, text, confirmText = 'Ya', cancelText = 'Batal', confirmColor = '#d33'}) {
+            return Swal.fire({
+                icon: 'warning',
+                title,
+                text,
+                showCancelButton: true,
+                confirmButtonText: confirmText,
+                cancelButtonText: cancelText,
+                confirmButtonColor: confirmColor,
+                focusCancel: true
+            });
+        }
+
+        // Copy rekening with Swal toast
+        document.querySelectorAll('.copy-rek').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const rek = btn.dataset.rek || '';
+                navigator.clipboard.writeText(rek).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Nomor rekening disalin',
+                        text: rek,
+                        toast: true,
+                        position: 'top-end',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }).catch(() => {
+                    Swal.fire({ icon: 'error', title: 'Gagal menyalin' });
+                });
+            });
+        });
+
+        // Cancel order forms
+        document.querySelectorAll('.form-cancel').forEach(form => {
+            form.addEventListener('submit', function(e){
+                e.preventDefault();
+                confirmAction({
+                    title: 'Batalkan pesanan?',
+                    text: 'Pesanan akan dibatalkan dan tidak dapat dikembalikan.',
+                    confirmText: 'Ya, batalkan',
+                    confirmColor: '#d33'
+                }).then(res => { if (res.isConfirmed) form.submit(); });
+            });
+        });
+
+        // Mark order selesai
+        document.querySelectorAll('.form-selesai').forEach(form => {
+            form.addEventListener('submit', function(e){
+                e.preventDefault();
+                confirmAction({
+                    title: 'Konfirmasi penerimaan?',
+                    text: 'Status akan diubah menjadi Selesai.',
+                    confirmText: 'Ya, sudah diterima',
+                    confirmColor: '#0f766e'
+                }).then(res => { if (res.isConfirmed) form.submit(); });
+            });
+        });
+
+        // Preview bukti pembayaran dengan SweetAlert gambar
+        document.querySelectorAll('.proof-preview').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const src = btn.getAttribute('data-src');
+                if (!src) return;
+                Swal.fire({
+                    title: 'Bukti Pembayaran',
+                    imageUrl: src,
+                    imageAlt: 'Bukti Pembayaran',
+                    showCloseButton: true,
+                    background: '#fff',
+                    width: 'auto'
+                });
+            });
+        });
     });
 </script>
 @endpush

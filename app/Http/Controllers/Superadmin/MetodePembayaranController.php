@@ -24,20 +24,27 @@ class MetodePembayaranController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi Input yang Lebih Ketat
-        $request->validate([
+        $isCOD = strtoupper($request->jenis) === 'COD';
+
+        $rules = [
             'nama_bank'      => 'required|string|max:100',
-            'jenis'          => 'required|in:Bank Transfer,E-Wallet,QRIS',
-            'nomor_rekening' => 'nullable|string|max:50',
-            'atas_nama'      => 'nullable|string|max:100', 
-            'gambar'         => 'required|image|mimes:jpeg,png,jpg,webp|max:2048' 
-        ], [
+            'jenis'          => 'required|in:COD,Bank Transfer,E-Wallet,QRIS',
+            'nomor_rekening' => $isCOD ? 'nullable|string|max:50' : 'required|string|max:50',
+            'atas_nama'      => $isCOD ? 'nullable|string|max:100' : 'required|string|max:100',
+            'gambar'         => $isCOD ? 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048' : 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
+        ];
+
+        $messages = [
             'nama_bank.required' => 'Nama Bank/E-Wallet wajib diisi.',
             'jenis.required'     => 'Jenis metode pembayaran wajib dipilih.',
-            'gambar.required'    => 'Logo atau gambar QRIS wajib diupload.',
+            'nomor_rekening.required' => 'Nomor rekening wajib diisi untuk metode selain COD.',
+            'atas_nama.required' => 'Nama pemilik rekening wajib diisi untuk metode selain COD.',
+            'gambar.required'    => 'Logo atau gambar wajib diupload untuk metode selain COD.',
             'gambar.image'       => 'File yang diupload harus berupa gambar.',
             'gambar.max'         => 'Ukuran gambar maksimal 2MB.',
-        ]);
+        ];
+
+        $request->validate($rules, $messages);
 
         try {
             DB::beginTransaction();
@@ -88,5 +95,18 @@ class MetodePembayaranController extends Controller
             Log::error("Error delete payment method: " . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal menghapus data.');
         }
+    }
+
+    public function toggleActive(Request $request, $id)
+    {
+        $request->validate([
+            'is_active' => 'required|boolean',
+        ]);
+
+        $payment = MetodePembayaran::findOrFail($id);
+        $payment->is_active = $request->boolean('is_active');
+        $payment->save();
+
+        return redirect()->back()->with('success', 'Status metode pembayaran diperbarui.');
     }
 }

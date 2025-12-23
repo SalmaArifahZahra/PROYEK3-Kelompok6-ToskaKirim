@@ -36,9 +36,13 @@ class AlamatUserController extends Controller
 
         AlamatUser::create($data);
 
+        $message = $countAlamat == 0 
+            ? 'Alamat berhasil ditambahkan dan ditetapkan sebagai alamat utama.'
+            : ($data['is_utama'] ? 'Alamat berhasil disimpan dan ditetapkan sebagai alamat utama.' : 'Alamat berhasil disimpan.');
+
         return response()->json([
             'success' => true,
-            'message' => 'Alamat berhasil disimpan.'
+            'message' => $message
         ]);
     }
 
