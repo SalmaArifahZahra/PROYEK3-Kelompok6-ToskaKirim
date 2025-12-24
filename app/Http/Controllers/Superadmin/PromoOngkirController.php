@@ -45,8 +45,16 @@ class PromoOngkirController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'nama_promo' => 'required|string|max:255',
+            'min_belanja' => 'required|numeric|min:0',
+            'nilai_potongan' => 'required|numeric|min:0',
+            'mekanisme' => 'required|in:flat,kelipatan',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
+
         $promo = PromoOngkir::findOrFail($id);
-        // Validasi sama seperti store...
         $promo->update($request->all());
         return redirect()->route('superadmin.promo.index')->with('success', 'Promo diperbarui!');
     }

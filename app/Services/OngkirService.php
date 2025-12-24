@@ -63,6 +63,7 @@ class OngkirService
             }
 
             // 5. Terapkan Promo Ongkir (jika ada)
+            // Promo hanya diterapkan jika: is_active = true DAN dalam rentang tanggal
             $promoBenefitKm = 0;
             $promoName = null;
             $promoDiscountAmount = 0;
@@ -80,7 +81,8 @@ class OngkirService
                     ->orderByDesc('tanggal_mulai')
                     ->first();
 
-                if ($promo) {
+                // Explicit validation: ensure promo is active before applying
+                if ($promo && $promo->is_active === true) {
                     $promoBenefitKm = (float) $promo->hitungBenefit($subtotalBelanja);
                     $promoName = $promo->nama_promo;
                 }

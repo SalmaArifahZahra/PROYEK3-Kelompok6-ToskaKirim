@@ -127,13 +127,16 @@ class PesananController extends Controller
 
         DB::beginTransaction();
         try {
+            // Calculate summary first
+            $summary = $this->calculateOrderSummary($itemsData, true);
+
             $ongkirService = new OngkirService();
             $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamat->id_alamat, $summary['subtotal']);
 
             if (!empty($ongkirData['error'])) {
                 throw new \Exception('Gagal menghitung ongkir: ' . $ongkirData['error']);
             }
-            $summary = $this->calculateOrderSummary($itemsData, true);
+
             $ongkirRecord = Ongkir::create([
                 'jarak' => $ongkirData['jarak'],
                 'jarak_before' => $ongkirData['jarak_before'] ?? $ongkirData['jarak'],

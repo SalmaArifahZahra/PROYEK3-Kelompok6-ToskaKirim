@@ -69,7 +69,7 @@
                                     <h4 class="font-medium text-slate-800">{{ $detail->produkDetail->produk->nama }}</h4>
                                     <p class="text-xs text-slate-500 mb-1">Varian: {{ $detail->produkDetail->nama_varian }}</p>
                                     <div class="flex justify-between items-end mt-2">
-                                        <p class="text-sm text-slate-600">{{ $detail->kuantitas }} x Rp {{ number_format($detail->harga_beli, 0, ',', '.') }}</p>
+                                        <p class="text-sm text-slate-600">{{ $detail->kuantitas }} x Rp {{ number_format($detail->harga_saat_beli, 0, ',', '.') }}</p>
                                         <p class="font-semibold text-slate-800">Rp {{ number_format($detail->subtotal_item, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
@@ -123,26 +123,38 @@
                             <span>Total Harga Produk</span>
                             <span>Rp {{ number_format($pesanan->subtotal_produk, 0, ',', '.') }}</span>
                         </div>
+                        @php
+                            $promoOngkirApplied = !empty($pesanan->ongkir) && $pesanan->ongkir->jarak_before && $pesanan->ongkir->jarak_before > $pesanan->ongkir->jarak;
+                            $promoOngkirSaving = $promoOngkirApplied
+                                ? ($pesanan->ongkir->jarak_before - $pesanan->ongkir->jarak) * $pesanan->ongkir->tarif_per_km
+                                : 0;
+                        @endphp
                         <div class="flex justify-between text-slate-600">
                             <span>Ongkos Kirim</span>
                             <span>Rp {{ number_format($pesanan->ongkir->total_ongkir, 0, ',', '.') }}</span>
                         </div>
+                        @if($promoOngkirApplied)
+                            <div class="flex justify-between text-teal-700">
+                                <span>Promo Ongkir{{ $pesanan->ongkir->promo_name ? ' - '.$pesanan->ongkir->promo_name : '' }}</span>
+                                <span>- Rp {{ number_format($promoOngkirSaving, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
                         <hr class="border-slate-100 my-4">
                         <div class="flex justify-between font-bold text-lg text-teal-600">
                             <span>Total Tagihan</span>
                             <span>Rp {{ number_format($pesanan->grand_total, 0, ',', '.') }}</span>
                         </div>
                     </div>
-                    
-                    @if(!empty($pesanan->ongkir) && $pesanan->ongkir->jarak_before && $pesanan->ongkir->jarak_before > $pesanan->ongkir->jarak)
+
+                    @if($promoOngkirApplied)
                         <div class="bg-green-50 border-t border-slate-100 px-6 py-4">
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-check-circle text-green-600 mt-0.5 flex-shrink-0"></i>
                                 <div class="text-sm">
-                                    <p class="text-green-700 font-semibold">Promo Ongkir Diterapkan</p>
+                                    <p class="text-green-700 font-semibold">Promo Ongkir Diterapkan{{ $pesanan->ongkir->promo_name ? ' - '.$pesanan->ongkir->promo_name : '' }}</p>
                                     <p class="text-green-600 text-xs mt-1">
                                         Jarak pengiriman berkurang dari {{ $pesanan->ongkir->jarak_before }} km menjadi {{ $pesanan->ongkir->jarak }} km
-                                        <br>Anda hemat: <span class="font-bold">Rp {{ number_format(($pesanan->ongkir->jarak_before - $pesanan->ongkir->jarak) * $pesanan->ongkir->tarif_per_km, 0, ',', '.') }}</span>
+                                        <br>Anda hemat: <span class="font-bold">Rp {{ number_format($promoOngkirSaving, 0, ',', '.') }}</span>
                                     </p>
                                 </div>
                             </div>

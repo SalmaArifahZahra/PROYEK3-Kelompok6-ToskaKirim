@@ -15,12 +15,15 @@ class Ongkir extends Model
 
     protected $fillable = [
         'jarak',
+        'jarak_before',
         'tarif_per_km',
         'total_ongkir',
+        'promo_name',
     ];
 
     protected $casts = [
         'jarak' => 'float',
+        'jarak_before' => 'float',
         'tarif_per_km' => 'float',
         'total_ongkir' => 'float',
     ];
