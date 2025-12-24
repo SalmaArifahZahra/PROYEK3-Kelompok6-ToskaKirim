@@ -207,6 +207,10 @@
                                             <span class="text-slate-600">Ongkos Kirim</span>
                                             <span class="font-medium" id="ongkirDisplay">@if(is_null($ongkir)) - @else Rp {{ number_format($ongkir ?? 0, 0, ',', '.') }} @endif</span>
                                         </div>
+                                        <div class="flex justify-between mt-2 hidden" id="promoRow">
+                                            <span class="text-slate-600 text-xs">Promo Ongkir</span>
+                                            <span class="font-medium text-xs" id="promoDisplay"></span>
+                                        </div>
                                     </div>
 
                                     <hr class="border-slate-200">
@@ -343,7 +347,8 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         },
                         body: JSON.stringify({
-                            id_layanan_pengiriman: layananId
+                            id_layanan_pengiriman: layananId,
+                            subtotal: subtotal
                         })
                     })
                     .then(r => r.json())
@@ -352,6 +357,9 @@
                             const ongkir = data.data.total_ongkir || 0;
                             const jarak = data.data.jarak || 0;
                             const tarif = data.data.tarif_per_km || 0;
+                            const promoKm = data.data.promo_benefit_km || 0;
+                            const promoName = data.data.promo_name || null;
+                            const promoAmount = data.data.promo_discount_amount || 0;
                             const grandTotal = subtotal + ongkir;
 
                             const elDistance = document.getElementById('distanceDisplay');
@@ -363,6 +371,19 @@
                             if (elTarif) elTarif.textContent = 'Rp ' + tarif.toLocaleString('id-ID') + '/km';
                             if (elOngkir) elOngkir.textContent = 'Rp ' + ongkir.toLocaleString('id-ID');
                             if (elTotal) elTotal.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
+
+                            const promoRow = document.getElementById('promoRow');
+                            const promoDisp = document.getElementById('promoDisplay');
+                            if (promoRow && promoDisp) {
+                                if (promoKm > 0) {
+                                    promoRow.classList.remove('hidden');
+                                    const promoText = `${promoName ? promoName + ' — ' : ''}-${promoKm.toFixed(2)} km (Rp ${promoAmount.toLocaleString('id-ID')})`;
+                                    promoDisp.textContent = promoText;
+                                } else {
+                                    promoRow.classList.add('hidden');
+                                    promoDisp.textContent = '';
+                                }
+                            }
                         } else {
                             Swal.fire({
                                 icon: 'error',
@@ -372,6 +393,12 @@
                             // Reset ke 0 jika gagal
                             if (document.getElementById('ongkirDisplay')) document.getElementById(
                                 'ongkirDisplay').textContent = 'Rp 0';
+                            const promoRow = document.getElementById('promoRow');
+                            const promoDisp = document.getElementById('promoDisplay');
+                            if (promoRow && promoDisp) {
+                                promoRow.classList.add('hidden');
+                                promoDisp.textContent = '';
+                            }
                         }
                     })
                     .catch(error => {

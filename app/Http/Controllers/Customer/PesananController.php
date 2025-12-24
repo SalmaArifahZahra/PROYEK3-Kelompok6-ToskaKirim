@@ -66,7 +66,7 @@ class PesananController extends Controller
 
         if ($selectedLayanan && $alamatUtama) {
             $ongkirService = new OngkirService();
-            $ongkirResult = $ongkirService->hitungOngkir($selectedLayanan->id, $alamatUtama->id_alamat);
+            $ongkirResult = $ongkirService->hitungOngkir($selectedLayanan->id, $alamatUtama->id_alamat, $summary['subtotal']);
             $ongkir = $ongkirResult['total_ongkir'] ?? 0;
         }
         return view('customer.pesanan.confirm', [
@@ -128,7 +128,7 @@ class PesananController extends Controller
         DB::beginTransaction();
         try {
             $ongkirService = new OngkirService();
-            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamat->id_alamat);
+            $ongkirData = $ongkirService->hitungOngkir($idLayanan, $alamat->id_alamat, $summary['subtotal']);
 
             if (!empty($ongkirData['error'])) {
                 throw new \Exception('Gagal menghitung ongkir: ' . $ongkirData['error']);
@@ -136,8 +136,10 @@ class PesananController extends Controller
             $summary = $this->calculateOrderSummary($itemsData, true);
             $ongkirRecord = Ongkir::create([
                 'jarak' => $ongkirData['jarak'],
+                'jarak_before' => $ongkirData['jarak_before'] ?? $ongkirData['jarak'],
                 'tarif_per_km' => $ongkirData['tarif_per_km'],
-                'total_ongkir' => $ongkirData['total_ongkir']
+                'total_ongkir' => $ongkirData['total_ongkir'],
+                'promo_name' => $ongkirData['promo_name'] ?? null,
             ]);
 
             $statusPesanan = $this->determineOrderStatus($isCOD, $request);
@@ -257,7 +259,10 @@ class PesananController extends Controller
     // Hitung Ongkir Dinamis dari Checkout
     public function calculateOngkir(Request $request)
     {
-        $request->validate(['id_layanan_pengiriman' => 'required|exists:layanan_pengiriman,id']);
+        $request->validate([
+            'id_layanan_pengiriman' => 'required|exists:layanan_pengiriman,id',
+            'subtotal' => 'nullable|numeric|min:0'
+        ]);
 
         $user = Auth::user();
         $alamatUtama = $user->alamatUser()->where('is_utama', true)->first();
@@ -267,7 +272,11 @@ class PesananController extends Controller
         }
 
         $ongkirService = new OngkirService();
-        $ongkirData = $ongkirService->hitungOngkir($request->id_layanan_pengiriman, $alamatUtama->id_alamat);
+        $ongkirData = $ongkirService->hitungOngkir(
+            $request->id_layanan_pengiriman,
+            $alamatUtama->id_alamat,
+            $request->subtotal ?? null
+        );
 
         if (!empty($ongkirData['error'])) {
             return response()->json(['success' => false, 'error' => $ongkirData['error']], 400);
@@ -275,10 +284,14 @@ class PesananController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
+                'jarak_before' => $ongkirData['jarak_before'] ?? null,
                 'jarak' => $ongkirData['jarak'],
                 'tarif_per_km' => $ongkirData['tarif_per_km'],
                 'total_ongkir' => $ongkirData['total_ongkir'],
-                'total_ongkir_formatted' => $ongkirData['total_ongkir_formatted']
+                'total_ongkir_formatted' => $ongkirData['total_ongkir_formatted'],
+                'promo_benefit_km' => $ongkirData['promo_benefit_km'] ?? 0,
+                'promo_name' => $ongkirData['promo_name'] ?? null,
+                'promo_discount_amount' => $ongkirData['promo_discount_amount'] ?? 0,
             ]
         ]);
     }

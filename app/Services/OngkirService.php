@@ -4,11 +4,12 @@ namespace App\Services;
 
 use App\Models\LayananPengiriman;
 use App\Models\AlamatUser;
+use App\Models\PromoOngkir;
 use Illuminate\Support\Facades\DB;
 
 class OngkirService
 {
-    public function hitungOngkir($idLayanan, $idAlamatUser)
+    public function hitungOngkir($idLayanan, $idAlamatUser, $subtotalBelanja = null)
     {
         try {
             // 1. Ambil Data Layanan & Alamat User
@@ -61,18 +62,50 @@ class OngkirService
                 $jarak = 5; 
             }
 
-            // 5. Hitung Tarif
+            // 5. Terapkan Promo Ongkir (jika ada)
+            $promoBenefitKm = 0;
+            $promoName = null;
+            $promoDiscountAmount = 0;
+
+            if (!is_null($subtotalBelanja) && $subtotalBelanja > 0) {
+                // Cari promo aktif dan dalam rentang tanggal
+                $today = now()->toDateString();
+                $promo = PromoOngkir::where('is_active', true)
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('tanggal_mulai')->orWhere('tanggal_mulai', '<=', $today);
+                    })
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('tanggal_selesai')->orWhere('tanggal_selesai', '>=', $today);
+                    })
+                    ->orderByDesc('tanggal_mulai')
+                    ->first();
+
+                if ($promo) {
+                    $promoBenefitKm = (float) $promo->hitungBenefit($subtotalBelanja);
+                    $promoName = $promo->nama_promo;
+                }
+            }
+
+            $jarakBefore = (float) $jarak;
+            $jarak = max($jarakBefore - $promoBenefitKm, 0.0);
+
+            // 6. Hitung Tarif setelah promo
             $tarifPerKm = $layanan->tarif_per_km;
             $totalOngkir = $jarak * $tarifPerKm;
+            $promoDiscountAmount = (int) ceil(min($promoBenefitKm, $jarakBefore) * $tarifPerKm);
 
             // FIX: Hapus logic minimum 5000 agar 2km * 2000 tetap jadi 4000
             // if ($totalOngkir < 5000) $totalOngkir = 5000; 
 
             return [
+                'jarak_before' => (float) $jarakBefore,
                 'jarak' => (float) $jarak,
                 'tarif_per_km' => (int) $tarifPerKm,
                 'total_ongkir' => (int) ceil($totalOngkir),
                 'total_ongkir_formatted' => 'Rp ' . number_format(ceil($totalOngkir), 0, ',', '.'),
+                'promo_benefit_km' => (float) $promoBenefitKm,
+                'promo_name' => $promoName,
+                'promo_discount_amount' => $promoDiscountAmount,
                 'error' => null
             ];
 

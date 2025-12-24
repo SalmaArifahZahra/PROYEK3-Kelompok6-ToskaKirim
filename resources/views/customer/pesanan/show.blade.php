@@ -133,6 +133,21 @@
                             <span>Rp {{ number_format($pesanan->grand_total, 0, ',', '.') }}</span>
                         </div>
                     </div>
+                    
+                    @if(!empty($pesanan->ongkir) && $pesanan->ongkir->jarak_before && $pesanan->ongkir->jarak_before > $pesanan->ongkir->jarak)
+                        <div class="bg-green-50 border-t border-slate-100 px-6 py-4">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-check-circle text-green-600 mt-0.5 flex-shrink-0"></i>
+                                <div class="text-sm">
+                                    <p class="text-green-700 font-semibold">Promo Ongkir Diterapkan</p>
+                                    <p class="text-green-600 text-xs mt-1">
+                                        Jarak pengiriman berkurang dari {{ $pesanan->ongkir->jarak_before }} km menjadi {{ $pesanan->ongkir->jarak }} km
+                                        <br>Anda hemat: <span class="font-bold">Rp {{ number_format(($pesanan->ongkir->jarak_before - $pesanan->ongkir->jarak) * $pesanan->ongkir->tarif_per_km, 0, ',', '.') }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
 
