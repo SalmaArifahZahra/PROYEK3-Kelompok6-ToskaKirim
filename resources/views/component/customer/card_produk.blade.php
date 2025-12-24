@@ -12,8 +12,8 @@
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
         @foreach ($produk as $item)
-            <a href="{{ route('customer.produk.detail', $item->id_produk) }}"
-               class="group bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-teal-300 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full relative">
+                <a href="{{ route('customer.produk.detail', $item->id_produk) }}"
+                    class="group bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-teal-300 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full relative">
 
 
                 <div class="relative w-full aspect-square bg-slate-50 overflow-hidden">
@@ -24,13 +24,14 @@
                     @endif
 
                     <img src="{{ $item->foto_url }}"
-                         alt="{{ $item->nama }}"
-                         class="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500 mix-blend-multiply" 
-                    />
+                        alt="{{ $item->nama }}"
+                        loading="lazy" decoding="async"
+                        class="w-full h-full object-contain p-3 md:p-4 group-hover:scale-110 transition-transform duration-500 mix-blend-multiply"
+                        onerror="this.src='{{ asset('images/no-image.png') }}'" />
                 </div>
 
 
-                <div class="p-4 flex flex-col flex-grow">
+                <div class="p-3 md:p-4 flex flex-col flex-grow">
                     @if(isset($item->kategori))
                         <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
                             {{ $item->kategori->nama_kategori }}

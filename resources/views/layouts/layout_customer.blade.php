@@ -21,6 +21,9 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
+        /* Hide horizontal scrollbar for snap lists */
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 
 </head>

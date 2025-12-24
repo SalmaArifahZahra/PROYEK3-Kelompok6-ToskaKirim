@@ -8,7 +8,7 @@
 
 @section('content')
 
-    <div class="max-w-5xl mx-auto my-8 px-4 relative z-10">
+    <div class="max-w-5xl mx-auto my-8 px-4 sm:px-6 lg:px-8 relative z-10">
 
         <nav class="text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
             <ol class="flex items-center gap-2">
@@ -53,23 +53,24 @@
                         <h3 class="text-slate-700 font-medium mb-3">Produk Dipesan</h3>
                         <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
                             <div
-                                class="grid grid-cols-12 bg-slate-50 border-b border-slate-200 py-3 px-4 text-sm font-semibold text-slate-600">
+                                class="min-w-[640px] grid grid-cols-12 bg-slate-50 border-b border-slate-200 py-3 px-4 text-sm font-semibold text-slate-600">
                                 <div class="col-span-6">Produk</div>
                                 <div class="col-span-2 text-right">Harga</div>
                                 <div class="col-span-2 text-center">Qty</div>
                                 <div class="col-span-2 text-right">Subtotal</div>
                             </div>
 
+                            <div class="overflow-x-auto">
                             @foreach ($selectedItems as $item)
                                 @php
                                     $produkDetail = $item['produk_detail'];
                                     $produk = $produkDetail->produk;
                                 @endphp
                                 <div
-                                    class="grid grid-cols-12 items-center bg-white border-b border-slate-200 py-4 px-4 hover:bg-slate-50">
+                                    class="min-w-[640px] grid grid-cols-12 items-center bg-white border-b border-slate-200 py-4 px-4 hover:bg-slate-50">
                                     <div class="col-span-6 flex items-center gap-3">
-                                        <img src="{{ $produk->foto_url ?? asset('images/icon_toska.png') }}"
-                                            class="w-12 h-12 rounded object-cover">
+                                        <img src="{{ $produk->foto_url ?? asset('images/icon_toska.png') }}" loading="lazy" decoding="async"
+                                            class="w-12 h-12 rounded object-cover" onerror="this.src='{{ asset('images/icon_toska.png') }}'">
                                         <div>
                                             <p class="font-medium text-slate-800 text-sm">{{ $produk->nama }}</p>
                                             <p class="text-xs text-slate-500">Varian: {{ $produkDetail->nama_varian }}</p>
@@ -86,6 +87,7 @@
                                     </div>
                                 </div>
                             @endforeach
+                            </div>
                         </div>
                     </div>
 
@@ -189,7 +191,7 @@
                         </div>
 
                         <div class="md:col-span-4">
-                            <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 sticky top-24">
+                            <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 md:sticky md:top-24">
                                 <h3 class="font-semibold text-slate-700 mb-4">Ringkasan Pembayaran</h3>
                                 <div class="space-y-3 text-sm">
                                     <div class="bg-white rounded p-3 border border-slate-200">

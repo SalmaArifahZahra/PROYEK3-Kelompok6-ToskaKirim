@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <div class="max-w-6xl mx-auto mt-8 px-4">
+    <div class="max-w-6xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
 
         <h1 class="text-2xl font-bold text-slate-800 mb-6">Keranjang Belanja</h1>
 
@@ -29,15 +29,15 @@
         @else
             <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden mb-6">
                 <div
-                    class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center font-semibold text-slate-700 text-sm">
+                    class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex items-center font-semibold text-slate-700 text-xs sm:text-sm">
                     <div class="w-1/12 flex justify-center">
                         <input type="checkbox" id="selectAllTop"
                             class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer">
                     </div>
                     <div class="w-5/12 md:w-4/12">Produk</div>
                     <div class="hidden md:block md:w-2/12 text-right pr-8">Harga Satuan</div>
-                    <div class="w-3/12 md:w-2/12 text-center">Kuantitas</div>
-                    <div class="w-3/12 md:w-2/12 text-right pr-4">Total Harga</div>
+                    <div class="w-3/12 md:w-2/12 text-center">Qty</div>
+                    <div class="w-3/12 md:w-2/12 text-right pr-1 sm:pr-4">Total</div>
                     <div class="hidden md:block md:w-1/12 text-center">Aksi</div>
                 </div>
 
@@ -49,7 +49,7 @@
                             $totalHarga = $item->quantity * $produkDetail->harga_jual;
                         @endphp
 
-                        <div class="p-6 flex items-center hover:bg-slate-50 transition-colors">
+                        <div class="p-4 sm:p-6 flex items-center hover:bg-slate-50 transition-colors">
                             <div class="w-1/12 flex justify-center">
                                 <input type="checkbox"
                                     class="itemCheckbox w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer"
@@ -58,19 +58,20 @@
 
                             <div class="w-5/12 md:w-4/12">
                                 <a href="{{ route('customer.produk.detail', $produk->id_produk) }}"
-                                    class="flex gap-4 group items-center">
+                                    class="flex gap-2 sm:gap-4 group items-center">
                                     <div
-                                        class="w-16 h-16 shrink-0 border border-slate-200 rounded-md overflow-hidden bg-white">
-                                        <img src="{{ $produk->foto_url }}"
-                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                                        class="w-14 h-14 sm:w-16 sm:h-16 shrink-0 border border-slate-200 rounded-md overflow-hidden bg-white">
+                                        <img src="{{ $produk->foto_url }}" loading="lazy" decoding="async"
+                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                            onerror="this.src='{{ asset('images/icon_toska.png') }}'">
                                     </div>
-                                    <div class="flex flex-col justify-center">
+                                    <div class="flex flex-col justify-center flex-1">
                                         <p
-                                            class="font-medium text-slate-800 group-hover:text-teal-600 transition-colors line-clamp-2">
+                                            class="font-medium text-slate-800 group-hover:text-teal-600 transition-colors line-clamp-2 text-xs sm:text-sm">
                                             {{ $produk->nama }}
                                         </p>
                                         <p class="text-xs text-slate-500 mt-1 bg-slate-100 px-2 py-0.5 rounded w-fit">
-                                            Varian: {{ $produkDetail->nama_varian }}
+                                            {{ $produkDetail->nama_varian }}
                                         </p>
                                         <div class="md:hidden mt-2">
                                             <form
@@ -92,20 +93,20 @@
                             <div class="w-3/12 md:w-2/12 flex justify-center">
                                 <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden">
                                     <button
-                                        class="minusBtn px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 transition"
-                                        data-id="{{ $item->id_produk_detail }}">-</button>
+                                        class="minusBtn px-2 sm:px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 transition text-sm"
+                                        data-id="{{ $item->id_produk_detail }}">−</button>
 
                                     <input type="number" value="{{ $item->quantity }}" min="1"
-                                        class="qtyInput w-12 text-center border-x border-slate-300 text-sm focus:outline-none py-1"
+                                        class="qtyInput w-10 sm:w-12 text-center border-x border-slate-300 text-xs sm:text-sm focus:outline-none py-1"
                                         data-id="{{ $item->id_produk_detail }}">
 
                                     <button
-                                        class="plusBtn px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 transition"
+                                        class="plusBtn px-2 sm:px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 transition text-sm"
                                         data-id="{{ $item->id_produk_detail }}">+</button>
                                 </div>
                             </div>
 
-                            <div class="w-3/12 md:w-2/12 text-right pr-4 font-bold text-orange-600 text-sm md:text-base"
+                            <div class="w-3/12 md:w-2/12 text-right pr-1 sm:pr-4 font-bold text-orange-600 text-xs sm:text-base"
                                 id="total-{{ $item->id_produk_detail }}" data-price="{{ $produkDetail->harga_jual }}">
                                 Rp {{ number_format($totalHarga, 0, ',', '.') }}
                             </div>
@@ -127,19 +128,18 @@
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6 sticky bottom-0 z-10">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex items-center gap-4 w-full md:w-auto">
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 sm:p-6 sticky bottom-0 z-10">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                         <div class="flex items-center gap-2">
                             <input type="checkbox" id="selectAll"
                                 class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer">
-                            <label for="selectAll" class="text-slate-700 text-sm font-medium cursor-pointer">Pilih Semua
-                                ({{ $keranjang->count() }})</label>
+                            <label for="selectAll" class="text-slate-700 font-medium cursor-pointer">Pilih Semua ({{ $keranjang->count() }})</label>
                         </div>
                         <span class="text-slate-300">|</span>
                         <button id="deleteSelected"
-                            class="text-red-500 hover:text-red-700 text-sm font-medium hover:underline disabled:opacity-50">
-                            Hapus 
+                            class="text-red-500 hover:text-red-700 font-medium hover:underline disabled:opacity-50">
+                            Hapus
                         </button>
 
                         <form id="formBulkDelete" action="{{ route('customer.keranjang.destroyBulk') }}" method="POST"
@@ -149,18 +149,18 @@
                         </form>
                     </div>
 
-                    <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
-                        <div class="text-right">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="text-right w-full sm:w-auto">
                             <p class="text-slate-500 text-xs">Total (<span id="selectedCount">0</span> produk):</p>
-                            <p class="text-orange-600 font-bold text-xl">Rp <span id="grandTotal">0</span></p>
+                            <p class="text-orange-600 font-bold text-lg sm:text-xl">Rp <span id="grandTotal">0</span></p>
                         </div>
 
-                        <form id="formCheckoutReal" action="{{ route('customer.keranjang.checkout') }}" method="POST">
+                        <form id="formCheckoutReal" action="{{ route('customer.keranjang.checkout') }}" method="POST" class="w-full sm:w-auto">
                             @csrf
                             <input type="hidden" name="items" id="itemsInputHidden">
 
                             <button type="submit"
-                                class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg shadow-orange-500/30 transition-all hover:scale-105 active:scale-95">
+                                class="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 sm:px-8 py-3 rounded-lg font-bold shadow-lg shadow-orange-500/30 transition-all hover:scale-105 active:scale-95">
                                 Checkout
                             </button>
                         </form>

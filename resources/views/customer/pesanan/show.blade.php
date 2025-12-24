@@ -28,7 +28,7 @@
         </div>
     @endif
 
-    <div class="max-w-5xl mx-auto my-8 px-4">
+    <div class="max-w-5xl mx-auto my-8 px-4 sm:px-6 lg:px-8">
         <nav class="text-sm text-slate-500 mb-6 flex justify-between items-center">
             <ol class="flex items-center gap-2">
                 <li><a href="{{ route('customer.pesanan.index') }}" class="hover:underline">Pesanan Saya</a></li>
@@ -61,8 +61,9 @@
                     <div class="divide-y divide-slate-100">
                         @foreach ($pesanan->detail as $detail)
                             <div class="p-6 flex gap-4">
-                                <img src="{{ $detail->produkDetail->produk->foto_url ?? asset('images/no-image.png') }}"
-                                     class="w-20 h-20 rounded-md object-cover border border-slate-100 shrink-0">
+                                <img src="{{ $detail->produkDetail->produk->foto_url ?? asset('images/no-image.png') }}" loading="lazy" decoding="async"
+                                     class="w-20 h-20 rounded-md object-cover border border-slate-100 shrink-0"
+                                     onerror="this.src='{{ asset('images/icon_toska.png') }}'">
                                 
                                 <div class="flex-1">
                                     <h4 class="font-medium text-slate-800">{{ $detail->produkDetail->produk->nama }}</h4>
@@ -110,7 +111,7 @@
             </div>
 
 
-            <div class="md:col-span-8 space-y-6 sticky top-24">
+            <div class="md:col-span-8 space-y-6 md:sticky md:top-24">
 
                 <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                     <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
@@ -172,7 +173,7 @@
                                     @forelse($transferMethods as $bank)
                                         <div class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg bg-white hover:border-slate-300 transition-colors">
                                             @if($bank->gambar)
-                                                <img src="{{ asset('storage/' . $bank->gambar) }}" class="h-8 w-auto object-contain">
+                                                <img src="{{ asset('storage/' . $bank->gambar) }}" class="h-8 w-auto object-contain" loading="lazy">
                                             @else
                                                 <div class="h-8 w-12 bg-slate-100 rounded flex items-center justify-center text-xs font-bold text-slate-400">BANK</div>
                                             @endif
@@ -199,7 +200,7 @@
                                             <p class="text-xs text-slate-500">Klik atau tarik foto ke sini</p>
                                             <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG (Max 2MB)</p>
                                         </div>
-                                        <img id="img-preview" class="hidden max-h-40 mx-auto rounded shadow-sm mt-2">
+                                        <img id="img-preview" class="hidden max-h-40 mx-auto rounded shadow-sm mt-2" alt="Preview Bukti Pembayaran">
                                     </div>
                                     
                                     <input type="hidden" name="jumlah_bayar" value="{{ $pesanan->grand_total }}">

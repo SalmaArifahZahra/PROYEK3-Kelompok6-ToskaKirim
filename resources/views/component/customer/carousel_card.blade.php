@@ -5,24 +5,24 @@
             <div class="swiper-wrapper">
                 {{-- Slide 1 --}}
                 <div class="swiper-slide">
-                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
-                        <img src="{{ asset('images/slider1.png') }}" alt="Promo 1" 
+                    <div class="relative w-full h-40 sm:h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider1.png') }}" alt="Promo 1" loading="lazy"
                              class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                     </div>
                 </div>
                 {{-- Slide 2 --}}
                 <div class="swiper-slide">
-                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
-                        <img src="{{ asset('images/slider2.png') }}" alt="Promo 2" 
+                    <div class="relative w-full h-40 sm:h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider2.png') }}" alt="Promo 2" loading="lazy"
                              class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                     </div>
                 </div>
                 {{-- Slide 3 --}}
                 <div class="swiper-slide">
-                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
-                        <img src="{{ asset('images/slider1.png') }}" alt="Promo 3" 
+                    <div class="relative w-full h-40 sm:h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider1.png') }}" alt="Promo 3" loading="lazy"
                              class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                     </div>
@@ -30,8 +30,8 @@
 
                 {{-- Slide 4 --}}
                 <div class="swiper-slide">
-                    <div class="relative w-full h-48 md:h-64 overflow-hidden rounded-xl">
-                        <img src="{{ asset('images/slider2.png') }}" alt="Promo 4" 
+                    <div class="relative w-full h-40 sm:h-48 md:h-64 overflow-hidden rounded-xl">
+                        <img src="{{ asset('images/slider2.png') }}" alt="Promo 4" loading="lazy"
                              class="w-full h-full object-cover transform transition-transform duration-700 hover:scale-105">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                     </div>

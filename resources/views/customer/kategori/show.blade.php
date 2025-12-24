@@ -3,9 +3,18 @@
 @section('title', 'Kategori - ' . $activeSubKategori->nama_kategori)
 
 @section('content')
-    <div class="max-w-6xl mx-auto flex gap-6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <aside class="w-1/4 bg-white p-5 rounded-lg shadow">
+        <!-- Mobile filter toggle -->
+        <div class="md:hidden mb-4">
+            <button id="toggleSubKategori" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm text-slate-700 font-medium">
+                Filter Kategori
+            </button>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+
+        <aside class="md:w-1/4 w-full bg-white p-5 rounded-lg shadow md:block hidden" id="subKategoriPanel">
 
             <h3 class="font-semibold text-lg text-gray-900 mb-4">
                 {{ $kategoriUtama->nama_kategori }}
@@ -39,8 +48,6 @@
             </div>
         </aside>
 
-
-
         <div class="flex-1">
 
             <div class="mb-4 text-sm">
@@ -68,5 +75,18 @@
             ])
         </div>
 
+        </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    const toggleSubBtn = document.getElementById('toggleSubKategori');
+    const subPanel = document.getElementById('subKategoriPanel');
+    if (toggleSubBtn && subPanel) {
+        toggleSubBtn.addEventListener('click', () => {
+            subPanel.classList.toggle('hidden');
+        });
+    }
+</script>
+@endpush

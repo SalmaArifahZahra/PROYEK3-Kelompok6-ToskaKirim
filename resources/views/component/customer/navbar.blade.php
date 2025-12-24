@@ -1,14 +1,14 @@
 <nav class="bg-[#5BC6BC] shadow-md sticky top-0 z-50">
-    <div class="max-w-9xl mx-auto px-7 py-3 flex items-center justify-between">
+    <div class="max-w-9xl mx-auto px-4 sm:px-6 md:px-7 py-2 md:py-3 flex items-center justify-between">
 
         <div class="flex items-center">
-            <img src="{{ asset('images/icon_toska.png') }}" alt="ToskaKirim Logo" class="h-16">
+            <img src="{{ asset('images/icon_toska.png') }}" alt="ToskaKirim Logo" class="h-12 md:h-16">
         </div>
 
-        <div class="flex items-center space-x-6">
-
-            <div class="flex justify-center mx-10">
-                <form id="searchForm" class="w-[350px]" method="GET" action="{{ route('customer.produk.search') }}">
+        <div class="flex items-center space-x-3 md:space-x-6">
+            <!-- Desktop search -->
+            <div class="hidden md:flex justify-center">
+                <form id="searchForm" class="w-[280px] lg:w-[350px]" method="GET" action="{{ route('customer.produk.search') }}">
                     <div class="relative">
                         <input id="searchInput" type="text" name="q" placeholder="Search"
                             class="w-full bg-white text-gray-700 rounded-full px-5 py-2 border border-gray-300 focus:outline-none"
@@ -20,6 +20,7 @@
                 </form>
             </div>
 
+            <!-- Cart -->
             <a href="{{ route('customer.keranjang.index') }}"
                 class="relative text-white text-xl hover:text-gray-100 transition">
                 <i class="fas fa-shopping-cart"></i>
@@ -35,8 +36,9 @@
                 @endif
             </a>
 
-            <a href="/" class="text-white font-medium hover:text-[#174552] transition">Home</a>
-            <div class="relative group">
+            <!-- Desktop links -->
+            <a href="/" class="hidden md:inline text-white font-medium hover:text-[#174552] transition">Home</a>
+            <div class="hidden md:block relative group">
                 <button class="flex items-center space-x-2 text-white font-medium focus:outline-none">
                     <span>Halo, {{ Auth::user()->nama }}</span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -65,26 +67,62 @@
 
                 </div>
             </div>
+
+            <!-- Mobile menu button -->
+            <button id="mobileMenuBtn" class="md:hidden text-white text-2xl" aria-label="Toggle Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile panel -->
+    <div id="mobileMenu" class="md:hidden bg-white shadow-md px-4 py-3 hidden">
+        <form method="GET" action="{{ route('customer.produk.search') }}" class="mb-3">
+            <div class="relative">
+                <input type="text" name="q" placeholder="Search"
+                       class="w-full bg-white text-gray-700 rounded-full px-4 py-2 border border-gray-300 focus:outline-none"
+                       value="{{ request('q') }}">
+                <button type="submit" class="absolute top-1/2 -translate-y-1/2 right-4">
+                    <i class="fas fa-search text-[#5BC6BC]"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="flex items-center justify-between">
+            <a href="/" class="text-gray-700 font-medium hover:text-[#174552] transition">Home</a>
+            <a href="{{ route('customer.pesanan.index') }}" class="text-gray-700 font-medium hover:text-[#174552] transition">Pesanan Saya</a>
+            <button id="logoutMobileBtn" class="text-red-600 font-medium">Logout</button>
         </div>
     </div>
 </nav>
 
 <script>
-    document.getElementById('logoutDropdownBtn').addEventListener('click', function() {
-        Swal.fire({
-            title: 'Apakah kamu yakin keluar?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Ya, logout!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('logoutForm').submit();
-            }
+    // Toggle mobile menu
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+
+    // Bind logout to both desktop dropdown and mobile button
+    document.querySelectorAll('#logoutDropdownBtn, #logoutMobileBtn').forEach(function(btn){
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            Swal.fire({
+                title: 'Apakah kamu yakin keluar?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, logout!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logoutForm').submit();
+                }
+            });
         });
     });
-
-
 </script>
